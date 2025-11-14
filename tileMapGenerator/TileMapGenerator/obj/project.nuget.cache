@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "KHblVzrWnp4=",
+  "success": true,
+  "projectFilePath": "C:\\Projects\\Projects\\tileMapGenerator\\tileMapGenerator\\TileMapGenerator\\TileMapGenerator.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lingb\\.nuget\\packages\\quikgraph\\2.5.0\\quikgraph.2.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
