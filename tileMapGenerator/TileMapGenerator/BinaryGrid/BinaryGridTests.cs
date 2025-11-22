@@ -357,55 +357,98 @@ public class BinaryGridTests
     [TestMethod]
     public void BinaryGridInsertCol_NormalSizeEmptyGraph_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
+        grid.InsertCol(2);
+        BinaryGrid test_grid = new BinaryGrid(5, 6);
+        test_grid._grid = 0b11111111_10000001_10000001_10000001_10000001_10000001_11111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
     [TestMethod]
     public void BinaryGridInsertCol_NormalSizeFullGraph_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.InsertCol(2);
+        BinaryGrid test_grid = new BinaryGrid(5, 6);
+        test_grid._grid = 0b11111111_11111011_11111011_11111011_11111011_11111011_11111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
     [TestMethod]
     public void BinaryGridInsertCol_NormalSizeEmptyGraphSides_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
+        grid.InsertCol(1);
+        BinaryGrid test_grid = new BinaryGrid(5, 6);
+        test_grid._grid = 0b11111111_10000001_10000001_10000001_10000001_10000001_11111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
     [TestMethod]
     public void BinaryGridInsertCol_NormalSizeFullGraphSides_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.InsertCol(1);
+        BinaryGrid test_grid = new BinaryGrid(5, 6);
+        test_grid._grid = 0b11111111_11111101_11111101_11111101_11111101_11111101_11111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
     [TestMethod]
     public void BinaryGridInsertCol_NormalSizeBadIndexes_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(0));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(6));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(7));
     }
 
     [TestMethod]
     public void BinaryGridInsertCol_1WideGrid_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 1);
+        grid.InsertCol(1);
+        BinaryGrid test_grid = new BinaryGrid(5, 2);
+        test_grid._grid = 0b1111_1001_1001_1001_1001_1001_1111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     } 
 
     [TestMethod]
     public void BinaryGridInsertCol_1HighGrid_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 5);
+        grid.InsertCol(1);
+        BinaryGrid test_grid = new BinaryGrid(1, 6);
+        test_grid._grid = 0b11111111_10000001_11111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     } 
 
     [TestMethod]
     public void BinaryGridInsertCol_1WideGrid_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(0));
+        grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(2));
+        grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(3));
     } 
 
     [TestMethod]
     public void BinaryGridInsertCol_1HighGrid_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(0));
+        grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(6));
+        grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.InsertCol(7));
     }  
 
     [TestMethod]

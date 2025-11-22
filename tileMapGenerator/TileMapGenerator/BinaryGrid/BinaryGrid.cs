@@ -158,7 +158,7 @@ public class BinaryGrid
     public void InsertCol(uint index)
     {
         CheckIndexValidity(1, index);
-        for (int row = 0; row < _size.Item1+2; row++)
+        for (int row = (int) _size.Item1 + 1; row >= 0; row--)
         {
             InsertEmptyCellInternal((uint) row, index);
         }
