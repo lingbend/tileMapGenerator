@@ -51,6 +51,18 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "MSTest": {
+              "target": "Package",
+              "version": "[4.0.2, )"
+            },
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[4.0.2, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[4.0.2, )"
+            },
             "QuikGraph": {
               "target": "Package",
               "version": "[2.5.0, )"
@@ -72,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

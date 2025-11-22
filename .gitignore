@@ -1,0 +1,5 @@
+.vscode
+bin
+tileMapGenerator/TileMapGenerator/obj/project.nuget.cache
+tileMapGenerator/TileMapGenerator/obj/project.assets.json
+C:\Projects\Projects\tileMapGenerator\.vscode
