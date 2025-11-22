@@ -142,6 +142,14 @@ public class BinaryGrid
         }
     }
 
+    private void ValidateNewSize(int size_change_x, int size_change_y)
+    {
+        if (_size.Item1 + size_change_x <= 0 || _size.Item2 + size_change_y <= 0)
+        {
+            throw new IndexOutOfRangeException("Graph cannot be smaller than 1 row or column.");
+        }
+    }
+
     // need error throwing on these insertion and deletion methods
 
     public void InsertRow(uint index)
@@ -169,7 +177,8 @@ public class BinaryGrid
     public void DeleteRow(uint index)
     {
         CheckIndexValidity(index, 1);
-        for (int col = 0 ; col < _size.Item2+2; col++)
+        ValidateNewSize(-1, 0);
+        for (int col = (int) _size.Item2+1 ; col >= 0; col--)
         {
             DeleteCellInternal(index, (uint) col);
         }
@@ -179,6 +188,7 @@ public class BinaryGrid
     public void DeleteCol(uint index)
     {
         CheckIndexValidity(1, index);
+        ValidateNewSize(0, -1);
         for (int row = 0 ; row < _size.Item1+2; row++)
         {
             DeleteCellInternal((uint) row, index);
