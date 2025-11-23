@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 
 namespace BinaryGrid;
 
@@ -53,9 +54,7 @@ public class BinaryGridTests
     public void BinaryGridChangeBorders_1SameOnEmpty_ValidNoChange()
     {
         BinaryGrid grid = new BinaryGrid(5, 5);
-        Debug.WriteLine(grid._grid.ToString("b"));
         grid.ChangeBorders(1);
-        Debug.WriteLine(grid._grid.ToString("b"));
     }
 
     [TestMethod]
@@ -120,7 +119,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000101_1000001_1111111;
         grid.SetCell(2, 2, 0);
-        Assert.AreEqual<ulong>(0, grid.GetCell(2, 2));
+        Assert.AreEqual<BigInteger>(0, grid.GetCell(2, 2));
     }
 
     [TestMethod]
@@ -129,7 +128,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
         grid.SetCell(2, 2, 1);
-        Assert.AreEqual<ulong>(1, grid.GetCell(2, 2));
+        Assert.AreEqual<BigInteger>(1, grid.GetCell(2, 2));
     }
 
     [TestMethod]
@@ -146,7 +145,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
         grid.SetCell(2, 2, 0);
-        Assert.AreEqual<ulong>(0, grid.GetCell(2, 2));
+        Assert.AreEqual<BigInteger>(0, grid.GetCell(2, 2));
     }
 
     [TestMethod]
@@ -155,7 +154,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
         grid.SetCell(2, 2, 1);
-        Assert.AreEqual<ulong>(1, grid.GetCell(2, 2));
+        Assert.AreEqual<BigInteger>(1, grid.GetCell(2, 2));
     }
 
     [TestMethod]
@@ -172,7 +171,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000011_1111111;
         grid.SetCell(1, 1, 0);
-        Assert.AreEqual<ulong>(0, grid.GetCell(1, 1));
+        Assert.AreEqual<BigInteger>(0, grid.GetCell(1, 1));
     }
 
     [TestMethod]
@@ -181,7 +180,7 @@ public class BinaryGridTests
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
         grid.SetCell(1, 1, 1);
-        Assert.AreEqual<ulong>(1, grid.GetCell(1, 1));
+        Assert.AreEqual<BigInteger>(1, grid.GetCell(1, 1));
     }
 
     [TestMethod]
@@ -197,7 +196,7 @@ public class BinaryGridTests
     {
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b000_000_000, grid.GetCellNeighbors(2, 2));
+        Assert.AreEqual<BigInteger>(0b000_000_000, grid.GetCellNeighbors(2, 2));
     }
 
     [TestMethod]
@@ -205,31 +204,31 @@ public class BinaryGridTests
     {
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000101_1000001_1111111;
-        Assert.AreEqual<ulong>(0b100_000_000, grid.GetCellNeighbors(2, 2), "self");
+        Assert.AreEqual<BigInteger>(0b100_000_000, grid.GetCellNeighbors(2, 2), "self");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1001001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b010_000_000, grid.GetCellNeighbors(2, 2), "right");
+        Assert.AreEqual<BigInteger>(0b010_000_000, grid.GetCellNeighbors(2, 2), "right");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1001001_1111111;
-        Assert.AreEqual<ulong>(0b001_000_000, grid.GetCellNeighbors(2, 2), "upper right");
+        Assert.AreEqual<BigInteger>(0b001_000_000, grid.GetCellNeighbors(2, 2), "upper right");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000101_1111111;
-        Assert.AreEqual<ulong>(0b000_100_000, grid.GetCellNeighbors(2, 2), "up");
+        Assert.AreEqual<BigInteger>(0b000_100_000, grid.GetCellNeighbors(2, 2), "up");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000011_1111111;
-        Assert.AreEqual<ulong>(0b000_010_000, grid.GetCellNeighbors(2, 2), "upper left");
+        Assert.AreEqual<BigInteger>(0b000_010_000, grid.GetCellNeighbors(2, 2), "upper left");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000011_1000001_1111111;
-        Assert.AreEqual<ulong>(0b000_001_000, grid.GetCellNeighbors(2, 2), "left");
+        Assert.AreEqual<BigInteger>(0b000_001_000, grid.GetCellNeighbors(2, 2), "left");
 
         grid._grid = 0b1111111_1000001_1000001_1000011_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b000_000_100, grid.GetCellNeighbors(2, 2), "lower left");
+        Assert.AreEqual<BigInteger>(0b000_000_100, grid.GetCellNeighbors(2, 2), "lower left");
 
         grid._grid = 0b1111111_1000001_1000001_1000101_1000001_1000000_1111111;
-        Assert.AreEqual<ulong>(0b000_000_010, grid.GetCellNeighbors(2, 2), "down");
+        Assert.AreEqual<BigInteger>(0b000_000_010, grid.GetCellNeighbors(2, 2), "down");
 
         grid._grid = 0b1111111_1000001_1000001_1001001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b000_000_001, grid.GetCellNeighbors(2, 2), "lower right");
+        Assert.AreEqual<BigInteger>(0b000_000_001, grid.GetCellNeighbors(2, 2), "lower right");
     }
 
     [TestMethod]
@@ -237,7 +236,7 @@ public class BinaryGridTests
     {
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1001111_1001111_1001111_1111111;
-        Assert.AreEqual<ulong>(0b111_111_111, grid.GetCellNeighbors(2, 2));
+        Assert.AreEqual<BigInteger>(0b111_111_111, grid.GetCellNeighbors(2, 2));
     }
 
     [TestMethod]
@@ -245,16 +244,16 @@ public class BinaryGridTests
     {
         BinaryGrid grid = new BinaryGrid(5, 5);
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b001_111_100, grid.GetCellNeighbors(1, 1), "upper left corner");
+        Assert.AreEqual<BigInteger>(0b001_111_100, grid.GetCellNeighbors(1, 1), "upper left corner");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b011_110_001, grid.GetCellNeighbors(1, 5), "upper right corner");
+        Assert.AreEqual<BigInteger>(0b011_110_001, grid.GetCellNeighbors(1, 5), "upper right corner");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b000_011_111, grid.GetCellNeighbors(5, 1), "lower left corner");
+        Assert.AreEqual<BigInteger>(0b000_011_111, grid.GetCellNeighbors(5, 1), "lower left corner");
 
         grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual<ulong>(0b011_000_111, grid.GetCellNeighbors(5, 5), "lower right corner");
+        Assert.AreEqual<BigInteger>(0b011_000_111, grid.GetCellNeighbors(5, 5), "lower right corner");
     }
 
     [TestMethod]

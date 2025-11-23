@@ -1,11 +1,14 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
+using System.Numerics;
+using Newtonsoft.Json.Converters;
 
 namespace BinaryGrid;
 
 // 1 indexed
 public class BinaryGrid
 {
-    internal ulong _grid;
+    internal BigInteger _grid;
     private (uint, uint) _size;
     public uint RowSize{get{return _size.Item1;}}
     public uint ColSize{get{return _size.Item2;}}
@@ -17,7 +20,8 @@ public class BinaryGrid
         {
             throw new IndexOutOfRangeException();
         }
-        _grid = (ulong) Math.Pow(2, (rows+2)*(columns+2)-1)*0;
+        _grid = BigInteger.Pow(2,  ((int) rows+2)*((int) columns+2)-1);
+
         _size = (rows, columns);
         if (borders == 1)
         {
@@ -38,26 +42,21 @@ public class BinaryGrid
         for (uint col = 0; col < _size.Item2+2; col++)
         {
             SetCellInternal(0, col, borders);
-            Debug.WriteLine(_grid.ToString("b"));
             SetCellInternal(_size.Item1+1, col, borders);
-            Debug.WriteLine(_grid.ToString("b"));
         }
-        Debug.WriteLine("transition to rows");
         for (uint row = 0; row < _size.Item1+2; row++)
         {
             SetCellInternal(row, 0, borders);
-            Debug.WriteLine(_grid.ToString("b"));
             SetCellInternal(row, _size.Item2+1, borders);
-            Debug.WriteLine(_grid.ToString("b"));
         }
         _border_num = borders;
     }
 
-    private ulong GetCellIndex(uint row, uint col){
+    private BigInteger GetCellIndex(uint row, uint col){
         return (row)*(_size.Item2+2) + col;
     }
 
-    public void SetCell(uint row, uint col, ulong val)
+    public void SetCell(uint row, uint col, BigInteger val)
     {
         if (val != 0 && val != 1)
         {
@@ -71,23 +70,19 @@ public class BinaryGrid
         SetCellInternal(row, col, val);
     }
 
-    private void SetCellInternal(uint row, uint col, ulong val)
+    private void SetCellInternal(uint row, uint col, BigInteger val)
     {
         if (GetCellInternal(row, col) == 1){
-            Debug.WriteLine("adding", ((ulong) Math.Pow(2,GetCellIndex(row, col)) * (val - 1)).ToString("b"));
-            _grid += (ulong) Math.Pow(2,GetCellIndex(row, col)) * (val - 1); //add0 or -1
-            Debug.WriteLine("set on 1");
+            _grid += BigInteger.Pow(2,  (int) GetCellIndex(row, col)) * (val - 1); //add0 or -1
+            BigInteger.Pow(2,  (int) GetCellIndex(row, col));
         }
         else
         {
-            Debug.WriteLine(GetCellIndex(row, col), "cell address");
-            Debug.WriteLine("adding", ((ulong) Math.Pow(2,GetCellIndex(row, col)) * val).ToString("b"));
-            _grid += (ulong) Math.Pow(2,GetCellIndex(row, col)) * val; //add1 or 0
-            Debug.WriteLine("set on 0");
+            _grid += BigInteger.Pow(2,  (int) GetCellIndex(row, col)) * val; //add1 or 0
         }
     }
 
-    public ulong GetCell(uint row, uint col)
+    public BigInteger GetCell(uint row, uint col)
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
@@ -97,7 +92,7 @@ public class BinaryGrid
         return GetCellInternal(row, col);
     }
 
-    private ulong GetCellInternal(uint row, uint col)
+    private BigInteger GetCellInternal(uint row, uint col)
     {
         return _grid >> (int) GetCellIndex(row, col) & 1;
     }
@@ -105,20 +100,20 @@ public class BinaryGrid
     private void InsertEmptyCellInternal(uint row, uint col)
     {
         int cell_index = (int) GetCellIndex(row, col);
-        ulong first_half = _grid & ((1UL << cell_index) - 1UL);
-        ulong second_half = (_grid << 1) & (~((1UL << (cell_index+1)) - 1UL));
+        BigInteger first_half = _grid & ((1UL << cell_index) - 1UL);
+        BigInteger second_half = (_grid << 1) & (~((1UL << (cell_index+1)) - 1UL));
         _grid = first_half | second_half;
     }
 
     private void DeleteCellInternal(uint row, uint col)
     {
         int cell_index = (int) GetCellIndex(row, col);
-        ulong first_half = _grid & ((1UL << cell_index) - 1UL);
-        ulong second_half = (_grid >> 1) & (~((1UL << cell_index) - 1UL));
+        BigInteger first_half = _grid & ((1UL << cell_index) - 1UL);
+        BigInteger second_half = (_grid >> 1) & (~((1UL << cell_index) - 1UL));
         _grid = first_half | second_half;
     }
 
-    public ulong GetCellNeighbors(uint row, uint col)
+    public BigInteger GetCellNeighbors(uint row, uint col)
     {
         uint neighbors = 0;
         neighbors = neighbors << 1 | (uint) GetCellInternal(row, col);
@@ -130,7 +125,6 @@ public class BinaryGrid
         neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col-1);
         neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col);
         neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col+1);
-        Debug.WriteLine(neighbors.ToString("b"), "neighbors");
         return neighbors;
     }
 
@@ -233,9 +227,9 @@ public class BinaryGrid
     /// <param name="col2"></param>
     /// <returns></returns>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    public ulong GetSlice(uint row1, uint col1, uint row2, uint col2)
+    public BigInteger GetSlice(uint row1, uint col1, uint row2, uint col2)
     {
-        ulong result = 0;
+        BigInteger result = 0;
         if (row1 == row2)
         {
             uint min_col = Math.Min(col1, col2);
@@ -341,7 +335,7 @@ public class BinaryGrid
 
     public uint GetCellOR(uint row, uint col)
     {
-        ulong neighbors = 0;
+        BigInteger neighbors = 0;
         neighbors |= (uint) GetCellInternal(row, col);
         neighbors |= (uint) GetCellInternal(row, col+1);
         neighbors |= (uint) GetCellInternal(row-1, col+1);
@@ -356,7 +350,7 @@ public class BinaryGrid
 
     public uint GetCellAND(uint row, uint col)
     {
-        ulong neighbors = 1;
+        BigInteger neighbors = 1;
         neighbors &= (uint) GetCellInternal(row, col);
         neighbors &= (uint) GetCellInternal(row, col+1);
         neighbors &= (uint) GetCellInternal(row-1, col+1);
