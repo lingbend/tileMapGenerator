@@ -264,7 +264,7 @@ public class BinaryGridTests
         grid.InsertRow(2);
         BinaryGrid test_grid = new BinaryGrid(6, 5);
         test_grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -275,7 +275,7 @@ public class BinaryGridTests
         grid.InsertRow(2);
         BinaryGrid test_grid = new BinaryGrid(6, 5);
         test_grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1000001_1010101_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -286,7 +286,7 @@ public class BinaryGridTests
         grid.InsertRow(2);
         BinaryGrid test_grid = new BinaryGrid(6, 5);
         test_grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1000001_1111111_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -297,7 +297,7 @@ public class BinaryGridTests
         grid.InsertRow(1);
         BinaryGrid test_grid = new BinaryGrid(6, 5);
         test_grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -308,7 +308,7 @@ public class BinaryGridTests
         grid.InsertRow(1);
         BinaryGrid test_grid = new BinaryGrid(6, 5);
         test_grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -329,7 +329,7 @@ public class BinaryGridTests
         grid.InsertRow(1);
         BinaryGrid test_grid = new BinaryGrid(6, 1);
         test_grid._grid = 0b111_101_101_101_101_101_101_111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -339,7 +339,7 @@ public class BinaryGridTests
         grid.InsertRow(1);
         BinaryGrid test_grid = new BinaryGrid(2, 5);
         test_grid._grid = 0b1111111_1000001_1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -373,7 +373,7 @@ public class BinaryGridTests
         grid.InsertCol(2);
         BinaryGrid test_grid = new BinaryGrid(5, 6);
         test_grid._grid = 0b11111111_10000001_10000001_10000001_10000001_10000001_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -384,7 +384,7 @@ public class BinaryGridTests
         grid.InsertCol(2);
         BinaryGrid test_grid = new BinaryGrid(5, 6);
         test_grid._grid = 0b11111111_10101001_10101001_10101001_10101001_10101001_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
 
@@ -396,7 +396,7 @@ public class BinaryGridTests
         grid.InsertCol(2);
         BinaryGrid test_grid = new BinaryGrid(5, 6);
         test_grid._grid = 0b11111111_11111011_11111011_11111011_11111011_11111011_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -407,7 +407,7 @@ public class BinaryGridTests
         grid.InsertCol(1);
         BinaryGrid test_grid = new BinaryGrid(5, 6);
         test_grid._grid = 0b11111111_10000001_10000001_10000001_10000001_10000001_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -418,7 +418,7 @@ public class BinaryGridTests
         grid.InsertCol(1);
         BinaryGrid test_grid = new BinaryGrid(5, 6);
         test_grid._grid = 0b11111111_11111101_11111101_11111101_11111101_11111101_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -439,7 +439,7 @@ public class BinaryGridTests
         grid.InsertCol(1);
         BinaryGrid test_grid = new BinaryGrid(5, 2);
         test_grid._grid = 0b1111_1001_1001_1001_1001_1001_1111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -449,7 +449,7 @@ public class BinaryGridTests
         grid.InsertCol(1);
         BinaryGrid test_grid = new BinaryGrid(1, 6);
         test_grid._grid = 0b11111111_10000001_11111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -482,7 +482,7 @@ public class BinaryGridTests
         grid.DeleteRow(2);
         BinaryGrid test_grid = new BinaryGrid(4, 5);
         test_grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -493,7 +493,7 @@ public class BinaryGridTests
         grid.DeleteRow(2);
         BinaryGrid test_grid = new BinaryGrid(3, 5);
         test_grid._grid = 0b1111111_1000001_1010101__1010101_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -504,7 +504,7 @@ public class BinaryGridTests
         grid.DeleteRow(2);
         BinaryGrid test_grid = new BinaryGrid(4, 5);
         test_grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -515,7 +515,7 @@ public class BinaryGridTests
         grid.DeleteRow(1);
         BinaryGrid test_grid = new BinaryGrid(3, 5);
         test_grid._grid = 0b1111111_1000001_1010101__1000001_1111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -536,7 +536,7 @@ public class BinaryGridTests
         grid.DeleteRow(1);
         BinaryGrid test_grid = new BinaryGrid(4, 1);
         test_grid._grid = 0b111_101_101_101_101_111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -571,7 +571,7 @@ public class BinaryGridTests
         grid.DeleteCol(2);
         BinaryGrid test_grid = new BinaryGrid(5, 4);
         test_grid._grid = 0b111111_100001_100001_100001_100001_100001_111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -582,7 +582,7 @@ public class BinaryGridTests
         grid.DeleteCol(2);
         BinaryGrid test_grid = new BinaryGrid(4, 4);
         test_grid._grid = 0b111111_101001_101001__101001_101001_111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
 
@@ -594,7 +594,7 @@ public class BinaryGridTests
         grid.DeleteCol(2);
         BinaryGrid test_grid = new BinaryGrid(5, 4);
         test_grid._grid = 0b111111_111111_111111_111111_111111_111111_111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
@@ -605,7 +605,7 @@ public class BinaryGridTests
         grid.DeleteCol(1);
         BinaryGrid test_grid = new BinaryGrid(4, 4);
         test_grid._grid = 0b111111_100001_101011__100001_101011_111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
 
@@ -627,7 +627,7 @@ public class BinaryGridTests
         grid.DeleteCol(1);
         BinaryGrid test_grid = new BinaryGrid(1, 4);
         test_grid._grid = 0b111111_100001_111111;
-        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     } 
 
     [TestMethod]
@@ -657,43 +657,177 @@ public class BinaryGridTests
     [TestMethod]
     public void BinaryGridSetSlice_0s_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid.SetSlice(1, 1, 5, 1, 1);
+        BinaryGrid test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000011_1000011_1000011_1000011_1000011_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid.SetSlice(2, 2, 4, 2, 1);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000101_1000101_1000101_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid.SetSlice(1, 1, 1, 5, 1);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1111111_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid.SetSlice(2, 2, 2, 4, 1);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000001_1000001_1011101_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+    
+        grid = new BinaryGrid(5, 5);
+        grid.SetSlice(4, 2, 2, 2, 1);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000101_1000101_1000101_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
     }
 
     [TestMethod]
     public void BinaryGridSetSlice_1s_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.SetSlice(1, 1, 5, 1, 0);
+        BinaryGrid test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1111101_1111101_1111101_1111101_1111101_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("B")} grid: {((ulong)grid._grid).ToString("B")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.SetSlice(2, 2, 4, 2, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1111111_1111011_1111011_1111011_1111111_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.SetSlice(1, 1, 1, 5, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.SetSlice(2, 2, 2, 4, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1111111_1111111_1111111_1100011_1111111_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+    
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.SetSlice(4, 2, 2, 2, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1111111_1111011_1111011_1111011_1111111_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
     }
 
     [TestMethod]
     public void BinaryGridSetSlice_Mixed_Valid()
     {
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1010101_1111111;
+        grid.SetSlice(1, 1, 5, 1, 1);
+        BinaryGrid test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1010111_1010111_1010111_1010111_1010111_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1010101_1111111;
+        grid.SetSlice(2, 2, 4, 2, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1010101_1010001_1010001_1010001_1010101_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1010101_1111111;
+        grid.SetSlice(1, 1, 1, 5, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1010101_1111111;
+        grid.SetSlice(2, 2, 2, 4, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1010101_1010101_1010101_1000001_1010101_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
         
+        grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1010101_1111111;
+        grid.SetSlice(2, 4, 2, 2, 0);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1010101_1010101_1010101_1000001_1010101_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
     }
 
     [TestMethod]
     public void BinaryGridSetGetSlice_DiagonalIndices_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(1, 1, 5, 5, 1), "Grid should not accept diagonal slicing");
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSlice(1, 1, 5, 5), "Grid should not accept diagonal slicing");
     }
 
     [TestMethod]
     public void BinaryGridSetGetSlice_SameStartEnd_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid.SetSlice(1, 1, 1, 1, 1);
+        BinaryGrid test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000011_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+        Assert.AreEqual(0b1, grid.GetSlice(1, 1, 1, 1));
+
+        grid = new BinaryGrid(5, 5);
+        grid.SetSlice(3, 4, 3, 4, 1);
+        test_grid = new BinaryGrid(5, 5);
+        test_grid._grid = 0b1111111_1000001_1000001_1010001_1000001_1000001_1111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+        Assert.AreEqual(0b1, grid.GetSlice(3, 4, 3, 4));
     }
 
     [TestMethod]
-    public void BinaryGridSetGetSlice_OutofBoundsIndices_Valid()
+    public void BinaryGridSetGetSlice_OutofBoundsIndices_Invalid()
     {
-        
-    }
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(0, 1, 4, 1, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(0, 1, 4, 1));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(4, 0, 4, 1, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(4, 0, 4, 1));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(4, 1, 0, 1, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(4, 1, 0, 1));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(0, 0, 4, 0, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(0, 0, 4, 0));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(6, 1, 6, 3, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(6, 1, 6, 3));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.SetSlice(4, 7, 4, 3, 1));
+        Assert.Throws<Exception>(()=>grid.GetSlice(4, 7, 4, 3));
+        }
 
     [TestMethod]
     public void BinaryGridSetGetSlice_1by1Grid_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 1);
+        grid.SetSlice(1, 1, 1, 1, 1);
+        BinaryGrid test_grid = new BinaryGrid(1, 1);
+        test_grid._grid = 0b111_111_111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {((ulong)test_grid._grid).ToString("b")} grid: {((ulong)grid._grid).ToString("b")}");
+        Assert.AreEqual(0b1, grid.GetSlice(1, 1, 1, 1));
     }
 
     [TestMethod]

@@ -17,7 +17,7 @@ public class BinaryGrid
         {
             throw new IndexOutOfRangeException();
         }
-        _grid = BigInteger.Pow(2,  ((int) rows+2)*((int) columns+2)-1);
+        _grid = new BigInteger(0);
 
         _size = (rows, columns);
         if (borders == 1)
