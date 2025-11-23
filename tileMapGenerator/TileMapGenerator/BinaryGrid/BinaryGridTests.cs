@@ -33,7 +33,7 @@ public class BinaryGridTests
     }
 
     [TestMethod]
-    public void BinaryGridConstructor_Huge_ValidFullSize()
+    public void BinaryGridConstructor_100x100_ValidFullSize()
     {
         _ = new BinaryGrid(100, 100);
     }
@@ -833,85 +833,149 @@ public class BinaryGridTests
     [TestMethod]
     public void BinaryGraphGetSliceOR_No1s_Valid0()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1000001_1111111;
+        Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 1, 5));
+        Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 5, 1));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_1_1s_Valid1()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1001001_1111111;
+        Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
+        Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 3, 5, 3));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_No0s_Valid1()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1111111_1111111;
+        Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
+        Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 2, 5, 2));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_Diagonal_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 5, 5));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(5, 1, 1, 5));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_BadIndices_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 0, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 6, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 7, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 0));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 6));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 7));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_SameStartEnd_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1111111_1111111;
+        Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 1));
+        Assert.AreEqual<uint>(0, grid.GetSliceOR(3, 3, 3, 3));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceOR_1by1_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 1);
+        Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 1, 1));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_No1s_Valid0()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1000001_1111111;
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 5, 1));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_1_1s_Valid0()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1001001_1111111;
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 3, 5, 3));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_No0s_Valid1()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1111111_1111111;
+        Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 5));
+        Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 2, 5, 2));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_Diagonal_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 5, 5));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(5, 1, 1, 5));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_BadIndices_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 0, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 6, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 7, 1));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 0));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 6));
+
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 7));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_SameStartEnd_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1010101_1010101_1010101_1010101_1111111_1111111;
+        Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 1));
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(3, 3, 3, 3));
     }
 
     [TestMethod]
     public void BinaryGraphGetSliceAND_1by1_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 1);
+        Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 1));
     }
 
     [TestMethod]
