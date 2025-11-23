@@ -114,7 +114,7 @@ public class BinaryGrid
     {
         int cell_index = (int) GetCellIndex(row, col);
         ulong first_half = _grid & ((1UL << cell_index) - 1UL);
-        ulong second_half = (_grid >> 1) & (~((1UL << (cell_index-1)) - 1UL));
+        ulong second_half = (_grid >> 1) & (~((1UL << cell_index) - 1UL));
         _grid = first_half | second_half;
     }
 
@@ -189,7 +189,8 @@ public class BinaryGrid
     {
         CheckIndexValidity(1, index);
         ValidateNewSize(0, -1);
-        for (int row = 0 ; row < _size.Item1+2; row++)
+        for (int row = (int) _size.Item1+1 ; row >= 0; row--)
+        // for (int row = 0 ; row < _size.Item1+2; row++)
         {
             DeleteCellInternal((uint) row, index);
         }

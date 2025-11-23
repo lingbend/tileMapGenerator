@@ -6,6 +6,7 @@ namespace BinaryGrid;
 public class BinaryGridTests
 {
     // TODO: Add non-square grid tests
+    // TODO: Add huge grid tests
     [TestMethod]
     public void BinaryGridConstructor_0Constructor_Valid()
     {
@@ -566,55 +567,92 @@ public class BinaryGridTests
     [TestMethod]
     public void BinaryGridDeleteCol_NormalSizeEmptyGraph_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1000001_1000001_1000001_1000001_1000001_1111111;
+        grid.DeleteCol(2);
+        BinaryGrid test_grid = new BinaryGrid(5, 4);
+        test_grid._grid = 0b111111_100001_100001_100001_100001_100001_111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
+
+    [TestMethod]
+    public void BinaryGridDeleteCol_NormalSizeAlternatingGraph_Valid()
+    {
+        BinaryGrid grid = new BinaryGrid(4, 5);
+        grid._grid = 0b1111111_1010101_1010101__1010101_1010101_1111111;
+        grid.DeleteCol(2);
+        BinaryGrid test_grid = new BinaryGrid(4, 4);
+        test_grid._grid = 0b111111_101001_101001__101001_101001_111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
+    }
+
 
     [TestMethod]
     public void BinaryGridDeleteCol_NormalSizeFullGraph_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = 0b1111111_1111111_1111111_1111111_1111111_1111111_1111111;
+        grid.DeleteCol(2);
+        BinaryGrid test_grid = new BinaryGrid(5, 4);
+        test_grid._grid = 0b111111_111111_111111_111111_111111_111111_111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
     [TestMethod]
-    public void BinaryGridDeleteCol_NormalSizeEmptyGraphSides_Valid()
+    public void BinaryGridDeleteCol_NormalSizeGraphSides_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(4, 5);
+        grid._grid = 0b1111111_1000001_1010101__1000001_1010101_1111111;
+        grid.DeleteCol(1);
+        BinaryGrid test_grid = new BinaryGrid(4, 4);
+        test_grid._grid = 0b111111_100001_101011__100001_101011_111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     }
 
-    [TestMethod]
-    public void BinaryGridDeleteCol_NormalSizeFullGraphSides_Valid()
-    {
-        
-    }
 
     [TestMethod]
     public void BinaryGridDeleteCol_NormalSizeBadIndexes_Invalid()
     {
-        
-    } 
-
-    [TestMethod]
-    public void BinaryGridDeleteCol_1WideGrid_Valid()
-    {
-        
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(0));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(6));
+        grid = new BinaryGrid(5, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(7));
     } 
 
     [TestMethod]
     public void BinaryGridDeleteCol_1HighGrid_Valid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 5);
+        grid.DeleteCol(1);
+        BinaryGrid test_grid = new BinaryGrid(1, 4);
+        test_grid._grid = 0b111111_100001_111111;
+        Assert.AreEqual(test_grid, grid, $"test grid: {test_grid._grid.ToString("b")} grid: {grid._grid.ToString("b")}");
     } 
 
     [TestMethod]
     public void BinaryGridDeleteCol_1WideGrid_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(0));
+        grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(1));
+        grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(2));
+        grid = new BinaryGrid(5, 1);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(3));
     } 
 
     [TestMethod]
     public void BinaryGridDeleteCol_1HighGrid_Invalid()
     {
-        
+        BinaryGrid grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(0));
+        grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(6));
+        grid = new BinaryGrid(1, 5);
+        Assert.Throws<IndexOutOfRangeException>(()=>grid.DeleteCol(7));
     } 
 
     [TestMethod]
