@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Numerics;
-using Newtonsoft.Json.Converters;
+﻿using System.Numerics;
 
 namespace BinaryGrid;
 
