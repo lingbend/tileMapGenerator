@@ -330,7 +330,8 @@ public class BinaryGrid
         return result;
     }
 
-    public uint GetCellOR(uint row, uint col)
+    // Currently untested as it may not be very useful
+    private uint GetCellOR(uint row, uint col)
     {
         BigInteger neighbors = 0;
         neighbors |= (uint) GetCellInternal(row, col);
@@ -345,7 +346,8 @@ public class BinaryGrid
         return (uint) neighbors;
     }
 
-    public uint GetCellAND(uint row, uint col)
+    // Currently untested as it may not be very useful
+    private uint GetCellAND(uint row, uint col)
     {
         BigInteger neighbors = 1;
         neighbors &= (uint) GetCellInternal(row, col);
