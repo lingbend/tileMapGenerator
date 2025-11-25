@@ -39,11 +39,8 @@ public class BinaryGrid
         {
             throw new ArgumentException("Value must be 0 or 1");
         }
-        for (uint col = 0; col < _size.Item2+2; col++)
-        {
-            SetCellInternal(0, col, borders);
-            SetCellInternal(_size.Item1+1, col, borders);
-        }
+        SetRowInternal(0, _size.Item2+1, borders, _size.Item2+1 + 1);
+        SetRowInternal(_size.Item1+1, _size.Item2+1, borders, _size.Item2+1 + 1);
         for (uint row = 0; row < _size.Item1+2; row++)
         {
             SetCellInternal(row, 0, borders);
@@ -78,6 +75,17 @@ public class BinaryGrid
         else
         {
             _grid &= ~((BinaryNumber.ONE <<  (int) GetCellIndex(row, col))&_grid);
+        }
+    }
+
+    private void SetRowInternal(uint row, uint col, uint val, uint length)
+    {
+        if (val == 1){
+            _grid |= new BinaryNumber((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length);
+        }
+        else
+        {
+            _grid &= ~((new BinaryNumber((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length))&_grid);
         }
     }
 
@@ -189,15 +197,20 @@ public class BinaryGrid
 
     public void SetSlice(uint row1, uint col1, uint row2, uint col2, uint val)
     {
+        if (val != 0 && val != 1)
+        {
+            throw new ArgumentException("Value must be 0 or 1");
+        } 
+        CheckIndexValidity(row1, col1);
+        CheckIndexValidity(row2, col2);
+
         if (row1 == row2)
         {
             uint min_col = Math.Min(col1, col2);
             uint max_col = Math.Max(col1, col2);
 
-            for (uint col = min_col; col <= max_col; col++)
-            {
-                SetCell(row1, col, val);
-            }
+            SetRowInternal(row1, max_col, val, max_col - min_col + 1);
+
         }
         else if (col1 == col2)
         {
