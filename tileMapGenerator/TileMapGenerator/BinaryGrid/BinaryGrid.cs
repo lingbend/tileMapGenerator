@@ -112,11 +112,33 @@ public class BinaryGrid
         _grid = first_half | second_half;
     }
 
+    private void InsertEmptyRowInternal(uint row, uint col, uint length)
+    {
+        int cell_index = (int) GetCellIndex(row, col);
+        BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
+        BinaryNumber second_half = (_grid << (int) length+1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (int) (cell_index+length+1));
+        _grid = first_half | second_half;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
+
     private void DeleteCellInternal(uint row, uint col)
     {
         int cell_index = (int) GetCellIndex(row, col);
         BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
         BinaryNumber second_half = (_grid >> 1) & (new BinaryNumber(_grid.Count - cell_index, 1) << cell_index);
+        _grid = first_half | second_half;
+    }
+
+    private void DeleteEmptyRowInternal(uint row, uint col, uint length)
+    {
+        int cell_index = (int) GetCellIndex(row, col);
+        BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
+        BinaryNumber second_half = (_grid >> (int) length+1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (int) (cell_index-length+1));
         _grid = first_half | second_half;
     }
 
@@ -154,10 +176,7 @@ public class BinaryGrid
     public void InsertRow(uint index)
     {
         CheckIndexValidity(index, 1);
-        for (uint col = 0; col < _size.Item2 + 2; col++)
-        {
-            InsertEmptyCellInternal(index, col);
-        }
+        InsertEmptyRowInternal(index, 0, _size.Item2+1);
         _size.Item1++;
         ChangeBorders(_border_num);
     }
@@ -177,10 +196,7 @@ public class BinaryGrid
     {
         CheckIndexValidity(index, 1);
         ValidateNewSize(-1, 0);
-        for (int col = (int) _size.Item2+1 ; col >= 0; col--)
-        {
-            DeleteCellInternal(index, (uint) col);
-        }
+        DeleteEmptyRowInternal(index, 0,  _size.Item2+1);
         _size.Item1--;
     }
 
@@ -360,38 +376,6 @@ public class BinaryGrid
         }
         return result;
     }
-
-    // // Currently untested as it may not be very useful
-    // private uint GetCellOR(uint row, uint col)
-    // {
-    //     BitArray neighbors = 0;
-    //     neighbors |= (uint) GetCellInternal(row, col);
-    //     neighbors |= (uint) GetCellInternal(row, col+1);
-    //     neighbors |= (uint) GetCellInternal(row-1, col+1);
-    //     neighbors |= (uint) GetCellInternal(row-1, col);
-    //     neighbors |= (uint) GetCellInternal(row-1, col-1);
-    //     neighbors |= (uint) GetCellInternal(row, col-1);
-    //     neighbors |= (uint) GetCellInternal(row+1, col-1);
-    //     neighbors |= (uint) GetCellInternal(row+1, col);
-    //     neighbors |= (uint) GetCellInternal(row+1, col+1);
-    //     return (uint) neighbors;
-    // }
-
-    // // Currently untested as it may not be very useful
-    // private uint GetCellAND(uint row, uint col)
-    // {
-    //     BitArray neighbors = 1;
-    //     neighbors &= (uint) GetCellInternal(row, col);
-    //     neighbors &= (uint) GetCellInternal(row, col+1);
-    //     neighbors &= (uint) GetCellInternal(row-1, col+1);
-    //     neighbors &= (uint) GetCellInternal(row-1, col);
-    //     neighbors &= (uint) GetCellInternal(row-1, col-1);
-    //     neighbors &= (uint) GetCellInternal(row, col-1);
-    //     neighbors &= (uint) GetCellInternal(row+1, col-1);
-    //     neighbors &= (uint) GetCellInternal(row+1, col);
-    //     neighbors &= (uint) GetCellInternal(row+1, col+1);
-    //     return (uint) neighbors;
-    // }
 
     public override bool Equals(object? obj)
     {

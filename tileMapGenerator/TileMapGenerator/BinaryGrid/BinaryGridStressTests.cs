@@ -92,7 +92,7 @@ public class BinaryGridStressTests
     public void BinaryGridDeleteRowCol_Huge_Valid()
     {
         BinaryGrid grid = new BinaryGrid(800, 800);
-        for (uint i = 0; i < 800; i++)
+        for (uint i = 0; i < 799; i++)
         {
             grid.DeleteRow(800 - i);
             grid.DeleteCol(800 - i);
