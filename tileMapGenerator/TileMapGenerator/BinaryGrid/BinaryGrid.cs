@@ -1,11 +1,14 @@
 ﻿using System.Numerics;
+using System.Collections;
+using System.Drawing;
+using System.Dynamic;
 
 namespace BinaryGrid;
 
 // 1 indexed
 public class BinaryGrid
 {
-    internal BigInteger _grid;
+    internal BinaryNumber _grid;
     private (uint, uint) _size;
     public uint RowSize{get{return _size.Item1;}}
     public uint ColSize{get{return _size.Item2;}}
@@ -17,7 +20,7 @@ public class BinaryGrid
         {
             throw new IndexOutOfRangeException();
         }
-        _grid = new BigInteger(0);
+        _grid = new BinaryNumber((int) ((rows + 2)*(columns + 2)), 0);
 
         _size = (rows, columns);
         if (borders == 1)
@@ -49,11 +52,11 @@ public class BinaryGrid
         _border_num = borders;
     }
 
-    private BigInteger GetCellIndex(uint row, uint col){
-        return (row)*(_size.Item2+2) + col;
+    private uint GetCellIndex(uint row, uint col){
+        return row*(_size.Item2+2) + col;
     }
 
-    public void SetCell(uint row, uint col, BigInteger val)
+    public void SetCell(uint row, uint col, uint val)
     {
         if (val != 0 && val != 1)
         {
@@ -67,19 +70,18 @@ public class BinaryGrid
         SetCellInternal(row, col, val);
     }
 
-    private void SetCellInternal(uint row, uint col, BigInteger val)
+    private void SetCellInternal(uint row, uint col, uint val)
     {
-        if (GetCellInternal(row, col) == 1){
-            _grid += BigInteger.Pow(2,  (int) GetCellIndex(row, col)) * (val - 1); //add0 or -1
-            BigInteger.Pow(2,  (int) GetCellIndex(row, col));
+        if (val == 1){
+            _grid |= BinaryNumber.ONE <<  (int) GetCellIndex(row, col);
         }
         else
         {
-            _grid += BigInteger.Pow(2,  (int) GetCellIndex(row, col)) * val; //add1 or 0
+            _grid &= ~((BinaryNumber.ONE <<  (int) GetCellIndex(row, col))&_grid);
         }
     }
 
-    public BigInteger GetCell(uint row, uint col)
+    public uint GetCell(uint row, uint col)
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
@@ -89,39 +91,39 @@ public class BinaryGrid
         return GetCellInternal(row, col);
     }
 
-    private BigInteger GetCellInternal(uint row, uint col)
+    private uint GetCellInternal(uint row, uint col)
     {
-        return _grid >> (int) GetCellIndex(row, col) & 1;
+        return ((_grid >> (int) GetCellIndex(row, col)) & BinaryNumber.ONE).ToUint();
     }
 
     private void InsertEmptyCellInternal(uint row, uint col)
     {
         int cell_index = (int) GetCellIndex(row, col);
-        BigInteger first_half = _grid & ((1UL << cell_index) - 1UL);
-        BigInteger second_half = (_grid << 1) & (~((1UL << (cell_index+1)) - 1UL));
+        BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
+        BinaryNumber second_half = (_grid << 1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (cell_index+1));
         _grid = first_half | second_half;
     }
 
     private void DeleteCellInternal(uint row, uint col)
     {
         int cell_index = (int) GetCellIndex(row, col);
-        BigInteger first_half = _grid & ((1UL << cell_index) - 1UL);
-        BigInteger second_half = (_grid >> 1) & (~((1UL << cell_index) - 1UL));
+        BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
+        BinaryNumber second_half = (_grid >> 1) & (new BinaryNumber(_grid.Count - cell_index, 1) << cell_index);
         _grid = first_half | second_half;
     }
 
-    public BigInteger GetCellNeighbors(uint row, uint col)
+    public uint GetCellNeighbors(uint row, uint col)
     {
         uint neighbors = 0;
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row, col);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row, col+1);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row-1, col+1);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row-1, col);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row-1, col-1);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row, col-1);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col-1);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col);
-        neighbors = neighbors << 1 | (uint) GetCellInternal(row+1, col+1);
+        neighbors = neighbors << 1 | GetCellInternal(row, col);
+        neighbors = neighbors << 1 | GetCellInternal(row, col+1);
+        neighbors = neighbors << 1 | GetCellInternal(row-1, col+1);
+        neighbors = neighbors << 1 | GetCellInternal(row-1, col);
+        neighbors = neighbors << 1 | GetCellInternal(row-1, col-1);
+        neighbors = neighbors << 1 | GetCellInternal(row, col-1);
+        neighbors = neighbors << 1 | GetCellInternal(row+1, col-1);
+        neighbors = neighbors << 1 | GetCellInternal(row+1, col);
+        neighbors = neighbors << 1 | GetCellInternal(row+1, col+1);
         return neighbors;
     }
 
@@ -141,14 +143,12 @@ public class BinaryGrid
         }
     }
 
-    // need error throwing on these insertion and deletion methods
-
     public void InsertRow(uint index)
     {
         CheckIndexValidity(index, 1);
-        for (int col = 0; col < _size.Item2 + 2; col++)
+        for (uint col = 0; col < _size.Item2 + 2; col++)
         {
-            InsertEmptyCellInternal(index, (uint) col);
+            InsertEmptyCellInternal(index, col);
         }
         _size.Item1++;
         ChangeBorders(_border_num);
@@ -194,9 +194,9 @@ public class BinaryGrid
             uint min_col = Math.Min(col1, col2);
             uint max_col = Math.Max(col1, col2);
 
-            for (int col = (int) min_col; col <= max_col; col++)
+            for (uint col = min_col; col <= max_col; col++)
             {
-                SetCell(row1, (uint) col, val);
+                SetCell(row1, col, val);
             }
         }
         else if (col1 == col2)
@@ -204,9 +204,9 @@ public class BinaryGrid
             uint min_row = Math.Min(row1, row2);
             uint max_row = Math.Max(row1, row2);
 
-            for (int row = (int) min_row; row <= max_row; row++)
+            for (uint row = min_row; row <= max_row; row++)
             {
-                SetCell((uint) row, col1, val);
+                SetCell(row, col1, val);
             } 
         }
         else
@@ -224,25 +224,23 @@ public class BinaryGrid
     /// <param name="col2"></param>
     /// <returns></returns>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    public BigInteger GetSlice(uint row1, uint col1, uint row2, uint col2)
+    public ulong GetSlice(uint row1, uint col1, uint row2, uint col2)
     {
-        BigInteger result = 0;
+        ulong result = 0;
         if (row1 == row2)
         {
             uint min_col = Math.Min(col1, col2);
             uint max_col = Math.Max(col1, col2);
 
-            
-
-            for (int col = (int) min_col; col <= max_col; col++)
+            for (uint col = min_col; col <= max_col; col++)
             {
                 if (col == min_col)
                 {
-                    result = (uint) GetCell(row1, min_col);
+                    result = GetCell(row1, min_col);
                 }
                 else
                 {
-                    result = (result << 1) | (uint) GetCell(row1, (uint) col);
+                    result = (result << 1) | GetCell(row1, col);
                 }
             }
         }
@@ -251,15 +249,15 @@ public class BinaryGrid
             uint min_row = Math.Min(row1, row2);
             uint max_row = Math.Max(row1, row2);
 
-            for (int row = (int) min_row; row <= max_row; row++)
+            for (uint row = min_row; row <= max_row; row++)
             {
                 if (row == min_row)
                 {
-                    result = (uint) GetCell((uint) row, col1);
+                    result = GetCell( row, col1);
                 }
                 else
                 {
-                    result = (result << 1) | (uint) GetCell((uint) row, col1);
+                    result = (result << 1) | GetCell(row, col1);
                 }
             } 
         }
@@ -278,9 +276,9 @@ public class BinaryGrid
             uint min_col = Math.Min(col1, col2);
             uint max_col = Math.Max(col1, col2);
 
-            for (int col = (int) min_col; col <= max_col; col++)
+            for (uint col = min_col; col <= max_col; col++)
             {
-                result |= (uint) GetCell(row1, (uint) col);
+                result |= GetCell(row1, col);
             }
         }
         else if (col1 == col2)
@@ -288,9 +286,9 @@ public class BinaryGrid
             uint min_row = Math.Min(row1, row2);
             uint max_row = Math.Max(row1, row2);
 
-            for (int row = (int) min_row; row <= max_row; row++)
+            for (uint row =  min_row; row <= max_row; row++)
             {
-                result |= (uint) GetCell((uint) row, col1);
+                result |=  GetCell(row, col1);
             } 
         }
         else
@@ -308,9 +306,9 @@ public class BinaryGrid
             uint min_col = Math.Min(col1, col2);
             uint max_col = Math.Max(col1, col2);
 
-            for (int col = (int) min_col; col <= max_col; col++)
+            for (uint col = min_col; col <= max_col; col++)
             {
-                result &= (uint) GetCell(row1, (uint) col);
+                result &= GetCell(row1, col);
             }
         }
         else if (col1 == col2)
@@ -318,9 +316,9 @@ public class BinaryGrid
             uint min_row = Math.Min(row1, row2);
             uint max_row = Math.Max(row1, row2);
 
-            for (int row = (int) min_row; row <= max_row; row++)
+            for (uint row =  min_row; row <= max_row; row++)
             {
-                result &= (uint) GetCell((uint) row, col1);
+                result &=  GetCell(row, col1);
             } 
         }
         else
@@ -330,43 +328,43 @@ public class BinaryGrid
         return result;
     }
 
-    // Currently untested as it may not be very useful
-    private uint GetCellOR(uint row, uint col)
-    {
-        BigInteger neighbors = 0;
-        neighbors |= (uint) GetCellInternal(row, col);
-        neighbors |= (uint) GetCellInternal(row, col+1);
-        neighbors |= (uint) GetCellInternal(row-1, col+1);
-        neighbors |= (uint) GetCellInternal(row-1, col);
-        neighbors |= (uint) GetCellInternal(row-1, col-1);
-        neighbors |= (uint) GetCellInternal(row, col-1);
-        neighbors |= (uint) GetCellInternal(row+1, col-1);
-        neighbors |= (uint) GetCellInternal(row+1, col);
-        neighbors |= (uint) GetCellInternal(row+1, col+1);
-        return (uint) neighbors;
-    }
+    // // Currently untested as it may not be very useful
+    // private uint GetCellOR(uint row, uint col)
+    // {
+    //     BitArray neighbors = 0;
+    //     neighbors |= (uint) GetCellInternal(row, col);
+    //     neighbors |= (uint) GetCellInternal(row, col+1);
+    //     neighbors |= (uint) GetCellInternal(row-1, col+1);
+    //     neighbors |= (uint) GetCellInternal(row-1, col);
+    //     neighbors |= (uint) GetCellInternal(row-1, col-1);
+    //     neighbors |= (uint) GetCellInternal(row, col-1);
+    //     neighbors |= (uint) GetCellInternal(row+1, col-1);
+    //     neighbors |= (uint) GetCellInternal(row+1, col);
+    //     neighbors |= (uint) GetCellInternal(row+1, col+1);
+    //     return (uint) neighbors;
+    // }
 
-    // Currently untested as it may not be very useful
-    private uint GetCellAND(uint row, uint col)
-    {
-        BigInteger neighbors = 1;
-        neighbors &= (uint) GetCellInternal(row, col);
-        neighbors &= (uint) GetCellInternal(row, col+1);
-        neighbors &= (uint) GetCellInternal(row-1, col+1);
-        neighbors &= (uint) GetCellInternal(row-1, col);
-        neighbors &= (uint) GetCellInternal(row-1, col-1);
-        neighbors &= (uint) GetCellInternal(row, col-1);
-        neighbors &= (uint) GetCellInternal(row+1, col-1);
-        neighbors &= (uint) GetCellInternal(row+1, col);
-        neighbors &= (uint) GetCellInternal(row+1, col+1);
-        return (uint) neighbors;
-    }
+    // // Currently untested as it may not be very useful
+    // private uint GetCellAND(uint row, uint col)
+    // {
+    //     BitArray neighbors = 1;
+    //     neighbors &= (uint) GetCellInternal(row, col);
+    //     neighbors &= (uint) GetCellInternal(row, col+1);
+    //     neighbors &= (uint) GetCellInternal(row-1, col+1);
+    //     neighbors &= (uint) GetCellInternal(row-1, col);
+    //     neighbors &= (uint) GetCellInternal(row-1, col-1);
+    //     neighbors &= (uint) GetCellInternal(row, col-1);
+    //     neighbors &= (uint) GetCellInternal(row+1, col-1);
+    //     neighbors &= (uint) GetCellInternal(row+1, col);
+    //     neighbors &= (uint) GetCellInternal(row+1, col+1);
+    //     return (uint) neighbors;
+    // }
 
     public override bool Equals(object? obj)
     {
         if (obj != null && obj is BinaryGrid)
         {
-            return ((BinaryGrid) obj)._grid == _grid;
+            return ((BinaryGrid) obj)._grid.Equals(_grid);
         }
         return base.Equals(obj);
     }
@@ -376,5 +374,209 @@ public class BinaryGrid
         return _grid.GetHashCode();
     }
 }
+
+internal class BinaryNumber
+    {
+        private BitArray _backing_array = new BitArray(0);
+        public BinaryNumber(ulong value)
+        {
+            _backing_array = ToBitArray(value);
+        } 
+
+        public static BinaryNumber ZERO{get;} = new BinaryNumber(0);
+        public static BinaryNumber ONE{get;} = new BinaryNumber(1);
+
+        public int Count{get {return _backing_array.Count;}}
+
+        public BinaryNumber(int bit_number, int default_value)
+        {
+            if (default_value != 1 && default_value != 0)
+            {
+                throw new ArgumentException("number must be 0 or 1");
+            }
+            _backing_array = new BitArray(bit_number, default_value == 1);
+        }
+
+        public BinaryNumber(BitArray bitArray)
+        {
+            _backing_array = new BitArray(bitArray);
+        }
+
+        public static BinaryNumber operator <<(BinaryNumber n, int shift_num)
+        {
+            BinaryNumber copy = new BinaryNumber(n._backing_array);
+            copy._backing_array.Length += shift_num;
+            copy._backing_array.LeftShift(shift_num);
+            return copy;
+        }
+
+        public static BinaryNumber operator >>(BinaryNumber n, int shift_num)
+        {
+            BinaryNumber copy = new BinaryNumber(n._backing_array);
+            copy._backing_array.RightShift(shift_num);
+            copy._backing_array.Length -= shift_num;
+            return copy;
+        }
+
+        public static BinaryNumber operator |(BinaryNumber n, BinaryNumber n2)
+        {
+            if (n._backing_array.Count == n2._backing_array.Count){
+                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                copy._backing_array.Or(n2._backing_array);
+                return copy;
+            }
+            else if (n._backing_array.Count > n2._backing_array.Count)
+            {
+                BinaryNumber copy = new BinaryNumber(n2._backing_array);
+                copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
+                copy._backing_array.Or(n._backing_array);
+                return copy;
+            }
+            else
+            {
+                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
+                copy._backing_array.Or(n2._backing_array);
+                return copy;
+            }
+        }
+        
+        public static BinaryNumber operator &(BinaryNumber n, BinaryNumber n2)
+        {
+            if (n._backing_array.Count == n2._backing_array.Count){
+                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                copy._backing_array.And(n2._backing_array);
+                return copy;
+            }
+            else if (n._backing_array.Count > n2._backing_array.Count)
+            {
+                BinaryNumber copy = new BinaryNumber(n2._backing_array);
+                copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
+                // GrowForAnd(copy, n._backing_array.Count - n2._backing_array.Count);
+                copy._backing_array.And(n._backing_array);
+                return copy;
+            }
+            else
+            {
+                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
+                // GrowForAnd(copy, n2._backing_array.Count - n._backing_array.Count);
+                copy._backing_array.And(n2._backing_array);
+                return copy;
+            }
+        }
+
+        private static void GrowForAnd(BinaryNumber n1, int length)
+        {
+            BitArray mask = new BitArray(length, true);
+            mask.Length += n1._backing_array.Count;
+            mask.LeftShift(n1._backing_array.Count);
+            n1._backing_array.Length += length;
+            n1._backing_array.Or(mask);
+        }
+
+        private static BitArray ToBitArray(object num_obj)
+        {
+            ulong num = (ulong) num_obj;
+            BitArray temp_array = new BitArray(BitConverter.GetBytes(num));
+            temp_array.Length = num.ToString("b").Length;
+            return temp_array;
+        }
+
+        public static BinaryNumber operator~(BinaryNumber n)
+        {
+            BinaryNumber copy = new BinaryNumber(n._backing_array);
+            copy._backing_array.Not();
+            return copy;
+        }
+
+        private long BitArrayToLong(BitArray bitArray)
+        {
+            byte[] temp_array = new byte[bitArray.Count];
+            bitArray.CopyTo(temp_array, 0);
+            return BitConverter.ToInt64(temp_array);
+        }
+
+        public uint ToUint()
+        {
+            byte[] temp_array = new byte[_backing_array.Count];
+            _backing_array.CopyTo(temp_array, 0);
+            try
+            {
+                return BitConverter.ToUInt32(temp_array);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                try
+                {
+                    return BitConverter.ToUInt16(temp_array);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    try
+                    {
+                        return (uint) BitConverter.ToHalf(temp_array);
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        try
+                        {
+                            return (uint) BitConverter.ToSingle(temp_array);
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            return (uint) (BitConverter.ToBoolean(temp_array) ? 1 : 0);
+                        }
+                        
+                    }
+                }
+                
+            }
+        
+        }
+
+        public ulong ToULong()
+        {
+            byte[] temp_array = new byte[_backing_array.Count];
+            _backing_array.CopyTo(temp_array, 0);
+            return BitConverter.ToUInt64(temp_array);
+        }
+
+        public BigInteger ToBigInteger()
+        {
+            byte[] temp_array = new byte[_backing_array.Count];
+            _backing_array.CopyTo(temp_array, 0);
+            return new BigInteger(temp_array);
+        }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not null && obj is BinaryNumber)
+        {
+            try
+            {
+                return ((BinaryNumber)obj).ToULong() == ToULong();
+            }
+            catch (Exception)
+            {
+                return ((BinaryNumber)obj).ToBigInteger() == ToBigInteger();
+            }
+        }
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        try
+            {
+                return ToULong().GetHashCode();
+            }
+        catch (Exception)
+            {
+                return ToBigInteger().GetHashCode();
+            }
+    }
+}
+
 
 
