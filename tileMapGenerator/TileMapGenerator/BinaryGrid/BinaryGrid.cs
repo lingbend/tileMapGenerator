@@ -292,6 +292,10 @@ public class BinaryGrid
             for (uint col = min_col; col <= max_col; col++)
             {
                 result |= GetCell(row1, col);
+                if (result > 0)
+                {
+                    break;
+                }
             }
         }
         else if (col1 == col2)
@@ -302,6 +306,10 @@ public class BinaryGrid
             for (uint row =  min_row; row <= max_row; row++)
             {
                 result |=  GetCell(row, col1);
+                if (result > 0)
+                {
+                    break;
+                }
             } 
         }
         else
@@ -322,6 +330,10 @@ public class BinaryGrid
             for (uint col = min_col; col <= max_col; col++)
             {
                 result &= GetCell(row1, col);
+                if (result == 0)
+                {
+                    break;
+                }
             }
         }
         else if (col1 == col2)
@@ -332,6 +344,10 @@ public class BinaryGrid
             for (uint row =  min_row; row <= max_row; row++)
             {
                 result &=  GetCell(row, col1);
+                if (result == 0)
+                {
+                    break;
+                }
             } 
         }
         else
