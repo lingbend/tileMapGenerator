@@ -93,7 +93,7 @@ public class BinaryGrid
 
     private uint GetCellInternal(uint row, uint col)
     {
-        return ((_grid >> (int) GetCellIndex(row, col)) & BinaryNumber.ONE).ToUint();
+        return ((_grid >> (int) GetCellIndex(row, col)) & BinaryNumber.ONE).ContainsOne();
     }
 
     private void InsertEmptyCellInternal(uint row, uint col)
@@ -377,7 +377,7 @@ public class BinaryGrid
 
 internal class BinaryNumber
     {
-        private BitArray _backing_array = new BitArray(0);
+        private BitArray _backing_array;
         public BinaryNumber(ulong value)
         {
             _backing_array = ToBitArray(value);
@@ -452,7 +452,6 @@ internal class BinaryNumber
             {
                 BinaryNumber copy = new BinaryNumber(n2._backing_array);
                 copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
-                // GrowForAnd(copy, n._backing_array.Count - n2._backing_array.Count);
                 copy._backing_array.And(n._backing_array);
                 return copy;
             }
@@ -460,19 +459,9 @@ internal class BinaryNumber
             {
                 BinaryNumber copy = new BinaryNumber(n._backing_array);
                 copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
-                // GrowForAnd(copy, n2._backing_array.Count - n._backing_array.Count);
                 copy._backing_array.And(n2._backing_array);
                 return copy;
             }
-        }
-
-        private static void GrowForAnd(BinaryNumber n1, int length)
-        {
-            BitArray mask = new BitArray(length, true);
-            mask.Length += n1._backing_array.Count;
-            mask.LeftShift(n1._backing_array.Count);
-            n1._backing_array.Length += length;
-            n1._backing_array.Or(mask);
         }
 
         private static BitArray ToBitArray(object num_obj)
@@ -490,12 +479,11 @@ internal class BinaryNumber
             return copy;
         }
 
-        private long BitArrayToLong(BitArray bitArray)
+        public uint ContainsOne()
         {
-            byte[] temp_array = new byte[bitArray.Count];
-            bitArray.CopyTo(temp_array, 0);
-            return BitConverter.ToInt64(temp_array);
+            return _backing_array.HasAnySet() ? 1U : 0U;
         }
+
 
         public uint ToUint()
         {
