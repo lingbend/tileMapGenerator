@@ -283,6 +283,8 @@ public class BinaryGrid
 
     public uint GetSliceOR(uint row1, uint col1, uint row2, uint col2)
     {
+        CheckIndexValidity(row1, col1);
+        CheckIndexValidity(row2, col2);
         uint result = 0;
         if (row1 == row2)
         {
@@ -321,6 +323,8 @@ public class BinaryGrid
 
     public uint GetSliceAND(uint row1, uint col1, uint row2, uint col2)
     {
+        CheckIndexValidity(row1, col1);
+        CheckIndexValidity(row2, col2);
         uint result = 1;
         if (row1 == row2)
         {
