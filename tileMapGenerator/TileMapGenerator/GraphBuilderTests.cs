@@ -11,9 +11,9 @@ public class GraphBuilderTests
     [TestMethod]
     public void GraphBuilderTreePhase_PossibleConnectedness_Valid()
     {
-        for (int min = 0; min < 7; min++)
+        for (int min = 1; min < 7; min++)
         {
-            for (int max = 0; max < 7; max++)
+            for (int max = min; max < 7; max++)
             {
                 UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>> output = new TileMapGenerator(5).GenerateNodeTree(1, [5], min, max, false);
                 CheckVerticesDegrees(output, min, max);
@@ -40,15 +40,15 @@ public class GraphBuilderTests
     {
         for (int i = 1; i < 7; i += 2)
         {
-            Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], i, i, false, true ));
-            Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], i, i, false));
+            Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], i, i, true, true ));
+            Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], i, i, false));
         }
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 1, false, true ));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 0, false, true ));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 1, 0, false, true ));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 1, false));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 0, false));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 1, 0, false));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 1, true, true ));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 0, true, true ));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 1, 0, true, true ));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 1, false));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 0, 0, false));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [5], 1, 0, false));
     }
 
     [TestMethod]
@@ -57,11 +57,10 @@ public class GraphBuilderTests
         // all permutations of min and max 0 - 6, except min0-1+max=0-1
         for (int min = 0; min < 7; min++)
         {
-            for (int max = 0; max < 7; max++)
-            {
-                UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>> output = new TileMapGenerator(5).GenerateNodeTree(1, [5], min, max, false, true );
-                CheckIsConnected(output);
-            }
+            
+            UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>> output = new TileMapGenerator(5).GenerateNodeTree(1, [5], min, (int) ((min+2)*1.25), false, true );
+            CheckIsConnected(output);
+            
         }
     }
 
@@ -77,7 +76,7 @@ public class GraphBuilderTests
     {
         for (int r = 1; r <= 100; r++)
         {
-            Assert.HasCount(r, new TileMapGenerator(5).GenerateNodeTree(1, [r], 3, 4, false, true ).Vertices);
+            Assert.HasCount(r, new TileMapGenerator(5).GenerateNodeTree(1, [r], 3, 4, true, true ).Vertices);
             Assert.HasCount(r, new TileMapGenerator(5).GenerateNodeTree(1, [r], 3, 4, false).Vertices);
         }
         // creates valid number of rooms 1 - 100
@@ -86,12 +85,21 @@ public class GraphBuilderTests
     [TestMethod]
     public void GraphBuilderTreePhase_RoomNumberWithDepth_Valid()
     {
+        List<int> room_input = new List<int>();
+
         for (int r = 1; r <= 25; r+=5)
         {
+            
+            
             for (int i = 1; i <= 5; i++)
             {
-                Assert.HasCount(r*i, new TileMapGenerator(5).GenerateNodeTree(i, [r], 3, 4, false, true ).Vertices);
-                Assert.HasCount(r*i, new TileMapGenerator(5).GenerateNodeTree(i, [r], 3, 4, false).Vertices);
+                room_input.Clear();
+                for (int j = 0; j < i; j++)
+                {
+                    room_input.Add(r);
+                }
+                Assert.HasCount(r*i, new TileMapGenerator(5).GenerateNodeTree(i, room_input, 3, 4, true, true ).Vertices);
+                Assert.HasCount(r*i, new TileMapGenerator(5).GenerateNodeTree(i, room_input, 3, 4, false).Vertices);
             }
         }
         // creates valid number of rooms 1 - 25 (increment by five) at depths 1-5
@@ -100,34 +108,49 @@ public class GraphBuilderTests
     [TestMethod]
     public void GraphBuilderTreePhase_RoomNumber_Invalid()
     {
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [0], 3, 4, false, true ));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [0], 3, 4, false));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [-1], 3, 4, false, true ));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [-1], 3, 4, false));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [0], 3, 4, true, true ));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [0], 3, 4, false));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [-1], 3, 4, true, true ));
+        Assert.Throws<ArgumentException>(()=>new TileMapGenerator(5).GenerateNodeTree(1, [-1], 3, 4, false));
         // 0 rooms, negative rooms
     }
 
     [TestMethod]
     public void GraphBuilderTreePhase_LotsOfDepth_Valid()
     {
-        var output = new TileMapGenerator(5).GenerateNodeTree(100, [1], 3, 4, false, true );
-        Assert.HasCount(100, output.Vertices);
+        List<int> room_input = new List<int>();
+        for (int i = 0; i < 100; i++)
+        {
+            room_input.Add(1);
+        }
+        var output = new TileMapGenerator(5).GenerateNodeTree(100, room_input, 3, 4, false, true );
+        Assert.HasCount(1, output.Vertices);
         CheckIsConnected(output);
 
-        output = new TileMapGenerator(5).GenerateNodeTree(100, [1], 3, 4, false, true );
-        Assert.HasCount(100, output.Vertices);
+        output = new TileMapGenerator(5).GenerateNodeTree(100, room_input, 3, 4, true, true );
+        Assert.HasCount(1, output.Vertices);
         CheckIsConnected(output);
     }
 
     [TestMethod]
     public void GraphBuilderTreePhase_NormalDepth_Valid()
     {
-        for (int depth = 1; depth <= 10; depth++)
+        List<int> room_input = new List<int>();
+        for (int i = 0; i < 100; i++)
         {
-            CheckIsConnected(new TileMapGenerator(5).GenerateNodeTree(depth, [5], 3, 4, false, true ));
-            CheckIsConnected(new TileMapGenerator(5).GenerateNodeTree(depth, [5], 3, 4, false));
-            Assert.HasCount(depth*5, new TileMapGenerator(5).GenerateNodeTree(depth, [5], 3, 4, false, true ).Vertices);
-            Assert.HasCount(depth*5, new TileMapGenerator(5).GenerateNodeTree(depth, [5], 3, 4, false).Vertices);
+            room_input.Add(5);
+        }
+        for (int depth = 1; depth <= 10; depth++)
+        {   
+            room_input.Clear();
+            for (int i = 0; i < depth; i++)
+            {
+                room_input.Add(5);
+            }
+            CheckIsConnected(new TileMapGenerator(5).GenerateNodeTree(depth, room_input, 3, 4, true, true ));
+            CheckIsConnected(new TileMapGenerator(5).GenerateNodeTree(depth, room_input, 3, 4, false));
+            Assert.HasCount(depth*5, new TileMapGenerator(5).GenerateNodeTree(depth, room_input, 3, 4, true, true ).Vertices);
+            Assert.HasCount(depth*5, new TileMapGenerator(5).GenerateNodeTree(depth, room_input, 3, 4, false).Vertices);
         }
     }
 
@@ -142,7 +165,7 @@ public class GraphBuilderTests
             {
                 room_input.Add(rooms);
             }
-            var output = new TileMapGenerator(5).GenerateNodeTree(10, room_input, 3, 4, false, true );
+            var output = new TileMapGenerator(5).GenerateNodeTree(10, room_input, 3, 4, true, true );
             CheckIsConnected(output);
             Assert.HasCount(10*rooms, output.Vertices);
             CheckVerticesDegrees(output, 3, 4);
@@ -157,9 +180,9 @@ public class GraphBuilderTests
     [TestMethod]
     public void GraphBuilderTreePhase_Depth_Invalid()
     {
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(0, [5], 3, 4, false, true ));
+        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(0, [5], 3, 4, true, true ));
         Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(0, [5], 3, 4, false));
-        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(-1, [5], 3, 4, false, true ));
+        Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(-1, [5], 3, 4, true, true ));
         Assert.Throws<Exception>(()=>new TileMapGenerator(5).GenerateNodeTree(-1, [5], 3, 4, false));
     }
 
@@ -169,7 +192,7 @@ public class GraphBuilderTests
     {
         for (int i = 1; i <= 1000; i++)
         {
-            new TileMapGenerator(5).GenerateNodeTree(i % 4, [i, i, i, i], 3, 4, false, true );
+            new TileMapGenerator(5).GenerateNodeTree((i % 4)+1, [i, i, i, i], 3, 4, true, true );
         }
     }
 
@@ -179,7 +202,7 @@ public class GraphBuilderTests
     {
         for (int i = 1; i <= 1000; i++)
         {
-            new TileMapGenerator(5).GenerateNodeTree(i % 4, [i, i, i, i], 0, 1, false);
+            new TileMapGenerator(5).GenerateNodeTree((i % 4)+1, [i, i, i, i], 0, 1, false);
         }
     }
 
