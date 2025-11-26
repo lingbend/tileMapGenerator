@@ -61,7 +61,7 @@ public class TileMapGenerator
         // (min_connections, max_connections, nodes_per_level) = CorrectGraphFeasibility(min_connections, max_connections, nodes_per_level); 
         // Debug.WriteLine($"next {min_connections}, {max_connections}, {nodes_per_level}");
         // CheckGraphFeasibility(min_connections, max_connections, nodes_per_level, depth);
-        _grid = new BinaryGrid((uint) nodes_per_level[0]*2, (uint) nodes_per_level[0]*2);
+        _grid = new BinaryGrid((uint) nodes_per_level[0]*4, (uint) nodes_per_level[0]*4);
         
         Graph nested_graph;
         if (central)
@@ -336,6 +336,7 @@ public class TileMapGenerator
     {
         Vertex new_vertex = new Vertex(source_vertex.Weight + direction_weight);
         Edge new_edge = source_vertex.ConnectToVertex(new_vertex);
+        new_edge.Weight = direction_weight;
         grid.SetCell((uint) new_vertex.Weight.Y, (uint) new_vertex.Weight.X, 1U);
         graph.AddVertex(new_vertex);
         graph.AddEdge(new_edge); 
@@ -364,8 +365,12 @@ public class TileMapGenerator
         foreach (var direction in available_directions)
         {
             Vector2 new_direction = direction + relative_loc;
-            if (new_direction.X >= 0 && new_direction.Y >= 0 &&
+            if (new_direction.X > 0 && new_direction.Y > 0 &&
              _grid.GetCell((uint) new_direction.Y, (uint) new_direction.X) == 1)
+            {
+                used_directions.Add(direction);
+            }
+            else if (new_direction.X <= 0 || new_direction.Y <= 0)
             {
                 used_directions.Add(direction);
             }

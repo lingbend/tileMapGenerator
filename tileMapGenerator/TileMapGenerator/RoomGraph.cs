@@ -19,6 +19,7 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
         _edge_id = UIDGenerator.GetNextID();
         Source = vertex_1;
         Target = vertex_2;
+        
     }
 
     public override bool Equals(object? obj)
