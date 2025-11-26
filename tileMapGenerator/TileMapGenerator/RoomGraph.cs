@@ -2,11 +2,12 @@ using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.Dynamic;
 using System.Numerics;
+using Mono.Cecil.Cil;
 using QuikGraph;
 
 namespace TileMapGenerator;
 
-public class RoomGraph
+public class RoomGraph : UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>>
 {
     
     // UndirectedGraph<int, UndirectedEdge<int>> graph = new UndirectedGraph<int,UndirectedEdge<int>>();
@@ -15,6 +16,8 @@ public class RoomGraph
     //     BidirectionalMatrixGraph<UndirectedEdge<int>> graphy = new BidirectionalMatrixGraph<UndirectedEdge<int>>(10);
     //     QuikGraph.TaggedEdge<int, UndirectedEdge<int>> grapy2 = new QuikGraph.TaggedEdge<int,UndirectedEdge<int>>();
     // }
+
+    // UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>> a= new UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>>().
 
     public int Degree { get; private set;}
     public int VertexCount{ get; private set;}
@@ -84,7 +87,7 @@ public class RoomGraph
         throw new NotImplementedException();
     }
 
-    public bool RemoveEdgesIf(Func<IEnumerable<Dictionary<string, object>>, bool> condition, out IEnumerable<Dictionary<string, object>> removed_edges)
+    public bool RemoveEdgesIf(Func<IEnumerable<Dictionary<string, object>>, bool> condition, out IEnumerable<Dictionary<string, object>> removedEdges)
     {
         throw new NotImplementedException();
     }
@@ -168,10 +171,10 @@ public class RoomGraph
 public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
 {
     private int _edge_id;
-    private TWeight? Weight {get;}
-    public RoomVertex<TWeight> Source {get;}
+    public TWeight? Weight {get; internal set;}
+    public RoomVertex<TWeight> Source {get; internal set;}
 
-    public RoomVertex<TWeight> Target {get;}
+    public RoomVertex<TWeight> Target {get; internal set;}
 
     public RoomEdge (RoomVertex<TWeight> vertex_1, RoomVertex<TWeight> vertex_2)
     {
@@ -193,14 +196,21 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
     {
         return _edge_id;
     }
-
 }
 
 public class RoomVertex<TWeight>
 {
     private int _vertex_id;
-    private List<RoomEdge<TWeight>> _edges = new List<RoomEdge<TWeight>>();
+    public List<RoomEdge<TWeight>> Edges{get; private set;} = new List<RoomEdge<TWeight>>();
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
+    public int Degree{get{return Edges.Count;}}
+    public TWeight? Weight {get; internal set;}
+
+    public RoomVertex(TWeight weight)
+    {
+        _vertex_id = UIDGenerator.GetNextID();
+        Weight = weight;
+    }
 
     public RoomVertex()
     {
@@ -215,14 +225,14 @@ public class RoomVertex<TWeight>
 
     public bool RemoveEdge(RoomEdge<TWeight> edge)
     {
-        return _edges.Remove(edge);
+        return Edges.Remove(edge);
     }
 
     public RoomEdge<TWeight> ConnectToVertex(RoomVertex<TWeight> vertex)
     {
         RoomEdge<TWeight> new_edge = new RoomEdge<TWeight>(this, vertex);
-        _edges.Add(new_edge);
-        vertex._edges.Add(new_edge);
+        Edges.Add(new_edge);
+        vertex.Edges.Add(new_edge);
         return new_edge;
     }
 
