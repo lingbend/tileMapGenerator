@@ -8,7 +8,7 @@ namespace TileMapGenerator;
 
 public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
 {
-    private int _edge_id;
+    public int _edge_id;
     public TWeight? Weight {get; internal set;}
     public RoomVertex<TWeight> Source {get; internal set;}
 
@@ -19,7 +19,6 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
         _edge_id = UIDGenerator.GetNextID();
         Source = vertex_1;
         Target = vertex_2;
-        
     }
 
     public override bool Equals(object? obj)
@@ -40,7 +39,7 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
 public class RoomVertex<TWeight>
 {
     private int _vertex_id;
-    public List<RoomEdge<TWeight>> Edges{get; private set;} = new List<RoomEdge<TWeight>>();
+    public HashSet<RoomEdge<TWeight>> Edges{get; private set;} = new HashSet<RoomEdge<TWeight>>();
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
     public int Degree{get{return Edges.Count;}}
     public TWeight? Weight {get; internal set;}
@@ -69,11 +68,13 @@ public class RoomVertex<TWeight>
         return Edges.Remove(edge);
     }
 
-    public RoomEdge<TWeight> ConnectToVertex(RoomVertex<TWeight> vertex)
+    public RoomEdge<TWeight> ConnectToVertex(RoomVertex<TWeight> vertex, TWeight weight)
     {
         RoomEdge<TWeight> new_edge = new RoomEdge<TWeight>(this, vertex);
         Edges.Add(new_edge);
         vertex.Edges.Add(new_edge);
+        new_edge.Weight = (TWeight) weight;
+        
         return new_edge;
     }
 
