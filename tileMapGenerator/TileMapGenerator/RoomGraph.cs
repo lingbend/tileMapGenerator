@@ -17,6 +17,10 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
     public RoomEdge (RoomVertex<TWeight> vertex_1, RoomVertex<TWeight> vertex_2)
     {
         _edge_id = UIDGenerator.GetNextID();
+        // if (_edge_id == 532)
+        // {
+        //     Console.Write(" ");
+        // }
         Source = vertex_1;
         Target = vertex_2;
     }
@@ -39,6 +43,13 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
 public class RoomVertex<TWeight>
 {
     private int _vertex_id;
+    internal int VertexID
+    {
+        get
+        {
+            return _vertex_id;
+        }
+    }
     public HashSet<RoomEdge<TWeight>> Edges{get; private set;} = new HashSet<RoomEdge<TWeight>>();
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
     public int Degree{get{return Edges.Count;}}

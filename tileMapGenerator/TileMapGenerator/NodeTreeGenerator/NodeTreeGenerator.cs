@@ -17,14 +17,14 @@ public class NodeTreeGenerator
 
     public NodeTreeGenerator(){}
 
-    internal (Graph, bool) GenerateNodeTree(int num_rooms, Dictionary<int, int> degree_weights, bool central=false, int depth=1)
+    internal (Graph, bool) GenerateNodeTree(int num_rooms, bool central=false, int depth=1)
     {  
         int size = (int) Math.Pow(4.0*(num_rooms*(1.0+(Settings.InitialPaddingPercent/100.0))), .5);
         (_graph, Dictionary<Vector2, Vertex> backing_dictionary) = GenerateFilledGraph((int) Math.Ceiling(size*Settings.InitialRatio.Y),(int) Math.Ceiling(size*Settings.InitialRatio.X));
-        return GenerateNodeTreeInner(num_rooms, degree_weights, size, ref backing_dictionary);
+        return GenerateNodeTreeInner(num_rooms, size, ref backing_dictionary);
     }
 
-    internal (Graph, bool) GenerateNodeTree(int num_rooms, Dictionary<int, int> degree_weights, Graph graph, bool central=false, int depth = 1)
+    internal (Graph, bool) GenerateNodeTree(int num_rooms, Graph graph, bool central=false, int depth = 1)
     {
         int size = (int)Math.Pow(4.0 * (num_rooms * (1.0 + (Settings.InitialPaddingPercent / 100.0))), .5);
         _graph = graph;
@@ -33,16 +33,16 @@ public class NodeTreeGenerator
         {
             backing_dictionary.Add(vertex.Weight, vertex);
         }
-        return GenerateNodeTreeInner(num_rooms, degree_weights, size, ref backing_dictionary);
+        return GenerateNodeTreeInner(num_rooms, size, ref backing_dictionary);
     }
 
-    private (Graph, bool) GenerateNodeTreeInner(int num_rooms, Dictionary<int, int> degree_weights, int size, ref Dictionary<Vector2, Vertex> backing_dictionary)
+    private (Graph, bool) GenerateNodeTreeInner(int num_rooms, int size, ref Dictionary<Vector2, Vertex> backing_dictionary)
     {
-        (_graph, backing_dictionary, List<Vector2> holes) = CutVerticesDownTo(_graph, backing_dictionary, (int)(num_rooms * (1.0 + (Settings.InitialPaddingPercent / 100.0))), degree_weights);
-        (_graph, backing_dictionary, bool result) = ReworkDegreeDistribution(degree_weights, _graph, backing_dictionary, holes, new Vector2(size, size));
+        (_graph, backing_dictionary, List<Vector2> holes) = CutVerticesDownTo(_graph, backing_dictionary, (int)(num_rooms * (1.0 + (Settings.InitialPaddingPercent / 100.0))));
+        (_graph, backing_dictionary, bool result) = ReworkDegreeDistribution(_graph, backing_dictionary, holes, new Vector2(size, size));
         if (Settings.InitialPaddingPercent != 0)
         {
-            (_graph, backing_dictionary, _) = CutVerticesDownTo(_graph, backing_dictionary, num_rooms, degree_weights);
+            (_graph, backing_dictionary, _) = CutVerticesDownTo(_graph, backing_dictionary, num_rooms);
         }
         foreach (var processor in Settings.PostProcessors)
         {
@@ -52,19 +52,59 @@ public class NodeTreeGenerator
         return (_graph, result);
     }
 
-    private (Graph, Dictionary<Vector2, Vertex>, bool) ReworkDegreeDistribution(Dictionary<int, int> degree_weights, Graph graph, Dictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes, Vector2 size)
+    private (Graph, Dictionary<Vector2, Vertex>) RemoveDuplicates(Graph graph, Dictionary<Vector2, Vertex> backing_dictionary)
     {
-        bool possible = true;
-        int min = degree_weights.Keys.Min();
-        int max = degree_weights.Keys.Max();
+        foreach (Vertex vertex in backing_dictionary.Values)
+        {
+            LinkedList<Edge> edges = new();
+            LinkedList<Edge> duplicate_edges = new();
+            foreach (Edge edge in vertex.Edges)
+            {
+                foreach (Edge edge1 in edges)
+                {
+                    if (edge.Source == vertex)
+                    {
+                        if (edge.Target == edge1.Target || edge.Target == edge1.Source)
+                        {
+                            duplicate_edges.AddLast(edge1);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (edge.Source == edge1.Target || edge.Source == edge1.Source)
+                        {
+                            duplicate_edges.AddLast(edge1);
+                            break;
+                        }
+                    }
+                }
+                
+                edges.AddLast(edge);
+            }
+            foreach (Edge edge in duplicate_edges)
+            {
+                RemoveEdge(graph, edge);
+            }
+        }
+        
+        return (graph, backing_dictionary);
+    }
 
-        (graph, backing_dictionary, holes, bool local_success) = ForceEdgesToRange(graph, backing_dictionary, holes, min, max, size);
+    private (Graph, Dictionary<Vector2, Vertex>, bool) ReworkDegreeDistribution(Graph graph, Dictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes, Vector2 size)
+    {
+        Dictionary<int, int> degree_percents = Settings.degree_percents;
+        bool possible = true;
+        int min = degree_percents.Keys.Min();
+        int max = degree_percents.Keys.Max();
+
+        (graph, backing_dictionary, _, bool local_success) = ForceEdgesToRange(graph, backing_dictionary, holes, min, max, size);
         possible &= local_success;
 
         Graph min_span_tree = GetMinSpanTree(graph);
         Graph min_span_tree_copy = GetMinSpanTree(graph);
-        Dictionary<int, int> degree_percents = CalculateDegreePercents(degree_weights);
-        
+        // Dictionary<int, int> degree_percents = CalculateDegreePercents(degree_weights);
+
         HashSet<Vertex> processed_vertices = new HashSet<Vertex>();
         HashSet<Edge> processed_edges = new HashSet<Edge>();
         HashSet<Vertex> deleted_vertices = new HashSet<Vertex>();
@@ -352,13 +392,13 @@ public class NodeTreeGenerator
             var disposable_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
             if (disposable_vertices.Contains(vertex))
             {
-                while (vertex.Degree > min)
+                while (graph.AdjacentDegree(vertex) > min)
                 {
                     var edge = ChooseRandom<Edge>(vertex.Edges);
                     graph = RemoveEdge(graph, edge);
                 }
 
-                if (vertex.Degree < max)
+                if (graph.AdjacentDegree(vertex) < max)
                 {
                     HashSet<Vector2> current_directions = new HashSet<Vector2>();
                     foreach (var edge in vertex.Edges)
@@ -392,7 +432,7 @@ public class NodeTreeGenerator
         foreach (var (vertex, degree) in unforced_vertices)
         {
             int target_degree;
-            if (vertex.Degree < min)
+            if (graph.AdjacentDegree(vertex) < min)
             {
                 target_degree = min;
             }
@@ -437,6 +477,10 @@ public class NodeTreeGenerator
             {
                 successful = false;
             }
+            if (GetConnectedComponents(graph).Count > 1)
+                {
+                    throw new Exception();
+                }
         }
         return (graph, backing_dictionary, holes, successful);
     }
@@ -504,11 +548,9 @@ public class NodeTreeGenerator
     }
 
 
-    internal (Graph, Dictionary<Vector2, Vertex>, List<Vector2>) CutVerticesDownTo(Graph graph, Dictionary<Vector2, Vertex> backing_dictionary, int target_number, Dictionary<int, int> weights)
+    internal (Graph, Dictionary<Vector2, Vertex>, List<Vector2>) CutVerticesDownTo(Graph graph, Dictionary<Vector2, Vertex> backing_dictionary, int target_number)
     {
         List<Vector2> holes = new List<Vector2>();
-        var percents = CalculateDegreePercents(weights);
-
         while (graph.VertexCount > target_number)
         {
             HashSet<Vertex> disposable_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);

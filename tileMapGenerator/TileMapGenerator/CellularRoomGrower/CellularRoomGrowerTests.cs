@@ -37,7 +37,7 @@ public class CellularRoomGrowerTests
         var generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
-        var(graph, _) = generator.GenerateNodeTree(5, degree_weights);
+        var(graph, _) = generator.GenerateNodeTree(5);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*5);
         Assert.HasCount(graph.VertexCount, rooms, "Room count 5 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 5 failed");
@@ -53,7 +53,7 @@ public class CellularRoomGrowerTests
         var generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
-        var(graph, _) = generator.GenerateNodeTree(1, degree_weights);
+        var(graph, _) = generator.GenerateNodeTree(1);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*1);
         Assert.HasCount(graph.VertexCount, rooms, "Room count 1 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 1 failed");
@@ -69,7 +69,7 @@ public class CellularRoomGrowerTests
         var generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
-        var(graph, _) = generator.GenerateNodeTree(30, degree_weights);
+        var(graph, _) = generator.GenerateNodeTree(30);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
@@ -120,7 +120,7 @@ public class CellularRoomGrowerTests
         var generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
-        var(graph, _) = generator.GenerateNodeTree(5, degree_weights);
+        var(graph, _) = generator.GenerateNodeTree(5);
         room_grower.Settings.MapArea = 30 * 5;
         var halls = room_grower.BuildHalls(graph);
         Assert.HasCount(graph.EdgeCount, halls);
@@ -157,7 +157,7 @@ public class CellularRoomGrowerTests
         NodeTreeGenerator generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
-        var(graph, _) = generator.GenerateNodeTree(5, degree_weights);
+        var(graph, _) = generator.GenerateNodeTree(5);
         return graph;
     }
 

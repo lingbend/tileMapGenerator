@@ -14,6 +14,11 @@ public class NodeTreeGeneratorSettings
     public Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> Shaper{get; set;} = DefaultShaper;
 
     public int PruningSelectivityMultiplier{get; set;} = 1;
+
+    public NodeTreeGeneratorSettings()
+    {
+        WeightedVertexRemover = DefaultWeightedVertexRemover;
+    }
     
     public static Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> DefaultShaper{get;} = ((graph, backing, weight) =>
     {
@@ -174,60 +179,79 @@ public class NodeTreeGeneratorSettings
 
     public int InitialPaddingPercent{get; set;} = 0;
 
-    public Func<Vertex, Dictionary<int, int>, int> WeightedVertexRemover{get; set;} = DefaultWeightedVertexRemover;
+    public Func<Vertex, Dictionary<int, int>, int> WeightedVertexRemover{get; set;}
 
 
-    public static Func<Vertex,Dictionary<int, int>, int> DefaultWeightedVertexRemover{get;} = ((vert, percents) =>
+    public int DefaultWeightedVertexRemover(Vertex vert, Dictionary<int, int> percents)
+    {
+        int distance = 0;
+        for(int i = 1; i < percents.Count; i++)
+        {
+            int temp_distance = Math.Abs(percents.Values.ElementAt(i-1) - percents.Values.ElementAt(i));
+            if (temp_distance > distance)
             {
-                if (percents.TryGetValue(vert.Degree, out int val))
+                distance = (int) Math.Ceiling(Math.Pow(temp_distance, 1.1));
+            }
+        }
+        int jitter = Random.Next(-distance,distance+1);
+        if (percents.TryGetValue(vert.Degree, out int val))
+        {
+            return 100 - val + jitter;
+        }
+        else
+        {
+            return 100 + jitter;
+        }
+    }
+
+    public int AntiStrandingWeightedVertexRemover(Vertex vert, Dictionary<int, int> percents)
+    {
+        int distance = 0;
+        for(int i = 1; i < percents.Count; i++)
+        {
+            int temp_distance = Math.Abs(percents.Values.ElementAt(i-1) - percents.Values.ElementAt(i));
+            if (temp_distance > distance)
+            {
+                distance = (int) Math.Ceiling(Math.Pow(temp_distance, 1.1));
+            }
+        }
+        int jitter = Random.Next(-distance,distance+1);
+        if (vert.Degree == 1 || vert.Degree == 2)
+        {
+            List<int> neighboring_degrees = new List<int>(vert.Degree);
+            foreach (Edge edge in vert.Edges)
+            {
+                if (vert == edge.Source)
                 {
-                    return 100 - val;
+                    neighboring_degrees.Add(edge.Target.Degree);
                 }
                 else
                 {
-                    return 100;
-                }
-            });
-
-    public static Func<Vertex,Dictionary<int, int>, int> AntiStrandingWeightedVertexRemover{get;} = ((vert, percents) =>
+                    neighboring_degrees.Add(edge.Source.Degree);
+                }                
+            }
+            if (neighboring_degrees.Sum() / (double) neighboring_degrees.Count <= 2)
             {
-                int multiplier = 1;
-                if (vert.Degree == 1 || vert.Degree == 2)
+                if (percents.TryGetValue(vert.Degree, out int val2))
                 {
-                    List<int> neighboring_degrees = new List<int>(vert.Degree);
-                    foreach (Edge edge in vert.Edges)
-                    {
-                        if (vert == edge.Source)
-                        {
-                            neighboring_degrees.Add(edge.Target.Degree);
-                        }
-                        else
-                        {
-                            neighboring_degrees.Add(edge.Source.Degree);
-                        }                
-                    }
-                    if (neighboring_degrees.Sum() / (double) neighboring_degrees.Count <= 2)
-                    {
-                        if (percents.TryGetValue(vert.Degree, out int val2))
-                        {
-                            return (100 - val2)*3;
-                        }
-                        else
-                        {
-                            return 300;
-                        }
-                    }
-                }
-                
-                if (percents.TryGetValue(vert.Degree, out int val))
-                {
-                    return 100 - val;
+                    return (100 - val2+jitter)*3;
                 }
                 else
                 {
-                    return 100;
+                    return 300+jitter;
                 }
-            });
+            }
+        }
+        
+        if (percents.TryGetValue(vert.Degree, out int val))
+        {
+            return 100 - val + jitter;
+        }
+        else
+        {
+            return 100 + jitter;
+        }
+    }
 
     public List<Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)>> PostProcessors{get; set;} = new List<Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)>>();
 
