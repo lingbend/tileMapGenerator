@@ -56,6 +56,7 @@ public class NodeTreeGenerator
         foreach (var processor in Settings.PostProcessors)
         {
             (_graph, backing_dictionary) = processor(_graph, backing_dictionary);
+            (_graph, backing_dictionary) = RemoveDuplicates(_graph, backing_dictionary);
             (_graph, backing_dictionary) = CheckForHolesAndPatch(_graph, backing_dictionary);
         }
         return (_graph, result);
@@ -93,7 +94,15 @@ public class NodeTreeGenerator
             }
             foreach (Edge edge in duplicate_edges)
             {
-                RemoveEdge(graph, edge);
+                if (edge.Target is null)
+                {
+                    edge.Source?.RemoveEdge(edge);
+                    edge.Target?.RemoveEdge(edge);
+                }
+                else
+                {
+                    RemoveEdge(graph, edge);
+                }
             }
         }
         
@@ -487,9 +496,9 @@ public class NodeTreeGenerator
                 successful = false;
             }
             if (GetConnectedComponents(graph).Count > 1)
-                {
-                    throw new Exception();
-                }
+            {
+                throw new Exception();
+            }
         }
         return (graph, backing_dictionary, holes, successful);
     }
