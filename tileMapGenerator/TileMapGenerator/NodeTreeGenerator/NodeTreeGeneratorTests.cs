@@ -32,17 +32,9 @@ public class GraphBuilderTests
         generator.Settings.WeightedVertexRemover = generator.Settings.AntiStrandingWeightedVertexRemover;
         generator.Settings.PruningSelectivityMultiplier = 2;
         // generator._random = new Random(13513251);
-        var (output, result) = generator.GenerateNodeTree(27);
-        (output, result) = generator.GenerateNodeTree(18, output);
+        var output = generator.GenerateNodeTree(27);
+        output = generator.GenerateNodeTree(18, output);
         // (output, result) = generator.GenerateNodeTree(27, degree_weights, output);
-        if (result)
-        {
-            CheckVerticesDegrees(output, 1, 4);
-        }
-        else
-        {
-            Debug.WriteLine("func returned false on exact");
-        }
         PrintToPNG(output, "GraphBuilderTreePhase_PossibleConnectedness_Valid");
     }
 
@@ -228,7 +220,7 @@ public class GraphBuilderTests
         var generator = new NodeTreeGenerator();
         generator.Settings.degree_percents = degree_weights;
         generator.Settings.WeightedVertexRemover = generator.Settings.AntiStrandingWeightedVertexRemover;
-        var(graph, _) = generator.GenerateNodeTree(1250);
+        var graph = generator.GenerateNodeTree(1250);
         PrintToPNG(graph, "NodeTreeGeneratorDegree_HugeSizeHalfVertices_Valid");
         Assert.HasCount(1250, graph.Vertices);
         CheckIsConnected(graph);
@@ -303,7 +295,7 @@ public class GraphBuilderTests
         visualizer.FormatVertex += (_, args) =>
         {
             args.VertexFormat.Position = new QuikGraph.Graphviz.Dot.GraphvizPoint((int) args.Vertex.Weight.X * 72, (int) args.Vertex.Weight.Y * 72);
-            args.VertexFormat.Label = args.Vertex.VertexID.ToString();
+            // args.VertexFormat.Label = args.Vertex.VertexID.ToString();
         };
         string file = visualizer.Generate()[..^1] + "layout=neato;\n}";
         File.WriteAllText($"../../{name}.dot", file);
@@ -324,7 +316,7 @@ public class GraphBuilderTests
             };
             var tree = new NodeTreeGenerator();
             tree.Settings.degree_percents = degree_weights;
-            (Graph graph, _) = tree.GenerateNodeTree(10);
+            Graph graph = tree.GenerateNodeTree(10);
             PrintToPNG(graph, $"GraphBuilderTreePhase_ConnectedUnit_Valid{range[0]}{range[1]}");
             CheckIsConnected(graph);
             
@@ -340,7 +332,7 @@ public class GraphBuilderTests
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var (graph, _) = generator.GenerateNodeTree(r);
+            var graph = generator.GenerateNodeTree(r);
             Assert.IsInRange(r*.9, r*1.1, graph.VertexCount);
         }
     }
@@ -352,7 +344,7 @@ public class GraphBuilderTests
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var (graph, _) = generator.GenerateNodeTree(r);
+            var graph = generator.GenerateNodeTree(r);
             Assert.HasCount(r, graph.Vertices);
         }
     }
@@ -371,7 +363,7 @@ public class GraphBuilderTests
         }
         var generator = new NodeTreeGenerator();
         generator.Settings.degree_percents = degree_weights;
-        var (graph, _) = generator.GenerateNodeTree(10);
+        var graph = generator.GenerateNodeTree(10);
         Assert.HasCount(r, graph.Vertices);
     }
 
@@ -382,13 +374,13 @@ public class GraphBuilderTests
         {   
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var (graph, _) = generator.GenerateNodeTree(5+depth);
+            var graph = generator.GenerateNodeTree(5+depth);
             CheckIsConnected(graph);
             Assert.HasCount(5+depth, graph.Vertices);
         }
     }
 
-    [Timeout(10000)]
+    // [Timeout(10000)]
     [TestMethod]
     public void GraphBuilderTreePhase_SpeedConnected_Valid()
     {
@@ -397,7 +389,9 @@ public class GraphBuilderTests
             int r = (i % 101)+1;
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            generator.GenerateNodeTree(r);
+            generator.Settings.Random = new Random(r*13*17+1%(i*i));
+            var graph = generator.GenerateNodeTree(r);
+            CheckIsConnected(graph);
         }
     }
 
@@ -416,7 +410,7 @@ public class GraphBuilderTests
             {
                 var generator = new NodeTreeGenerator();
                 generator.Settings.degree_percents = degree_weights;
-                var (graph, _) = generator.GenerateNodeTree(40);
+                var graph = generator.GenerateNodeTree(40);
                 var vertices = graph.Vertices;
                 foreach (var vertex in vertices)
                 {

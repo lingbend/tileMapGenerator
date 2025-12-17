@@ -29,7 +29,11 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
     {
         if (obj is not null && obj is RoomEdge<TWeight> edge)
         {
-            return _edge_id == ((RoomEdge<TWeight>) obj)._edge_id;
+            if ((Target == edge.Target && Source == edge.Source) || (Target == edge.Source && Source == edge.Target))
+            {
+                return true;
+            }
+            return _edge_id == edge._edge_id;
         }
         return base.Equals(obj);
     }
