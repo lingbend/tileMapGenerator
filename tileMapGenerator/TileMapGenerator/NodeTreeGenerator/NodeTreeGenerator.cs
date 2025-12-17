@@ -38,6 +38,15 @@ public class NodeTreeGenerator
 
     private (Graph, bool) GenerateNodeTreeInner(int num_rooms, int size, ref Dictionary<Vector2, Vertex> backing_dictionary)
     {
+        if (num_rooms == 1)
+        {
+            _graph = new Graph();
+            Vertex vert = new Vertex(Vector2.One);
+            _graph.AddVertex(vert);
+            backing_dictionary = new();
+            backing_dictionary.Add(Vector2.One, vert);
+            return (_graph, true);
+        }
         (_graph, backing_dictionary, List<Vector2> holes) = CutVerticesDownTo(_graph, backing_dictionary, (int)(num_rooms * (1.0 + (Settings.InitialPaddingPercent / 100.0))));
         (_graph, backing_dictionary, bool result) = ReworkDegreeDistribution(_graph, backing_dictionary, holes, new Vector2(size, size));
         if (Settings.InitialPaddingPercent != 0)
