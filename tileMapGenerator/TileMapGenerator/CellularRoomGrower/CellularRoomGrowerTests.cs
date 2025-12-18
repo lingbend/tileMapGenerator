@@ -98,15 +98,51 @@ public class CellularRoomGrowerTests
     }
 
     [TestMethod]
-    public void CellularRoomGenerateSizedRooms_TooSmallToFit_Invalid()
+    public void CellularRoomGenerateSizedRooms_TooSmallToFit_Valid()
     {
-        
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        var(graph, _) = generator.GenerateFilledGraph(5, 5);
+        var (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 30);
+        Assert.HasCount(25, rooms, "size 30");
+        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 64);
+        Assert.HasCount(25, rooms, "size 64");
     }
 
+    [Timeout(5000)]
     [TestMethod]
-    public void CellularRoomGenerateSizedRooms_EmptyHelperMethods_Invalid()
+    public void CellularRoomGenerateSizedRooms_EmptyHelperMethods_Valid()
     {
-        
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        var(graph, _) = generator.GenerateFilledGraph(5, 5);
+        room_grower.Settings.DirectionChooser = (_, _)=>Vector2.Zero;
+        var (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
+        Assert.HasCount(25, rooms, "Bad Direction Chooser case");
+        room_grower.Settings.DirectionChooser = CellularRoomGrowerSettings.DefaultDirectionChooser;
+        room_grower.Settings.ShapeChooser = (_, _)=>(_, _)=>[];
+        (graph, _) = generator.GenerateFilledGraph(5, 5);
+        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
+        Assert.HasCount(25, rooms, "Bad Shape Chooser case");
+        room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.DefaultShapeChooser;
+        room_grower.Settings.Prioritizer = (_, _)=> null;
+        (graph, _) = generator.GenerateFilledGraph(5, 5);
+        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
+        Assert.HasCount(25, rooms, "Bad Prioritizer case");
+        room_grower.Settings.Prioritizer = CellularRoomGrowerSettings.DefaultPrioritizer;
+        room_grower.Settings.ValidDirections = [];
+        (graph, _) = generator.GenerateFilledGraph(5, 5);
+        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
+        Assert.HasCount(25, rooms, "Bad Valid Directions case");
+        room_grower.Settings.ValidDirections =  CellularRoomGrowerSettings.DefaultValidDirections;
+        room_grower.Settings.SideRatio = Vector2.Zero;
+        (graph, _) = generator.GenerateFilledGraph(5, 5);
+        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
+        Assert.HasCount(25, rooms, "Bad Side Ratio case");
     }
 
     [TestMethod]
@@ -153,9 +189,23 @@ public class CellularRoomGrowerTests
     }
 
     [TestMethod]
-    public void CellularRoomGrowerGrowRooms_Valid()
+    public void CellularRoomGrowerGrowRooms_MaxSizeUsed_Valid()
     {
-        
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        var graph = generator.GenerateNodeTree(5);
+        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30 * 5);
+        for (uint i = 1; i < grid.RowSize; i++)
+        {
+            Assert.IsGreaterThan(0u, grid.GetSliceOR(i, 1, i, grid.ColSize));
+        }
+
+        for (uint j = 1; j < grid.RowSize; j++)
+        {
+            Assert.IsGreaterThan(0u, grid.GetSliceOR(1, j, grid.RowSize, j));
+        }
     }
 
     private Graph InitializeGraph()

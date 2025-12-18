@@ -10,13 +10,14 @@ public class CellularRoomGrowerSettings
 {
     public Func<Graph, IEnumerable<Room>, Room?> Prioritizer{get; set;} = DefaultPrioritizer;
     public Func<IEnumerable<Vector2>, Room, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
-    public List<Vector2> ValidDirections{get; set;} = [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
+    public List<Vector2> ValidDirections{get; set;} = DefaultValidDirections;
+    public static List<Vector2> DefaultValidDirections{get;} = [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
      -Vector2.UnitY];
 
     public Func<Graph, Vertex, Func<int, Vector2, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
     public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
 
-    public int MapArea{get; set;}
+    internal int MapArea{get; set;}
 
     public Vector2 SideRatio{get; set;} = Vector2.One;
 
