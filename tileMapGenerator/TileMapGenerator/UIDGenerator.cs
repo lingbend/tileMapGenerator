@@ -6,6 +6,6 @@ static internal class UIDGenerator
 
     public static int GetNextID()
     {
-        return _id++;
+        return Interlocked.Increment(ref _id);
     }
 }
