@@ -17,10 +17,6 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
     public RoomEdge (RoomVertex<TWeight> vertex_1, RoomVertex<TWeight> vertex_2)
     {
         _edge_id = UIDGenerator.GetNextID();
-        // if (_edge_id == 532)
-        // {
-        //     Console.Write(" ");
-        // }
         Source = vertex_1;
         Target = vertex_2;
     }
@@ -58,8 +54,6 @@ public class RoomVertex<TWeight>
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
     public int Degree{get{return Edges.Count;}}
     public TWeight? Weight {get; internal set;}
-    public bool Center{get; set;} = false;
-    public UndirectedGraph<RoomVertex<Vector2>, RoomEdge<Vector2>>? InnerGraph{get; set;} = null;
 
     public RoomVertex(TWeight weight)
     {
@@ -78,16 +72,25 @@ public class RoomVertex<TWeight>
         _vertex_id = UIDGenerator.GetNextID();
     }
 
-    public bool RemoveEdge(RoomEdge<TWeight> edge)
+    public void RemoveEdge(RoomEdge<TWeight> edge)
     {
-        return Edges.Remove(edge);
+        lock (Edges)
+        {
+            Edges.Remove(edge);
+        }
     }
 
     public RoomEdge<TWeight> ConnectToVertex(RoomVertex<TWeight> vertex, TWeight weight)
     {
         RoomEdge<TWeight> new_edge = new RoomEdge<TWeight>(this, vertex);
-        Edges.Add(new_edge);
-        vertex.Edges.Add(new_edge);
+        lock (Edges)
+        {
+            Edges.Add(new_edge);
+        }
+        lock (vertex.Edges) {
+            vertex.Edges.Add(new_edge);
+        }
+        
         new_edge.Weight = (TWeight) weight;
         
         return new_edge;
