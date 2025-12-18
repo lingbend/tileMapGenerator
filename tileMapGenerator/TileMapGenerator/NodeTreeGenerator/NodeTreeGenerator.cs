@@ -697,8 +697,8 @@ public class NodeTreeGenerator
                 backing_dictionary.TryAdd(vertex.Weight, vertex);
             });
         });
-
-        Parallel.For(1, rows+1, i=>
+        
+        var vertical_edging = new Thread(()=>Parallel.For(1, rows+1, i=>
         {
             Parallel.For(1, cols, j=>
             {
@@ -710,29 +710,26 @@ public class NodeTreeGenerator
                 {
                     throw new Exception();
                 }
-                Edge edge;
-                lock (edges)
-                {
-                    edge = vert1.ConnectToVertex(vert2, vert2.Weight - vert1.Weight);
-                }
+                Edge edge = vert1.ConnectToVertex(vert2, vert2.Weight - vert1.Weight);
                 edges.Add(edge);
             });
-        });
+        }));
 
+        vertical_edging.Start();
+
+        //horizontal edging
         Parallel.For(1, rows, i=>
         {
             Parallel.For(1, cols+1, j=>
             {
                 backing_dictionary.TryGetValue(new Vector2(i, j), out Vertex vert1);
                 backing_dictionary.TryGetValue(new Vector2(i+1, j), out Vertex vert2);
-                Edge edge;
-                lock (edges)
-                {
-                    edge = vert1.ConnectToVertex(vert2, vert2.Weight - vert1.Weight);
-                }
+                Edge edge = vert1.ConnectToVertex(vert2, vert2.Weight - vert1.Weight);
                 edges.Add(edge);
             });
         });
+
+        vertical_edging.Join();
 
         graph.AddVerticesAndEdgeRange(edges);
         return (graph, backing_dictionary);
