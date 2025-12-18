@@ -394,7 +394,7 @@ public class BinaryGrid
         return _grid.GetHashCode();
     }
 
-    public void ToPNG()
+    public void ToBMP()
     {
         Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
         image.SetResolution(300, 300);
