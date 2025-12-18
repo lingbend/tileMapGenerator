@@ -82,13 +82,7 @@ public class NodeTreeGenerator
         new_vertices_container.AddVerticesAndEdgeRange(GetAllEdges(new_vertices));
         InnerReworkDegreeDistribution(ref graph, backing_dictionary, min_span_tree, new_vertices_container, degree_percents, processed_vertices, processed_edges, deleted_vertices, new HashSet<Vertex>());
         var edge_copy = new List<Edge>(graph.Edges);
-        foreach (var edge in edge_copy)
-        {
-            if (!min_span_tree.ContainsEdge(edge))
-            {
-                graph = RemoveEdge(graph, edge);
-            }
-        }
+        RemoveEdges(graph, edge_copy.Where(e=>!min_span_tree.ContainsEdge(e)).ToHashSet());
         return (min_span_tree, backing_dictionary);
     }
 
@@ -385,10 +379,7 @@ public class NodeTreeGenerator
                 Vector2 hole_full = (Vector2) hole!;
                 holes.Remove(hole_full);
                 backing_dictionary.TryGetValue(hole_full, out Vertex value);
-                foreach (Edge edge in value?.Edges ?? [])
-                {
-                    graph = RemoveEdge(graph, edge);
-                }
+                RemoveEdges(graph, value?.Edges ?? []);
                 if (value != null)
                 {
                     graph.RemoveVertex(backing_dictionary[hole_full]);
@@ -413,9 +404,26 @@ public class NodeTreeGenerator
         return (graph, backing_dictionary);
     }
 
+    private Graph RemoveEdges(Graph graph, ISet<Edge> edges)
+    {
+        lock (graph)
+        {
+            graph.RemoveEdges(edges);
+        }
+        Parallel.ForEach(edges, edge =>
+        {
+            edge.Source.RemoveEdge(edge);
+            edge.Target.RemoveEdge(edge);
+        });
+        return graph;
+    }
+
     private Graph RemoveEdge(Graph graph, Edge edge)
     {
-        graph.RemoveEdge(edge);
+        lock (graph)
+        {
+            graph.RemoveEdge(edge);
+        }
         edge.Source.RemoveEdge(edge);
         edge.Target.RemoveEdge(edge);
         return graph;
@@ -423,16 +431,23 @@ public class NodeTreeGenerator
 
     private (Vector2?, bool) GetHoleOfDegreeOrGreater(ConcurrentDictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes, int degree_min)
     {
+        string locker = string.Empty;
         Span<Vector2> holes_copy = new Span<Vector2>(holes.ToArray());
         Settings.Random.Shuffle(holes_copy);
-        foreach (var hole in holes_copy)
+        Vector2? found_hole = null;
+        Parallel.ForEach(holes_copy.ToArray(), (hole, state)=>
         {
             if (GetAdjacentVertices(backing_dictionary, hole).Count >= degree_min)
             {
-                return (hole, true);
+                lock (locker)
+                {
+                    found_hole = hole;
+                    state.Stop();
+                }
             }
-        }
-        return (null, false);
+        });
+
+        return (found_hole, found_hole is not null);
     }
 
     private List<Vertex> GetAdjacentVertices(ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Vector2 origin)
@@ -456,10 +471,7 @@ public class NodeTreeGenerator
             HashSet<Vertex> disposable_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
             Vertex choice = ChooseWeightedRandom(disposable_vertices, Settings.degree_percents, Settings.WeightedVertexRemover, ((target_number*Settings.PruningSelectivityMultiplier)/5)+2);
 
-            foreach (Edge edge in choice.Edges.ToArray())
-            {
-                graph = RemoveEdge(graph, edge);
-            }
+            RemoveEdges(graph, choice.Edges.ToHashSet());
             graph.RemoveVertex(choice);
             backing_dictionary.TryRemove(choice.Weight, out _);
             holes.Add(choice.Weight);
@@ -535,7 +547,6 @@ public class NodeTreeGenerator
                     {
                         unified_graph.AddVerticesAndEdge(vertex.ConnectToVertex(adj_vertex, adj_vertex.Weight - vertex.Weight));
                         unified_graph.AddVerticesAndEdgeRange(comp.Edges);
-                        continue;
                     }
                 }
                 unified_graph.AddVerticesAndEdgeRange(comp.Edges);
@@ -689,6 +700,8 @@ public class NodeTreeGenerator
         ConcurrentDictionary<Vector2, Vertex> backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
         Graph graph = new Graph(false);
         ConcurrentBag<Edge> edges = new();
+
+        // initialize all vertices
         Parallel.For(1, rows+1, i=>
         {
             Parallel.For(1, cols+1, j=>
@@ -697,7 +710,7 @@ public class NodeTreeGenerator
                 backing_dictionary.TryAdd(vertex.Weight, vertex);
             });
         });
-        
+
         var vertical_edging = new Thread(()=>Parallel.For(1, rows+1, i=>
         {
             Parallel.For(1, cols, j=>
