@@ -986,6 +986,25 @@ public class BinaryGridTests
     {
         return (long) binNum.ToULong();
     }
+
+
+    [TestMethod]
+    public void BinaryGraphToPNG_ByHand()
+    {
+        BinaryGrid grid = new BinaryGrid(5, 5);
+        grid._grid = ToBinaryNumber(0b1111111_1000001_1000001_1001111_1001111_1001111_1111111);
+        grid.ToPNG();
+        grid = new BinaryGrid(5, 5);
+        grid._grid = ToBinaryNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+        grid.ToPNG();
+        grid = new BinaryGrid(5, 5);
+        grid._grid = ToBinaryNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+        grid.ToPNG();
+        grid = new BinaryGrid(5, 5);
+        grid._grid = ToBinaryNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+        grid.ToPNG();
+    }
+    
 }
 
 

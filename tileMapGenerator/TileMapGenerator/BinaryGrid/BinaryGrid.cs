@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Drawing;
 using System.Dynamic;
+using TileMapGenerator;
 
 namespace BinaryGrid;
 
@@ -13,6 +14,7 @@ public class BinaryGrid
     public uint RowSize{get{return _size.Item1;}}
     public uint ColSize{get{return _size.Item2;}}
     private uint _border_num = 1;
+    private int _id;
 
     public BinaryGrid(uint rows, uint columns, uint borders = 1)
     {
@@ -31,6 +33,7 @@ public class BinaryGrid
         {
             throw new ArgumentException("Value must be 0 or 1");
         }        
+        _id = UIDGenerator.GetNextID();
     }
 
     public void ChangeBorders(uint borders)
@@ -389,6 +392,38 @@ public class BinaryGrid
     public override int GetHashCode()
     {
         return _grid.GetHashCode();
+    }
+
+    public void ToPNG()
+    {
+        Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
+        image.SetResolution(300, 300);
+        for(int row = 1; row <= _size.Item2; row++)
+        {
+            for(int col = 1; col <= _size.Item1; col++)
+            {
+                if (GetCell((uint) row, (uint) col) == 1)
+                {
+                    DrawRect(image, new Vector2(1+(30*(col-1)), 1+(30*(row-1))), Color.Black);
+                }
+                else
+                {
+                    DrawRect(image, new Vector2(1+(30*(col-1)), 1+(30*(row-1))), Color.White);
+                }
+            }
+        }
+        image.Save($"../../Grid_{_id}.bmp");
+    }
+
+    private void DrawRect(Bitmap image, Vector2 upper_left, Color color)
+    {
+        for(int row = (int) upper_left.Y; row < upper_left.Y + 30; row++)
+        {
+            for(int col = (int) upper_left.X; col < upper_left.X + 30; col++)
+            {
+                image.SetPixel(col-1, row-1, color);
+            }
+        }
     }
 }
 
