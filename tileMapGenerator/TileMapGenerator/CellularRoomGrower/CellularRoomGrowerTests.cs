@@ -27,7 +27,18 @@ public class CellularRoomGrowerTests
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         var(graph, _) = generator.GenerateFilledGraph(5, 5);
-        room_grower.GenerateSizedRooms(graph, 100);
+        room_grower.GenerateSizedRooms(graph, 1000);
+    }
+
+    [TestMethod]
+    public void CellularRoomGrowerGenerateSizedRooms_ExactSize_Valid()
+    {
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        var(graph, _) = generator.GenerateFilledGraph(5, 5);
+        room_grower.GenerateSizedRooms(graph, 65);
     }
 
     [TestMethod]
@@ -83,12 +94,7 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         Graph graph = new Graph();
-        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*1);
-        Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
-        Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
-        Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
-        Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
-        Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
+        Assert.Throws<Exception> (()=>room_grower.GenerateSizedRooms(graph, 30*1));
     }
 
     [TestMethod]

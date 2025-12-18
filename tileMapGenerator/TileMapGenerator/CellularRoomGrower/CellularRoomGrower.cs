@@ -43,7 +43,7 @@ public class CellularRoomGrower
             {
                 tags = new(Settings.Tagger(graph, vertex));
             }
-            Room new_room = new Room(vertex, Settings.ShapeChooser(graph, vertex), Settings.ValidDirections, AdjustLocus(vertex.Weight), tags);
+            Room new_room = new Room(vertex, Settings.ShapeChooser(graph, vertex), Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), tags);
             rooms.Add(new_room);
         }
         return rooms;
@@ -54,16 +54,17 @@ public class CellularRoomGrower
         List<Hall> halls = new(graph.EdgeCount);
         foreach (Edge edge in graph.Edges)
         {
-            halls.Add(new Hall(edge, AdjustLocus((edge.Source.Weight + edge.Target.Weight) * new Vector2(.5f, .5f))));
+            halls.Add(new Hall(edge, AdjustLocus((edge.Source.Weight + edge.Target.Weight) * new Vector2(.5f, .5f), graph.VertexCount)));
         }
         return halls;
     }
 
     // Essentially stretches the vector2 according to a matrix transformation
-    private Vector2 AdjustLocus(Vector2 locus)
+    private Vector2 AdjustLocus(Vector2 locus, int room_number)
     {
-        double width_modifier = (Math.Sqrt(Settings.MapArea) * Settings.SideRatio.X - 2.0) / old_relative_size.X;
-        double height_modifier = (Math.Sqrt(Settings.MapArea) * Settings.SideRatio.Y - 2.0) / old_relative_size.Y;
+        double width_modifier = (Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 1.0) / old_relative_size.X;
+        double height_modifier = (Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 1.0) / old_relative_size.Y;
+
         if (width_modifier <= 1)
         {
             if (width_modifier < -1)
@@ -101,8 +102,8 @@ public class CellularRoomGrower
 
     internal BinaryGrid BuildGrid(IEnumerable<Room> rooms, IEnumerable<Hall> halls)
     {
-        double width = Math.Ceiling(Math.Sqrt(Settings.MapArea) * Settings.SideRatio.X + 1.0);
-        double height = Math.Ceiling(Math.Sqrt(Settings.MapArea) * Settings.SideRatio.Y + 1.0);
+        double width = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 5.0);
+        double height = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 5.0);
         BinaryGrid grid = new BinaryGrid((uint) height, (uint) width);
 
         foreach (Room room in rooms)
@@ -180,6 +181,14 @@ public class CellularRoomGrower
 
     private bool CheckDirection(BinaryGrid grid, Vector2 direction, Room room)
     {
+        foreach (var spot in room.GetTempGrownSides(direction))
+        {
+            if (spot.X > grid.ColSize || spot.X <= 0 || spot.Y > grid.RowSize || spot.Y <= 0)
+            {
+                return false;
+            }
+        }
+        
         int side_check = (int) room.GetTempGrownSides(direction).Select(vec=>grid.GetCell((uint)vec.Y, (uint)vec.X)).Sum(i=>i);
         return side_check == 0;
     }
