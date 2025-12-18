@@ -3,6 +3,7 @@ using System.Numerics;
 using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numerics.Vector2>, TileMapGenerator.RoomEdge<System.Numerics.Vector2>>;
 using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
 using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
+using System.Collections.Concurrent;
 
 
 public class NodeTreeGeneratorSettings
@@ -11,7 +12,7 @@ public class NodeTreeGeneratorSettings
      -Vector2.UnitY];
     public Random Random{get; set;} = new Random();
 
-    public Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> Shaper{get; set;} = DefaultShaper;
+    public Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> Shaper{get; set;} = DefaultShaper;
 
     public int PruningSelectivityMultiplier{get; set;} = 1;
 
@@ -20,7 +21,7 @@ public class NodeTreeGeneratorSettings
         WeightedVertexRemover = DefaultWeightedVertexRemover;
     }
     
-    public static Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> DefaultShaper{get;} = ((graph, backing, weight) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> DefaultShaper{get;} = ((graph, backing, weight) =>
     {
         int size = graph.VertexCount;
         Dictionary<int, int> enum_numbering = new Dictionary<int, int>();
@@ -44,7 +45,7 @@ public class NodeTreeGeneratorSettings
         return backing.Values.Zip(nums);
     });
 
-    public static Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> RadialShaper{get;} = ((graph, backing, weight) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> RadialShaper{get;} = ((graph, backing, weight) =>
     {
         int size = graph.VertexCount;
         Dictionary<int, int> enum_numbering = new Dictionary<int, int>();
@@ -87,7 +88,7 @@ public class NodeTreeGeneratorSettings
         return cleaned_vertices.Zip(nums);
     });
 
-    public static Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> CentralAxisXShaper{get;} = ((graph, backing, weight) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> CentralAxisXShaper{get;} = ((graph, backing, weight) =>
     {
         int size = graph.VertexCount;
         Dictionary<int, int> enum_numbering = new Dictionary<int, int>();
@@ -130,7 +131,7 @@ public class NodeTreeGeneratorSettings
         return cleaned_vertices.Zip(nums);
     });
 
-    public static Func<Graph, Dictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> CentralAxisYShaper{get;} = ((graph, backing, weight) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> CentralAxisYShaper{get;} = ((graph, backing, weight) =>
     {
         int size = graph.VertexCount;
         Dictionary<int, int> enum_numbering = new Dictionary<int, int>();
@@ -253,9 +254,9 @@ public class NodeTreeGeneratorSettings
         }
     }
 
-    public List<Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)>> PostProcessors{get; set;} = new List<Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)>>();
+    public List<Func<Graph, ConcurrentDictionary<Vector2, Vertex>, (Graph, ConcurrentDictionary<Vector2, Vertex>)>> PostProcessors{get; set;} = new List<Func<Graph, ConcurrentDictionary<Vector2, Vertex>, (Graph, ConcurrentDictionary<Vector2, Vertex>)>>();
 
-    public static Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)> HorizontalSymmetryPostProcessor{get;} = (graph, backing_dictionary) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, (Graph, ConcurrentDictionary<Vector2, Vertex>)> HorizontalSymmetryPostProcessor{get;} = (graph, backing_dictionary) =>
     {
         List<Vertex> weights = new List<Vertex>(graph.Vertices.OrderBy((vert)=>vert.Weight.Y));
         List<Vertex> median_list;
@@ -263,7 +264,7 @@ public class NodeTreeGeneratorSettings
         Vertex? extra = null;
 
         Graph new_graph = new Graph(false);
-        Dictionary<Vector2, Vertex> new_backing_dictionary = new Dictionary<Vector2, Vertex>();
+        ConcurrentDictionary<Vector2, Vertex> new_backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
 
         if (weights.Count % 2 == 0)
         {
@@ -275,7 +276,7 @@ public class NodeTreeGeneratorSettings
             median_list = weights[..((weights.Count-1) / 2)];
             extra = weights[(weights.Count-1)/2];
             var extra_vertex = new Vertex(extra.Weight);
-            new_backing_dictionary.Add(extra.Weight, extra_vertex);
+            new_backing_dictionary.TryAdd(extra.Weight, extra_vertex);
             new_graph.AddVertex(extra_vertex);
             median = (int) extra.Weight.Y + 1;
         }
@@ -286,8 +287,8 @@ public class NodeTreeGeneratorSettings
             Vertex reflected_vertex = new Vertex(GetHorizontalReflection(new_vertex.Weight, median));
             new_graph.AddVertex(new_vertex);
             new_graph.AddVertex(reflected_vertex);
-            new_backing_dictionary.Add(new_vertex.Weight, new_vertex);
-            new_backing_dictionary.Add(reflected_vertex.Weight, reflected_vertex);
+            new_backing_dictionary.TryAdd(new_vertex.Weight, new_vertex);
+            new_backing_dictionary.TryAdd(reflected_vertex.Weight, reflected_vertex);
         }
         if (extra != null)
         {
@@ -426,7 +427,7 @@ public class NodeTreeGeneratorSettings
     }
 
 
-    public static Func<Graph, Dictionary<Vector2, Vertex>, (Graph, Dictionary<Vector2, Vertex>)> VerticalSymmetryPostProcessor{get;} = (graph, backing_dictionary) =>
+    public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, (Graph, ConcurrentDictionary<Vector2, Vertex>)> VerticalSymmetryPostProcessor{get;} = (graph, backing_dictionary) =>
     {
         List<Vertex> weights = new List<Vertex>(graph.Vertices.OrderBy((vert)=>vert.Weight.X));
         List<Vertex> median_list;
@@ -434,7 +435,7 @@ public class NodeTreeGeneratorSettings
         Vertex? extra = null;
 
         Graph new_graph = new Graph(false);
-        Dictionary<Vector2, Vertex> new_backing_dictionary = new Dictionary<Vector2, Vertex>();
+        ConcurrentDictionary<Vector2, Vertex> new_backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
 
         if (weights.Count % 2 == 0)
         {
@@ -446,7 +447,7 @@ public class NodeTreeGeneratorSettings
             median_list = weights[..((weights.Count-1) / 2)];
             extra = weights[(weights.Count-1)/2];
             var extra_vertex = new Vertex(extra.Weight);
-            new_backing_dictionary.Add(extra.Weight, extra_vertex);
+            new_backing_dictionary.TryAdd(extra.Weight, extra_vertex);
             new_graph.AddVertex(extra_vertex);
             median = (int) extra.Weight.X + 1;
         }
@@ -457,8 +458,8 @@ public class NodeTreeGeneratorSettings
             Vertex reflected_vertex = new Vertex(GetVerticalReflection(new_vertex.Weight, median));
             new_graph.AddVertex(new_vertex);
             new_graph.AddVertex(reflected_vertex);
-            new_backing_dictionary.Add(new_vertex.Weight, new_vertex);
-            new_backing_dictionary.Add(reflected_vertex.Weight, reflected_vertex);
+            new_backing_dictionary.TryAdd(new_vertex.Weight, new_vertex);
+            new_backing_dictionary.TryAdd(reflected_vertex.Weight, reflected_vertex);
         }
         if (extra != null)
         {

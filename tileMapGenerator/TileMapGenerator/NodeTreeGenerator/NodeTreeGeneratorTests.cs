@@ -11,6 +11,7 @@ using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
 using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
 using QuikGraph.Graphviz;
 using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
 
 [TestClass]
 public class GraphBuilderTests
@@ -88,15 +89,15 @@ public class GraphBuilderTests
     {
         var generator = new NodeTreeGenerator();
         Graph graph = new Graph(false);
-        Dictionary<Vector2, Vertex> backing_dictionary = new Dictionary<Vector2, Vertex>();
+        ConcurrentDictionary<Vector2, Vertex> backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
         var center = new Vertex(new Vector2(1,1));
         graph.AddVertex(center);
-        backing_dictionary.Add(center.Weight, center);
+        backing_dictionary.TryAdd(center.Weight, center);
         for (int i = 2; i < 12; i++)
         {
             var new_vertex = new Vertex(new Vector2(i, i));
             graph.AddVerticesAndEdge(center.ConnectToVertex(new_vertex, Vector2.Zero));
-            backing_dictionary.Add(new_vertex.Weight, new_vertex);
+            backing_dictionary.TryAdd(new_vertex.Weight, new_vertex);
         }
         var non_articulating_points = generator.GetTarjanNonArticulatingPoints(graph, backing_dictionary);
         Assert.HasCount(10, non_articulating_points);
