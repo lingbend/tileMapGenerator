@@ -394,7 +394,7 @@ public class BinaryGrid
         return _grid.GetHashCode();
     }
 
-    public void ToBMP()
+    public void ToBMP(string name = "")
     {
         Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
         image.SetResolution(300, 300);
@@ -412,7 +412,7 @@ public class BinaryGrid
                 }
             }
         }
-        image.Save($"../../Grid_{_id}.bmp");
+        image.Save($"../../{name}Grid_{_id}.bmp");
     }
 
     private void DrawRect(Bitmap image, Vector2 upper_left, Color color)

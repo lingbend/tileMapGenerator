@@ -16,12 +16,31 @@ public class CellularRoomGrower
 
     public (Graph, BinaryGrid, IEnumerable<Room>, IEnumerable<Hall>) GenerateSizedRooms(Graph graph, int map_area)
     {
+        if (Settings.ValidDirections.Count == 0)
+        {
+            Settings.ValidDirections = CellularRoomGrowerSettings.DefaultValidDirections;
+        }
+        if (Settings.SideRatio.LengthSquared() == 0)
+        {
+            Settings.SideRatio = Vector2.One;
+        }
         Settings.MapArea = map_area;
         old_relative_size = GetOldRelativeSize(graph);
         IEnumerable<Room> rooms = BuildRooms(graph);
         IEnumerable<Hall> halls = BuildHalls(graph);
         BinaryGrid grid = BuildGrid(rooms, halls);
         (rooms, grid) = GrowRooms(rooms, graph, grid, Settings.Prioritizer);
+
+        int retry_count = 0;
+        while (rooms.Count() < graph.VertexCount && retry_count < 10 && Settings.MapArea < Settings.MaxArea)
+        {
+            Settings.MapArea = (int) Math.Ceiling(Math.Pow(Settings.MapArea, 1.1d));
+            rooms = BuildRooms(graph);
+            halls = BuildHalls(graph);
+            grid = BuildGrid(rooms, halls);
+            (rooms, grid) = GrowRooms(rooms, graph, grid, Settings.Prioritizer);
+            retry_count++;
+        }
         return (graph, grid, rooms, halls);
     }
 
@@ -131,7 +150,7 @@ public class CellularRoomGrower
     {
         Room? next_room;
         IEnumerable<Room> growable_rooms = rooms;
-        List<Room> new_rooms = new(rooms.Count());
+        HashSet<Room> new_rooms = new(rooms.Count());
         while ( (growable_rooms = GetGrowableRooms(growable_rooms, grid)).Any() && (next_room = prioritizer(graph, growable_rooms)) is not null)
         {
             (grid, Room new_room) = GrowRoom(grid, next_room, Settings.DirectionChooser);
@@ -147,7 +166,7 @@ public class CellularRoomGrower
         {
             foreach (Vector2 direction in Settings.ValidDirections)
             {
-                if (CheckDirection(grid, direction, room))
+                if (CheckDirection(grid, direction, room) && !room.Tags.Contains("_grow_error_"))
                 {
                     growable_rooms.Add(room);
                     break;  
@@ -157,7 +176,7 @@ public class CellularRoomGrower
         return growable_rooms;
     }
 
-    private (BinaryGrid, Room) GrowRoom(BinaryGrid grid, Room room, Func<IEnumerable<Vector2>, Room, Vector2> direction_chooser)
+    internal (BinaryGrid, Room) GrowRoom(BinaryGrid grid, Room room, Func<IEnumerable<Vector2>, Room, Vector2> direction_chooser)
     {
         List<Vector2> open_directions = new();
         foreach (Vector2 direction in Settings.ValidDirections)
@@ -169,13 +188,55 @@ public class CellularRoomGrower
         }
 
         
-        if (open_directions is null)
+        if (open_directions is null || !open_directions.Any())
         {
             throw new NullReferenceException("Room cannot grow, no directions found");
         }
 
-        Vector2 chosen_direction = direction_chooser(open_directions, room);
-        (grid, room) = GrowSide(grid, room, chosen_direction);
+        Vector2 chosen_direction;
+
+        Vector2 max = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
+        Vector2 min = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+        if (max.X - min.X < 2 && (open_directions.Contains(Vector2.UnitX) || open_directions.Contains(-Vector2.UnitX)))
+        {
+            List<Vector2> payload = new();
+            if (open_directions.Contains(Vector2.UnitX))
+            {
+                payload.Add(Vector2.UnitX);
+            }
+            if (open_directions.Contains(-Vector2.UnitX))
+            {
+                payload.Add(-Vector2.UnitX);
+            }
+            chosen_direction = direction_chooser(payload, room);
+        }
+        else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2.UnitY) || open_directions.Contains(-Vector2.UnitY)))
+        {
+            List<Vector2> payload = new();
+            if (open_directions.Contains(Vector2.UnitY))
+            {
+                payload.Add(Vector2.UnitY);
+            }
+            if (open_directions.Contains(-Vector2.UnitY))
+            {
+                payload.Add(-Vector2.UnitY);
+            }
+            chosen_direction = direction_chooser(payload, room);
+        }
+        else
+        {
+            chosen_direction = direction_chooser(open_directions, room);
+        }
+
+        
+        if (Settings.ValidDirections.Contains(chosen_direction))
+        {
+            (grid, room) = GrowSide(grid, room, chosen_direction);
+        }
+        else
+        {
+            room.Tags.Add("_grow_error_");
+        }
         return (grid, room);
     }
 
@@ -183,18 +244,27 @@ public class CellularRoomGrower
     {
         foreach (var spot in room.GetTempGrownSides(direction))
         {
-            if (spot.X > grid.ColSize || spot.X <= 0 || spot.Y > grid.RowSize || spot.Y <= 0)
+            if (spot.X > grid.ColSize || spot.X < 1 || spot.Y > grid.RowSize || spot.Y < 1)
             {
                 return false;
             }
         }
+
+        var new_sides = room.GetTempGrownSides(direction);
+        var old_sides = room.GetSides();
+        var different_sides = new_sides.Except(old_sides);
         
-        int side_check = (int) room.GetTempGrownSides(direction).Select(vec=>grid.GetCell((uint)vec.Y, (uint)vec.X)).Sum(i=>i);
+        int side_check = (int) different_sides.Select(vec=>(vec==room.Locus) ? 0 : grid.GetCell((uint)vec.Y, (uint)vec.X)).Sum(i=>i);
         return side_check == 0;
     }
 
     private (BinaryGrid, Room) GrowSide(BinaryGrid grid, Room room, Vector2 side)
     {
+        foreach (Vector2 point in room.GetSides())
+        {
+            grid.SetCell((uint) point.Y, (uint) point.X, 0U);
+        }
+
         foreach (Vector2 point in room.GetTempGrownSides(side))
         {
             grid.SetCell((uint) point.Y, (uint) point.X, 1U);
@@ -213,18 +283,30 @@ public class Room
     public Func<int, Vector2, IEnumerable<Vector2>> Shape {get; private set;}
     private List<Vector2> corners = new();
     private List<Side> sides = new();
-    public IEnumerable<string> Tags{get; set;} = new List<string>();
+    public List<string> Tags{get; set;} = new List<string>();
     
 
-    internal Room(Vertex vertex, Func<int, Vector2, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, IEnumerable<string>? tags = null)
+    internal Room(Vertex vertex, Func<int, Vector2, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
     {
         Vertex = vertex;
         Locus = center;
-        Shape = shaper;
+        
+        Shape = (num, vec) =>
+        {
+            var result = shaper(num, vec);
+            if (result.Count() == 0 || result is null)
+            {
+                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec);
+            }
+            else
+            {
+                return result;
+            }
+        };
         corners.Add(center);
         foreach (Vector2 direction in valid_directions)
         {
-            sides.Add(new Side(direction, center+direction, shaper));
+            sides.Add(new Side(direction, center, Shape));
         }
 
         if (tags is not null)
@@ -236,6 +318,11 @@ public class Room
     public IEnumerable<Vector2> GetSide(Vector2 direction)
     {
         return sides.Find((side)=>side.Direction == direction)!.Points;
+    }
+
+    public IEnumerable<Vector2> GetSides()
+    {
+        return sides.SelectMany((s)=>s.Points);
     }
 
     public IEnumerable<Vector2> GetTempGrownSides(Vector2 direction, int amount = 1)
@@ -252,6 +339,7 @@ public class Room
     private IEnumerable<Side> CalculateGrowth(Vector2 growing_side, int amount = 1)
     {
         List<Side> grown_sides_copy = new();
+        Side target_side = sides.First((s)=>s.Direction == growing_side);
 
         foreach (Side side in sides)
         {
@@ -261,7 +349,29 @@ public class Room
             }
             else if ((side.Direction + growing_side).LengthSquared() >= 1)
             {
-                grown_sides_copy.Add(side.ChangeLengthBy(amount));
+                Side new_side = side.ChangeLengthBy(amount);
+
+                Vector2 max;
+                Vector2 min;
+
+                if (Math.Abs(side.Direction.X) > 0)
+                {
+                    max = side.Points.MaxBy(v=>v.Y);
+                    min = side.Points.MinBy(v=>v.Y);
+                }
+                else
+                {
+                    max = side.Points.MaxBy(v=>v.X);
+                    min = side.Points.MinBy(v=>v.X);
+                }
+
+                if (!new_side.Points.Contains(max + growing_side) || !new_side.Points.Contains(min + growing_side))
+                {
+                    new_side = new_side.ChangeCenterBy(growing_side);
+                }
+                
+                grown_sides_copy.Add(new_side);
+
             }
             else
             {

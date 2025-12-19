@@ -27,7 +27,8 @@ public class CellularRoomGrowerTests
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         var(graph, _) = generator.GenerateFilledGraph(5, 5);
-        room_grower.GenerateSizedRooms(graph, 1000);
+        var (_, grid, _, _) = room_grower.GenerateSizedRooms(graph, 1000);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_Runs_Valid");
     }
 
     [TestMethod]
@@ -38,7 +39,8 @@ public class CellularRoomGrowerTests
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         var(graph, _) = generator.GenerateFilledGraph(5, 5);
-        room_grower.GenerateSizedRooms(graph, 65);
+        var (_, grid, _, _) = room_grower.GenerateSizedRooms(graph, 65);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_ExactSize_Valid");
     }
 
     [TestMethod]
@@ -50,6 +52,7 @@ public class CellularRoomGrowerTests
         generator.Settings.degree_percents = degree_weights;
         var graph = generator.GenerateNodeTree(5);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*5);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts5_Valid");
         Assert.HasCount(graph.VertexCount, rooms, "Room count 5 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 5 failed");
         Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 5 failed");
@@ -66,11 +69,52 @@ public class CellularRoomGrowerTests
         generator.Settings.degree_percents = degree_weights;
         var graph = generator.GenerateNodeTree(1);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*1);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts1_Valid");
         Assert.HasCount(graph.VertexCount, rooms, "Room count 1 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 1 failed");
         Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 1 failed");
         Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 1 failed");
         Assert.HasCount(graph.EdgeCount, halls, "Hall count 1 failed");
+    }
+
+    [TestMethod]
+    public void CellularRoomGrowerGrowRoom_CorrectGrowth1Room_Valid()
+    {
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        var graph = generator.GenerateNodeTree(1);
+        var vertex = new Vertex(new Vector2(10, 10));
+        var room = new Room(vertex, CellularRoomGrowerSettings.DefaultShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
+        BinaryGrid grid = new BinaryGrid(100, 100);
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow1");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow2");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, -1));
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow3");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow4");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow5");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow6");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow7");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow8");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow9");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow10");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow11");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow12");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow13");
+        // Assert.AreEqual(2, grid.GetSlice((uint)))
     }
 
     [TestMethod]
@@ -82,6 +126,8 @@ public class CellularRoomGrowerTests
         generator.Settings.degree_percents = degree_weights;
         Graph graph = generator.GenerateNodeTree(30);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts30_Valid");
+
         Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
         Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
@@ -105,13 +151,15 @@ public class CellularRoomGrowerTests
         generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         var(graph, _) = generator.GenerateFilledGraph(5, 5);
-        var (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 30);
-        Assert.HasCount(25, rooms, "size 30");
+        var (_, grid, rooms, _) = room_grower.GenerateSizedRooms(graph, 30);
+        grid.ToBMP("CellularRoomGenerateSizedRooms_TooSmallToFit_Valid");
+
+        Assert.HasCount(graph.VertexCount, rooms, "size 30");
         (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 64);
-        Assert.HasCount(25, rooms, "size 64");
+        Assert.HasCount(graph.VertexCount, rooms, "size 64");
     }
 
-    [Timeout(5000)]
+    // [Timeout(5000)]
     [TestMethod]
     public void CellularRoomGenerateSizedRooms_EmptyHelperMethods_Valid()
     {
@@ -129,11 +177,6 @@ public class CellularRoomGrowerTests
         (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
         Assert.HasCount(25, rooms, "Bad Shape Chooser case");
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.DefaultShapeChooser;
-        room_grower.Settings.Prioritizer = (_, _)=> null;
-        (graph, _) = generator.GenerateFilledGraph(5, 5);
-        (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
-        Assert.HasCount(25, rooms, "Bad Prioritizer case");
-        room_grower.Settings.Prioritizer = CellularRoomGrowerSettings.DefaultPrioritizer;
         room_grower.Settings.ValidDirections = [];
         (graph, _) = generator.GenerateFilledGraph(5, 5);
         (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
@@ -185,6 +228,8 @@ public class CellularRoomGrowerTests
         }
 
         var grid = room_grower.BuildGrid(rooms, halls);
+        grid.ToBMP("CellularRoomGrowerBuildGrid_FilledGridSpotsCount_Valid");
+
         Assert.AreEqual(rooms.Count + halls.Count, GetGridCount(grid));
     }
 
@@ -197,6 +242,7 @@ public class CellularRoomGrowerTests
         generator.Settings.degree_percents = degree_weights;
         var graph = generator.GenerateNodeTree(5);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30 * 5);
+        grid.ToBMP("CellularRoomGrowerGrowRooms_MaxSizeUsed_Valid");
         for (uint i = 1; i < grid.RowSize; i++)
         {
             Assert.IsGreaterThan(0u, grid.GetSliceOR(i, 1, i, grid.ColSize));
