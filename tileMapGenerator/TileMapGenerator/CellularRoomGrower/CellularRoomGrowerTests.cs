@@ -159,7 +159,7 @@ public class CellularRoomGrowerTests
         Assert.HasCount(graph.VertexCount, rooms, "size 64");
     }
 
-    // [Timeout(5000)]
+    [Timeout(10000)]
     [TestMethod]
     public void CellularRoomGenerateSizedRooms_EmptyHelperMethods_Valid()
     {
@@ -228,7 +228,6 @@ public class CellularRoomGrowerTests
         }
 
         var grid = room_grower.BuildGrid(rooms, halls);
-        grid.ToBMP("CellularRoomGrowerBuildGrid_FilledGridSpotsCount_Valid");
 
         Assert.AreEqual(rooms.Count + halls.Count, GetGridCount(grid));
     }

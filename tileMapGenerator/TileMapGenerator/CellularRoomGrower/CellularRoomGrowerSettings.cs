@@ -18,7 +18,7 @@ public class CellularRoomGrowerSettings
     public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
 
     internal int MapArea{get; set;}
-    public int MaxArea{get; set;} = 1_000_000;
+    public int MaxArea{get; set;} = 100_000;
 
     public Vector2 SideRatio{get; set;} = Vector2.One;
 

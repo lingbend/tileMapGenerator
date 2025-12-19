@@ -24,6 +24,19 @@ public class CellularRoomGrower
         {
             Settings.SideRatio = Vector2.One;
         }
+        var temp_func = Settings.DirectionChooser;
+        Settings.DirectionChooser = (vecs, room) =>
+        {
+            var result = temp_func(vecs, room);
+            if (Settings.ValidDirections.Contains(result))
+            {
+                return result;
+            }
+            else
+            {
+                return CellularRoomGrowerSettings.DefaultDirectionChooser(vecs, room);
+            }
+        };
         Settings.MapArea = map_area;
         old_relative_size = GetOldRelativeSize(graph);
         IEnumerable<Room> rooms = BuildRooms(graph);
@@ -32,7 +45,7 @@ public class CellularRoomGrower
         (rooms, grid) = GrowRooms(rooms, graph, grid, Settings.Prioritizer);
 
         int retry_count = 0;
-        while (rooms.Count() < graph.VertexCount && retry_count < 10 && Settings.MapArea < Settings.MaxArea)
+        while (retry_count < 10 && Settings.MapArea < Settings.MaxArea && (rooms.Count() < graph.VertexCount || CheckForBadRoomArea(rooms)))
         {
             Settings.MapArea = (int) Math.Ceiling(Math.Pow(Settings.MapArea, 1.1d));
             rooms = BuildRooms(graph);
@@ -42,6 +55,20 @@ public class CellularRoomGrower
             retry_count++;
         }
         return (graph, grid, rooms, halls);
+    }
+
+    private bool CheckForBadRoomArea(IEnumerable<Room> rooms)
+    {
+        foreach (Room room in rooms)
+        {
+            Vector2 max = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
+            Vector2 min = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+            if (max.X - min.X < 2 || max.Y - min.Y < 2)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Vector2 GetOldRelativeSize(Graph graph)
