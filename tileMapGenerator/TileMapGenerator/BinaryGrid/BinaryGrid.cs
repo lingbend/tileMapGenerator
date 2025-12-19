@@ -403,9 +403,9 @@ public class BinaryGrid
         using var brush = new SolidBrush(Color.Black);
 
         graphic.Clear(Color.White);
-        for(int row = 1; row <= _size.Item2; row++)
+        for(int row = 1; row <= _size.Item1; row++)
         {
-            for(int col = 1; col <= _size.Item1; col++)
+            for(int col = 1; col <= _size.Item2; col++)
             {
                 if (GetCell((uint) row, (uint) col) == 1)
                 {
