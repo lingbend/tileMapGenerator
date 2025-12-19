@@ -3,6 +3,7 @@ using System.Collections;
 using System.Drawing;
 using System.Dynamic;
 using TileMapGenerator;
+using System.Drawing.Imaging;
 
 namespace BinaryGrid;
 
@@ -396,34 +397,24 @@ public class BinaryGrid
 
     public void ToBMP(string name = "")
     {
-        Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
+        using Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
         image.SetResolution(300, 300);
+        using var graphic = Graphics.FromImage(image);
+        using var brush = new SolidBrush(Color.Black);
+
+        graphic.Clear(Color.White);
         for(int row = 1; row <= _size.Item2; row++)
         {
             for(int col = 1; col <= _size.Item1; col++)
             {
                 if (GetCell((uint) row, (uint) col) == 1)
                 {
-                    DrawRect(image, new Vector2(1+(30*(col-1)), 1+(30*(row-1))), Color.Black);
-                }
-                else
-                {
-                    DrawRect(image, new Vector2(1+(30*(col-1)), 1+(30*(row-1))), Color.White);
+                    // DrawRect(image, new Vector2(1+(30*(col-1)), 1+(30*(row-1))), Color.Black);
+                    graphic.FillRectangle(brush, new RectangleF(30*(col-1), 30*(row-1), 30f, 30f));
                 }
             }
         }
         image.Save($"../../{name}Grid_{_id}.bmp");
-    }
-
-    private void DrawRect(Bitmap image, Vector2 upper_left, Color color)
-    {
-        for(int row = (int) upper_left.Y; row < upper_left.Y + 30; row++)
-        {
-            for(int col = (int) upper_left.X; col < upper_left.X + 30; col++)
-            {
-                image.SetPixel(col-1, row-1, color);
-            }
-        }
     }
 }
 
