@@ -269,7 +269,7 @@ public class CellularRoomGrower
 
     private bool CheckDirection(BinaryGrid grid, Vector2 direction, Room room)
     {
-        foreach (var spot in room.GetTempGrownSides(direction))
+        foreach (var spot in room.GetTempGrownSides(direction).Item1)
         {
             if (spot.X > grid.ColSize || spot.X < 1 || spot.Y > grid.RowSize || spot.Y < 1)
             {
@@ -277,7 +277,7 @@ public class CellularRoomGrower
             }
         }
 
-        var new_sides = room.GetTempGrownSides(direction);
+        var (new_sides, _) = room.GetTempGrownSides(direction);
         var old_sides = room.GetSides();
         var different_sides = new_sides.Except(old_sides);
         
@@ -292,7 +292,7 @@ public class CellularRoomGrower
             grid.SetCell((uint) point.Y, (uint) point.X, 0U);
         }
 
-        foreach (Vector2 point in room.GetTempGrownSides(side))
+        foreach (Vector2 point in  room.GetTempGrownSides(side).Item1)
         {
             grid.SetCell((uint) point.Y, (uint) point.X, 1U);
         }
@@ -307,33 +307,37 @@ public class Room
 {
     public Vector2 Locus {get; private set;}
     public Vertex Vertex {get; private set;}
-    public Func<int, Vector2, IEnumerable<Vector2>> Shape {get; private set;}
-    private List<Vector2> corners = new();
+    public Func<int, Vector2, IDictionary<Vector2, Vector2>, IEnumerable<Vector2>> Shape {get; private set;}
+    // private List<Vector2> corners = new();
+    private Dictionary<Vector2, Vector2> Corners {get; set;} = new();
     private List<Side> sides = new();
     public List<string> Tags{get; set;} = new List<string>();
     
 
-    internal Room(Vertex vertex, Func<int, Vector2, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
+    internal Room(Vertex vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
     {
         Vertex = vertex;
         Locus = center;
+        Corners.Add(new Vector2(-1, -1), Locus);
+        Corners.Add(new Vector2(1, -1), Locus);
+        Corners.Add(new Vector2(-1, 1), Locus);
+        Corners.Add(new Vector2(1, 1), Locus);
         
-        Shape = (num, vec) =>
+        Shape = (num, vec, corners) =>
         {
-            var result = shaper(num, vec);
+            var result = shaper(num, vec, Corners);
             if (result.Count() == 0 || result is null)
             {
-                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec);
+                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec, Corners);
             }
             else
             {
                 return result;
             }
         };
-        corners.Add(center);
         foreach (Vector2 direction in valid_directions)
         {
-            sides.Add(new Side(direction, center, Shape));
+            sides.Add(new Side(direction, center, Shape, Corners));
         }
 
         if (tags is not null)
@@ -352,51 +356,71 @@ public class Room
         return sides.SelectMany((s)=>s.Points);
     }
 
-    public IEnumerable<Vector2> GetTempGrownSides(Vector2 direction, int amount = 1)
+    public (IEnumerable<Vector2>, Dictionary<Vector2, Vector2>) GetTempGrownSides(Vector2 direction, int amount = 1)
     {
-        return CalculateGrowth(direction, amount).SelectMany((side)=>side.Points);
+        var (new_sides, temp_corners) = CalculateGrowth(direction, amount);
+        return (new_sides.SelectMany((side)=>side.Points), temp_corners);
     }
 
     public void GrowSide(Vector2 direction, int amount = 1)
     {
-        IEnumerable<Side> new_sides = CalculateGrowth(direction, amount);
+        var (new_sides, temp_corners) = CalculateGrowth(direction, amount);
+        Corners = temp_corners;
         sides = new List<Side>(new_sides);
     }
 
-    private IEnumerable<Side> CalculateGrowth(Vector2 growing_side, int amount = 1)
+    private (IEnumerable<Side>, Dictionary<Vector2, Vector2>) CalculateGrowth(Vector2 growing_side, int amount = 1)
     {
         List<Side> grown_sides_copy = new();
         Side target_side = sides.First((s)=>s.Direction == growing_side);
+
+        Dictionary<Vector2, Vector2> temp_corners = new(Corners);
+
+        foreach (Vector2 key in temp_corners.Keys)
+        {
+            if (key.X == growing_side.X && key.X != 0)
+            {
+                temp_corners[key] += new Vector2(growing_side.X, 0);
+            }
+            else if (key.Y == growing_side.Y && key.Y != 0)
+            {
+                temp_corners[key] += new Vector2(0, growing_side.Y);
+            }
+        }
 
         foreach (Side side in sides)
         {
             if (side.Direction == growing_side)
             {
-                grown_sides_copy.Add(side.ChangeCenterBy(growing_side));
+                grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
             }
             else if ((side.Direction + growing_side).LengthSquared() >= 1)
             {
-                Side new_side = side.ChangeLengthBy(amount);
-
-                Vector2 max;
-                Vector2 min;
-
-                if (Math.Abs(side.Direction.X) > 0)
-                {
-                    max = side.Points.MaxBy(v=>v.Y);
-                    min = side.Points.MinBy(v=>v.Y);
-                }
-                else
-                {
-                    max = side.Points.MaxBy(v=>v.X);
-                    min = side.Points.MinBy(v=>v.X);
-                }
-
-                if (!new_side.Points.Contains(max + growing_side) || !new_side.Points.Contains(min + growing_side))
-                {
-                    new_side = new_side.ChangeCenterBy(growing_side);
-                }
+                Side new_side = side.ChangeLengthBy(amount, temp_corners);
                 
+                Vector2 max_y_vec = side.Points.MaxBy(v=>v.Y);
+                Vector2 min_y_vec = side.Points.MinBy(v=>v.Y);
+                float max_y = max_y_vec.Y;
+                float min_y = min_y_vec.Y;
+                Vector2 max_x_vec = side.Points.MaxBy(v=>v.X);
+                Vector2 min_x_vec = side.Points.MinBy(v=>v.X);
+                float max_x = max_x_vec.X;
+                float min_x = min_x_vec.X;
+
+                if (max_x == min_x && (!new_side.Points.Contains(max_y_vec + growing_side) || !new_side.Points.Contains(min_y_vec + growing_side)))
+                {
+                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+                }
+                else if (max_y == min_y && (!new_side.Points.Contains(max_x_vec + growing_side) || !new_side.Points.Contains(min_x_vec + growing_side)))
+                {
+                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+                }
+                else if (max_x != min_x && max_y != min_y && (min_x + growing_side.X > side.Points.Select(v=>v.X).Min() || max_x + growing_side.X < side.Points.Select(v=>v.X).Max())
+                 && (min_y + growing_side.Y > side.Points.Select(v=>v.Y).Min() || max_y + growing_side.Y < side.Points.Select(v=>v.Y).Max()))
+                {
+                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+                }
+
                 grown_sides_copy.Add(new_side);
 
             }
@@ -406,7 +430,7 @@ public class Room
             }
         }   
 
-        return grown_sides_copy;
+        return (grown_sides_copy, temp_corners);
     }
 
     private class Side
@@ -414,17 +438,17 @@ public class Room
         public Vector2 Direction{get;}
         public Vector2 Center{get; private set;}
         public int Length{get; private set;}
-        private Func<int, Vector2, IEnumerable<Vector2>> Shape {get;}
+        private Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> Shape {get;}
         public IEnumerable<Vector2> Points{get; private set;} = new List<Vector2>();
 
-        public Side(Vector2 direction, Vector2 center, Func<int, Vector2, IEnumerable<Vector2>> shaper, int initial_length=1)
+        public Side(Vector2 direction, Vector2 center, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, Dictionary<Vector2, Vector2> corners, int initial_length=1)
         {
             CheckIfSizeIsValid(initial_length);
              
             Direction = direction;
             Center = center;
             Shape = shaper;
-            Points = OffsetPoints(shaper(initial_length, direction), center);
+            Points = OffsetPoints(shaper(initial_length, direction, corners), center);
             Length = initial_length;
         }
 
@@ -446,25 +470,25 @@ public class Room
             }
         }
 
-        internal Side ChangeLengthBy(int size_modifier)
+        internal Side ChangeLengthBy(int size_modifier, Dictionary<Vector2, Vector2> corners)
         {
-            return SetLengthTo(Length + size_modifier);
+            return SetLengthTo(Length + size_modifier, corners);
         }
 
-        internal Side SetLengthTo(int new_size)
+        internal Side SetLengthTo(int new_size, Dictionary<Vector2, Vector2> corners)
         {
             CheckIfSizeIsValid(new_size);
-            return new Side(Direction, Center, Shape, new_size);
+            return new Side(Direction, Center, Shape, corners, new_size);
         }
 
-        internal Side ChangeCenterBy(Vector2 center_modifier)
+        internal Side ChangeCenterBy(Vector2 center_modifier, Dictionary<Vector2, Vector2> corners)
         {
-            return SetCenterTo(Center + center_modifier);
+            return SetCenterTo(Center + center_modifier, corners);
         }
 
-        internal Side SetCenterTo(Vector2 new_center)
+        internal Side SetCenterTo(Vector2 new_center, Dictionary<Vector2, Vector2> corners)
         {
-            return new Side(Direction, new_center, Shape, Length);
+            return new Side(Direction, new_center, Shape, corners, Length);
         }
     }
 }

@@ -89,31 +89,31 @@ public class CellularRoomGrowerTests
         var room = new Room(vertex, CellularRoomGrowerSettings.DefaultShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
         BinaryGrid grid = new BinaryGrid(100, 100);
         new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow1");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow1");
         new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow2");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow2");
         new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, -1));
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow3");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow3");
         new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow4");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow4");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow5");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow5");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow6");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow6");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow7");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow7");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow8");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow8");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow9");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow9");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow10");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow10");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow11");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow11");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow12");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow12");
         new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        // grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow13");
+        grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow13");
         // Assert.AreEqual(2, grid.GetSlice((uint)))
     }
 
@@ -172,7 +172,7 @@ public class CellularRoomGrowerTests
         var (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
         Assert.HasCount(25, rooms, "Bad Direction Chooser case");
         room_grower.Settings.DirectionChooser = CellularRoomGrowerSettings.DefaultDirectionChooser;
-        room_grower.Settings.ShapeChooser = (_, _)=>(_, _)=>[];
+        room_grower.Settings.ShapeChooser = (_, _)=>(_, _, _)=>[];
         (graph, _) = generator.GenerateFilledGraph(5, 5);
         (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
         Assert.HasCount(25, rooms, "Bad Shape Chooser case");
@@ -230,6 +230,77 @@ public class CellularRoomGrowerTests
         var grid = room_grower.BuildGrid(rooms, halls);
 
         Assert.AreEqual(rooms.Count + halls.Count, GetGridCount(grid));
+    }
+
+    // [TestMethod]
+    public void CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid()
+    {
+        var room_grower = new CellularRoomGrower();
+        room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
+        room_grower.Settings.SideRatio = new Vector2(.5f, 2);
+        var generator = new NodeTreeGenerator();
+        // generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        // Graph graph = generator.GenerateNodeTree(30);
+        Graph graph = generator.GenerateNodeTree(1);
+
+        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid");
+
+        grid = new BinaryGrid(100, 100);
+        var vertex = new Vertex(new Vector2(10, 10));
+        var room = new Room(vertex, CellularRoomGrowerSettings.CircularShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid1");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid2");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid3");
+        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid4");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid5");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid6");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid7");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid8");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid9");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid10");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid11");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid12");
+        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid13");
+
+        Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
+        Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
+        Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
+        Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
+        Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
+    }
+
+    [TestMethod]
+    public void CellularRoomGrowerGenerateSizedRooms_CircularCorrectCounts30_Valid()
+    {
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
+        Graph graph = generator.GenerateNodeTree(25);
+        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularCorrectCounts30_Valid");
+
+        Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
+        Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
+        Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
+        Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
+        Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
     }
 
     [TestMethod]
