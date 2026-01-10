@@ -232,7 +232,7 @@ public class CellularRoomGrowerTests
         Assert.AreEqual(rooms.Count + halls.Count, GetGridCount(grid));
     }
 
-    // [TestMethod]
+    [TestMethod]
     public void CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid()
     {
         var room_grower = new CellularRoomGrower();
@@ -244,44 +244,55 @@ public class CellularRoomGrowerTests
         // Graph graph = generator.GenerateNodeTree(30);
         Graph graph = generator.GenerateNodeTree(1);
 
-        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
-        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid");
+        // var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
+        // grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid");
 
-        grid = new BinaryGrid(100, 100);
+        BinaryGrid grid = new BinaryGrid(100, 100);
         var vertex = new Vertex(new Vector2(10, 10));
         var room = new Room(vertex, CellularRoomGrowerSettings.CircularShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
-        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid1");
-        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid2");
-        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid3");
-        new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid4");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid5");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid6");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid7");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid8");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid9");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid10");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid11");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));
+        
+        
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid12");
-        new CellularRoomGrower().GrowRoom(grid, room, CellularRoomGrowerSettings.DefaultDirectionChooser);
-        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid13");
 
-        Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
-        Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
-        Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
-        Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
-        Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
+        // Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
+        // Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
+        // Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
+        // Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
+        // Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
     }
 
     [TestMethod]

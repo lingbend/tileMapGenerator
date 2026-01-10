@@ -5,6 +5,7 @@ using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numer
 using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
 using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
+using System.Diagnostics;
 
 public class CellularRoomGrower
 {
@@ -61,8 +62,8 @@ public class CellularRoomGrower
     {
         foreach (Room room in rooms)
         {
-            Vector2 max = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
-            Vector2 min = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+            Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
+            Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
             if (max.X - min.X < 2 || max.Y - min.Y < 2)
             {
                 return true;
@@ -222,8 +223,10 @@ public class CellularRoomGrower
 
         Vector2 chosen_direction;
 
-        Vector2 max = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
-        Vector2 min = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+        // Vector2 max = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
+        // Vector2 min = room.GetSides().Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+        Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
+        Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
         if (max.X - min.X < 2 && (open_directions.Contains(Vector2.UnitX) || open_directions.Contains(-Vector2.UnitX)))
         {
             List<Vector2> payload = new();
@@ -269,7 +272,8 @@ public class CellularRoomGrower
 
     private bool CheckDirection(BinaryGrid grid, Vector2 direction, Room room)
     {
-        foreach (var spot in room.GetTempGrownSides(direction).Item1)
+        var (temp_sides, _) = room.GetTempGrownSides(direction);
+        foreach (var spot in temp_sides)
         {
             if (spot.X > grid.ColSize || spot.X < 1 || spot.Y > grid.RowSize || spot.Y < 1)
             {
@@ -277,9 +281,9 @@ public class CellularRoomGrower
             }
         }
 
-        var (new_sides, _) = room.GetTempGrownSides(direction);
+        // var (new_sides, _) = room.GetTempGrownSides(direction);
         var old_sides = room.GetSides();
-        var different_sides = new_sides.Except(old_sides);
+        var different_sides = temp_sides.Except(old_sides);
         
         int side_check = (int) different_sides.Select(vec=>(vec==room.Locus) ? 0 : grid.GetCell((uint)vec.Y, (uint)vec.X)).Sum(i=>i);
         return side_check == 0;
@@ -309,7 +313,7 @@ public class Room
     public Vertex Vertex {get; private set;}
     public Func<int, Vector2, IDictionary<Vector2, Vector2>, IEnumerable<Vector2>> Shape {get; private set;}
     // private List<Vector2> corners = new();
-    private Dictionary<Vector2, Vector2> Corners {get; set;} = new();
+    public Dictionary<Vector2, Vector2> Corners {get; private set;} = new();
     private List<Side> sides = new();
     public List<string> Tags{get; set;} = new List<string>();
     
@@ -325,10 +329,10 @@ public class Room
         
         Shape = (num, vec, corners) =>
         {
-            var result = shaper(num, vec, Corners);
+            var result = shaper(num, vec, (Dictionary<Vector2, Vector2>) corners);
             if (result.Count() == 0 || result is null)
             {
-                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec, Corners);
+                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec, (Dictionary<Vector2, Vector2>) corners);
             }
             else
             {
@@ -376,7 +380,7 @@ public class Room
 
         Dictionary<Vector2, Vector2> temp_corners = new(Corners);
 
-        foreach (Vector2 key in temp_corners.Keys)
+        foreach (Vector2 key in Corners.Keys)
         {
             if (key.X == growing_side.X && key.X != 0)
             {
@@ -426,10 +430,9 @@ public class Room
             }
             else
             {
-                grown_sides_copy.Add(side);
+                grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
             }
         }   
-
         return (grown_sides_copy, temp_corners);
     }
 
@@ -448,19 +451,10 @@ public class Room
             Direction = direction;
             Center = center;
             Shape = shaper;
-            Points = OffsetPoints(shaper(initial_length, direction, corners), center);
+            Points = shaper(initial_length, direction, corners);
             Length = initial_length;
         }
 
-        private IEnumerable<Vector2> OffsetPoints(IEnumerable<Vector2> points, Vector2 center)
-        {
-            List<Vector2> offset_points = new();
-            foreach (Vector2 point in points)
-            {
-                offset_points.Add(point + center);
-            }
-            return offset_points;
-        }
 
         private void CheckIfSizeIsValid(int size)
         {
