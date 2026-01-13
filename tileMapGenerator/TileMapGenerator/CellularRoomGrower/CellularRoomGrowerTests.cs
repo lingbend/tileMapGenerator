@@ -300,12 +300,31 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         var generator = new NodeTreeGenerator();
-        generator.Settings.Random = new Random(123);
+        // generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
         Graph graph = generator.GenerateNodeTree(25);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularCorrectCounts30_Valid");
+
+        Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
+        Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");
+        Assert.IsGreaterThan(graph.VertexCount+graph.EdgeCount, GetGridCount(grid), "Grid cells count 30 failed");
+        Assert.HasCount(graph.EdgeCount, new_graph.Edges, "New graph edge count 30 failed");
+        Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
+    }
+
+    [TestMethod]
+    public void CellularRoomGrowerGenerateSizedRooms_CaveCorrectCounts30_Valid()
+    {
+        var room_grower = new CellularRoomGrower();
+        var generator = new NodeTreeGenerator();
+        // generator.Settings.Random = new Random(123);
+        generator.Settings.degree_percents = degree_weights;
+        room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CaveShapeChooser;
+        Graph graph = generator.GenerateNodeTree(25);
+        var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
+        grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CaverCorrectCounts30_Valid");
 
         Assert.HasCount(graph.VertexCount, rooms, "Room count 30 failed");
         Assert.HasCount(graph.VertexCount, new_graph.Vertices, "New Graph vertices count 30 failed");

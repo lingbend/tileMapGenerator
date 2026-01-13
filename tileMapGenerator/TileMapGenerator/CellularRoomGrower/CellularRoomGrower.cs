@@ -90,7 +90,10 @@ public class CellularRoomGrower
             {
                 tags = new(Settings.Tagger(graph, vertex));
             }
-            Room new_room = new Room(vertex, Settings.ShapeChooser(graph, vertex), Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), tags);
+
+            var shape = Settings.ShapeChooser(graph, vertex);
+            Room.SideType room_type = Room.SideType.CIRCLE;
+            Room new_room = new Room(vertex, shape, Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), room_type, tags);
             rooms.Add(new_room);
         }
         return rooms;
@@ -281,7 +284,6 @@ public class CellularRoomGrower
             }
         }
 
-        // var (new_sides, _) = room.GetTempGrownSides(direction);
         var old_sides = room.GetSides();
         var different_sides = temp_sides.Except(old_sides);
         
@@ -316,10 +318,20 @@ public class Room
     public Dictionary<Vector2, Vector2> Corners {get; private set;} = new();
     private List<Side> sides = new();
     public List<string> Tags{get; set;} = new List<string>();
+    private Dictionary<Vector2, List<Side>> growth_cache = new();
+
+    public enum SideType
+    {
+        RECT,
+        CIRCLE
+    }
+
+    public SideType sideType {get; private set;} = SideType.CIRCLE;
     
 
-    internal Room(Vertex vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
+    internal Room(Vertex vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, SideType side_type=SideType.RECT, List<string>? tags = null)
     {
+        sideType = side_type;
         Vertex = vertex;
         Locus = center;
         Corners.Add(new Vector2(-1, -1), Locus);
@@ -339,10 +351,19 @@ public class Room
                 return result;
             }
         };
-        foreach (Vector2 direction in valid_directions)
+
+        if (sideType == SideType.RECT)
         {
-            sides.Add(new Side(direction, center, Shape, Corners));
+            foreach (Vector2 direction in valid_directions)
+            {
+                sides.Add(new Side(direction, center, Shape, Corners));
+            }
         }
+        else
+        {
+            sides.Add(new Side(Vector2.Zero, center, Shape, Corners)); // need to have modification to default shape fallback for circle
+        }
+        
 
         if (tags is not null)
         {
@@ -352,7 +373,14 @@ public class Room
 
     public IEnumerable<Vector2> GetSide(Vector2 direction)
     {
-        return sides.Find((side)=>side.Direction == direction)!.Points;
+        if (sideType == SideType.RECT){
+            return sides.Find((side)=>side.Direction == direction)!.Points;
+        }
+        else
+        {
+            return sides.First().Points;
+        }
+        
     }
 
     public IEnumerable<Vector2> GetSides()
@@ -371,14 +399,16 @@ public class Room
         var (new_sides, temp_corners) = CalculateGrowth(direction, amount);
         Corners = temp_corners;
         sides = new List<Side>(new_sides);
+        growth_cache.Clear();
     }
 
     private (IEnumerable<Side>, Dictionary<Vector2, Vector2>) CalculateGrowth(Vector2 growing_side, int amount = 1)
     {
-        List<Side> grown_sides_copy = new();
-        Side target_side = sides.First((s)=>s.Direction == growing_side);
-
         Dictionary<Vector2, Vector2> temp_corners = new(Corners);
+        
+
+        List<Side> grown_sides_copy = new();
+        // Side target_side = sides.First((s)=>s.Direction == growing_side);
 
         foreach (Vector2 key in Corners.Keys)
         {
@@ -392,47 +422,58 @@ public class Room
             }
         }
 
+        if (growth_cache.ContainsKey(growing_side))
+        {
+            return (growth_cache[growing_side], temp_corners);
+        }
+
+        
+
         foreach (Side side in sides)
         {
-            if (side.Direction == growing_side)
-            {
-                grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
-            }
-            else if ((side.Direction + growing_side).LengthSquared() >= 1)
-            {
-                Side new_side = side.ChangeLengthBy(amount, temp_corners);
+            var temp_side = side.ChangeCenterBy(growing_side, temp_corners);
+            temp_side = temp_side.ChangeLengthBy(amount, temp_corners);
+            // if (side.Direction == growing_side)
+            // {
+            //     grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
+            // }
+            // else if ((side.Direction + growing_side).LengthSquared() >= 1 || side.Direction == Vector2.Zero) // this might need to be adjusted for Zero
+            // {
+            //     Side new_side = side.ChangeLengthBy(amount, temp_corners);
                 
-                Vector2 max_y_vec = side.Points.MaxBy(v=>v.Y);
-                Vector2 min_y_vec = side.Points.MinBy(v=>v.Y);
-                float max_y = max_y_vec.Y;
-                float min_y = min_y_vec.Y;
-                Vector2 max_x_vec = side.Points.MaxBy(v=>v.X);
-                Vector2 min_x_vec = side.Points.MinBy(v=>v.X);
-                float max_x = max_x_vec.X;
-                float min_x = min_x_vec.X;
+            //     Vector2 max_y_vec = side.Points.MaxBy(v=>v.Y);
+            //     Vector2 min_y_vec = side.Points.MinBy(v=>v.Y);
+            //     float max_y = max_y_vec.Y;
+            //     float min_y = min_y_vec.Y;
+            //     Vector2 max_x_vec = side.Points.MaxBy(v=>v.X);
+            //     Vector2 min_x_vec = side.Points.MinBy(v=>v.X);
+            //     float max_x = max_x_vec.X;
+            //     float min_x = min_x_vec.X;
 
-                if (max_x == min_x && (!new_side.Points.Contains(max_y_vec + growing_side) || !new_side.Points.Contains(min_y_vec + growing_side)))
-                {
-                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
-                }
-                else if (max_y == min_y && (!new_side.Points.Contains(max_x_vec + growing_side) || !new_side.Points.Contains(min_x_vec + growing_side)))
-                {
-                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
-                }
-                else if (max_x != min_x && max_y != min_y && (min_x + growing_side.X > side.Points.Select(v=>v.X).Min() || max_x + growing_side.X < side.Points.Select(v=>v.X).Max())
-                 && (min_y + growing_side.Y > side.Points.Select(v=>v.Y).Min() || max_y + growing_side.Y < side.Points.Select(v=>v.Y).Max()))
-                {
-                    new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
-                }
+            //     if (max_x == min_x && (!new_side.Points.Contains(max_y_vec + growing_side) || !new_side.Points.Contains(min_y_vec + growing_side)))
+            //     {
+            //         new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+            //     }
+            //     else if (max_y == min_y && (!new_side.Points.Contains(max_x_vec + growing_side) || !new_side.Points.Contains(min_x_vec + growing_side)))
+            //     {
+            //         new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+            //     }
+            //     else if (max_x != min_x && max_y != min_y && (min_x + growing_side.X > side.Points.Select(v=>v.X).Min() || max_x + growing_side.X < side.Points.Select(v=>v.X).Max())
+            //      && (min_y + growing_side.Y > side.Points.Select(v=>v.Y).Min() || max_y + growing_side.Y < side.Points.Select(v=>v.Y).Max()))
+            //     {
+            //         new_side = new_side.ChangeCenterBy(growing_side, temp_corners);
+            //     }
 
-                grown_sides_copy.Add(new_side);
+            //     grown_sides_copy.Add(new_side);
 
-            }
-            else
-            {
-                grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
-            }
+            // }
+            // else
+            // {
+            //     grown_sides_copy.Add(side.ChangeCenterBy(growing_side, temp_corners));
+            // }
+            grown_sides_copy.Add(temp_side);
         }   
+        growth_cache[growing_side] = grown_sides_copy;
         return (grown_sides_copy, temp_corners);
     }
 

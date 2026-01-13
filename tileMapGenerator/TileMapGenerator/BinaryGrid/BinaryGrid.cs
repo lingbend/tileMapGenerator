@@ -161,6 +161,11 @@ public class BinaryGrid
         return neighbors;
     }
 
+    public uint GetAllSetCellNeighbors(uint row, uint col)
+    {
+        return (uint) BitOperations.PopCount(GetCellNeighbors(row, col));
+    }
+
     private void CheckIndexValidity(uint row, uint col)
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
