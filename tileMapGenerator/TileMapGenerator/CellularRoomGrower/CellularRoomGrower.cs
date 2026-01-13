@@ -92,8 +92,7 @@ public class CellularRoomGrower
             }
 
             var shape = Settings.ShapeChooser(graph, vertex);
-            Room.SideType room_type = Room.SideType.CIRCLE;
-            Room new_room = new Room(vertex, shape, Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), room_type, tags);
+            Room new_room = new Room(vertex, shape, Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), tags);
             rooms.Add(new_room);
         }
         return rooms;
@@ -319,19 +318,10 @@ public class Room
     private List<Side> sides = new();
     public List<string> Tags{get; set;} = new List<string>();
     private Dictionary<Vector2, List<Side>> growth_cache = new();
-
-    public enum SideType
-    {
-        RECT,
-        CIRCLE
-    }
-
-    public SideType sideType {get; private set;} = SideType.CIRCLE;
     
 
-    internal Room(Vertex vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, SideType side_type=SideType.RECT, List<string>? tags = null)
+    internal Room(Vertex vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
     {
-        sideType = side_type;
         Vertex = vertex;
         Locus = center;
         Corners.Add(new Vector2(-1, -1), Locus);
@@ -352,17 +342,7 @@ public class Room
             }
         };
 
-        if (sideType == SideType.RECT)
-        {
-            foreach (Vector2 direction in valid_directions)
-            {
-                sides.Add(new Side(direction, center, Shape, Corners));
-            }
-        }
-        else
-        {
-            sides.Add(new Side(Vector2.Zero, center, Shape, Corners)); // need to have modification to default shape fallback for circle
-        }
+        sides.Add(new Side(Vector2.Zero, center, Shape, Corners));
         
 
         if (tags is not null)
@@ -373,14 +353,7 @@ public class Room
 
     public IEnumerable<Vector2> GetSide(Vector2 direction)
     {
-        if (sideType == SideType.RECT){
-            return sides.Find((side)=>side.Direction == direction)!.Points;
-        }
-        else
-        {
-            return sides.First().Points;
-        }
-        
+        return sides.First().Points;
     }
 
     public IEnumerable<Vector2> GetSides()
