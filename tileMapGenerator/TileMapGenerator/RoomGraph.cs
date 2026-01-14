@@ -6,17 +6,24 @@ using BinaryGrid;
 
 namespace TileMapGenerator;
 
-public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
+internal interface IDedThing
+{
+    int ID{get; internal set;}
+}
+
+public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>, IDedThing
 {
     public int _edge_id;
+
     public TWeight? Weight {get; internal set;}
     public RoomVertex<TWeight> Source {get; internal set;}
 
     public RoomVertex<TWeight> Target {get; internal set;}
+    public int ID { get => _edge_id; set => _edge_id = value; }
 
     public RoomEdge (RoomVertex<TWeight> vertex_1, RoomVertex<TWeight> vertex_2)
     {
-        _edge_id = UIDGenerator.GetNextID();
+        _edge_id = UIDGenerator.GetNextID(vertex_1.ID + vertex_2.ID);
         Source = vertex_1;
         Target = vertex_2;
     }
@@ -40,16 +47,11 @@ public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>
     }
 }
 
-public class RoomVertex<TWeight>
+public class RoomVertex<TWeight> : IDedThing
 {
     private int _vertex_id;
-    internal int VertexID
-    {
-        get
-        {
-            return _vertex_id;
-        }
-    }
+
+    public int ID { get => _vertex_id; set => _vertex_id = value; }
     public HashSet<RoomEdge<TWeight>> Edges{get; private set;} = new HashSet<RoomEdge<TWeight>>();
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
     public int Degree{get{return Edges.Count;}}
@@ -57,20 +59,20 @@ public class RoomVertex<TWeight>
 
     public RoomVertex(TWeight weight)
     {
-        _vertex_id = UIDGenerator.GetNextID();
         Weight = weight;
+        _vertex_id = UIDGenerator.GetNextID(Weight!.ToString());
     }
 
-    public RoomVertex()
+    internal RoomVertex()
     {
-        _vertex_id = UIDGenerator.GetNextID();
+        _vertex_id = UIDGenerator.GetNextID(" ");
     }
 
-    public RoomVertex(Dictionary<string, object?> data)
-    {
-        _data = data;
-        _vertex_id = UIDGenerator.GetNextID();
-    }
+    // public RoomVertex(Dictionary<string, object?> data)
+    // {
+    //     _data = data;
+    //     _vertex_id = UIDGenerator.GetNextID();
+    // }
 
     public void RemoveEdge(RoomEdge<TWeight> edge)
     {

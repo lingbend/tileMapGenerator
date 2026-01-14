@@ -18,6 +18,7 @@ public class GraphBuilderTests
 {
     Dictionary<int, int> degree_weights = new Dictionary<int, int>([KeyValuePair.Create(1, 5), KeyValuePair.Create(2, 25), KeyValuePair.Create(3, 30), KeyValuePair.Create(4, 40)]);
 
+    // Currently non-deterministic
     [TestMethod]
     public void GraphBuilderTreePhase_PossibleConnectedness_Valid()
     {
@@ -48,6 +49,7 @@ public class GraphBuilderTests
         }
     }
 
+    // Currently deterministic
     [TestMethod]
     public void NodeTreeGeneratorGenerateFilledGraph_NormalSize_Valid()
     {
@@ -103,10 +105,12 @@ public class GraphBuilderTests
         Assert.HasCount(10, non_articulating_points);
     }
 
+    // Currently deterministic
     [TestMethod]
     public void NodeTreeGeneratorCutVerticesDownTo_NormalSizeHalfVertices_Valid()
     {
         var generator = new NodeTreeGenerator();
+        generator.Settings.Random = new Random(4881);
         generator.Settings.degree_percents = degree_weights;
         var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
         (graph, dictionary, var holes) = generator.CutVerticesDownTo(graph, dictionary, 12);
@@ -296,7 +300,7 @@ public class GraphBuilderTests
         visualizer.FormatVertex += (_, args) =>
         {
             args.VertexFormat.Position = new QuikGraph.Graphviz.Dot.GraphvizPoint((int) args.Vertex.Weight.X * 72, (int) args.Vertex.Weight.Y * 72);
-            // args.VertexFormat.Label = args.Vertex.VertexID.ToString();
+            args.VertexFormat.Label = args.Vertex.ID.ToString();
         };
         string file = visualizer.Generate()[..^1] + "layout=neato;\n}";
         File.WriteAllText($"../../{name}.dot", file);

@@ -6,8 +6,8 @@ using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
 using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using static Math;
-using System.Runtime.Intrinsics;
-using System.Linq.Expressions;
+using ConcurrentRandom;
+using System.Collections.Concurrent;
 
 public class CellularRoomGrowerSettings
 {
@@ -25,7 +25,7 @@ public class CellularRoomGrowerSettings
 
     public Vector2 SideRatio{get; set;} = Vector2.One;
 
-    public static Random Random{get;set;} = new Random();
+    public static Random Random{get;set;}
     
     public static Room? DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
     {
@@ -182,17 +182,18 @@ public class CellularRoomGrowerSettings
                 return GetRectangleSides(length, direction, corners);
             }
             HashSet<Vector2> circle_points = new(RoundPoints(GetCircleSides(length, direction, corners, 6)));
-            HashSet<Vector2> points = new(circle_points);
+            ConcurrentBag<Vector2> points = new(circle_points);
             
             int i_max = 3;
             for (int i = 0; i < i_max + 1; i++)
             {
                 if (i != i_max)
                 {
-                    for (int j = 0; j < Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .5)); j++)
+                    ConcurrentRandom rand = new(Random.Next());
+                    Parallel.For(0, (int) (Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .5))), (j) =>
                     {
-                        points.Add(new Vector2(Random.Next((int) min.X, (int) max.X + 1), Random.Next((int) min.Y, (int) max.Y + 1)));
-                    }
+                        points.Add(rand.NextVector2(corners.Values.Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2)+j, (int) min.X, (int) max.X + 1, (int) min.Y, (int) max.Y));
+                    });
                 }
                 
                 BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0);

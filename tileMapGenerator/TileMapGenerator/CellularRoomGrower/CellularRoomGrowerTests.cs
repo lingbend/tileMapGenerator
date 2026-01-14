@@ -7,6 +7,7 @@ using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using NodeTreeGenerator;
 using System.Diagnostics;
+using QuikGraph.Graphviz;
 
 [TestClass]
 public class CellularRoomGrowerTests
@@ -300,7 +301,7 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         var generator = new NodeTreeGenerator();
-        // generator.Settings.Random = new Random(123);
+        generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
         Graph graph = generator.GenerateNodeTree(25);
@@ -319,10 +320,13 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         var generator = new NodeTreeGenerator();
-        // generator.Settings.Random = new Random(123);
+        generator.Settings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CaveShapeChooser;
+        CellularRoomGrowerSettings.Random = new Random(134534); 
         Graph graph = generator.GenerateNodeTree(25);
+        PrintGraphToPNG(graph, "Caves");
+        
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CaverCorrectCounts30_Valid");
 
@@ -374,5 +378,19 @@ public class CellularRoomGrowerTests
             }
         }
         return (int) total;
+    }
+
+    private void PrintGraphToPNG(Graph graph, string name)
+    {
+        var visualizer = new GraphvizAlgorithm<Vertex, Edge>(graph);
+        visualizer.FormatVertex += (_, args) =>
+        {
+            args.VertexFormat.Position = new QuikGraph.Graphviz.Dot.GraphvizPoint((int) args.Vertex.Weight.X * 72, (int) args.Vertex.Weight.Y * 72);
+            // args.VertexFormat.Label = args.Vertex.VertexID.ToString();
+        };
+        string file = visualizer.Generate()[..^1] + "layout=neato;\n}";
+        File.WriteAllText($"../../{name}.dot", file);
+        using var process = Process.Start("dot", $"-Tpng -n ../../{name}.dot -o ../../{name}.png");
+        process.WaitForExit();
     }
 }

@@ -10,7 +10,7 @@ using DFS = QuikGraph.Algorithms.Search.UndirectedDepthFirstSearchAlgorithm<Tile
 using System.Collections.Concurrent;
 using QuikGraph.Graphviz;
 using System.Diagnostics;
-
+using System.Collections;
 
 public class NodeTreeGenerator
 {
@@ -75,18 +75,18 @@ public class NodeTreeGenerator
         Graph min_span_tree = GetMinSpanTree(graph);
         Graph min_span_tree_copy = GetMinSpanTree(graph);
 
-        HashSet<Vertex> processed_vertices = new();HashSet<Vertex> deleted_vertices = new(); HashSet<Vertex> new_vertices = new();
-        HashSet<Edge> processed_edges = new(); 
+        OrderedHashSet<Vertex> processed_vertices = new();OrderedHashSet<Vertex> deleted_vertices = new(); OrderedHashSet<Vertex> new_vertices = new();
+        OrderedHashSet<Edge> processed_edges = new(); 
         InnerReworkDegreeDistribution(ref graph, backing_dictionary, min_span_tree, min_span_tree_copy, degree_percents, processed_vertices, processed_edges, deleted_vertices, new_vertices);
         Graph new_vertices_container = new Graph(false);
         new_vertices_container.AddVerticesAndEdgeRange(GetAllEdges(new_vertices));
-        InnerReworkDegreeDistribution(ref graph, backing_dictionary, min_span_tree, new_vertices_container, degree_percents, processed_vertices, processed_edges, deleted_vertices, new HashSet<Vertex>());
+        InnerReworkDegreeDistribution(ref graph, backing_dictionary, min_span_tree, new_vertices_container, degree_percents, processed_vertices, processed_edges, deleted_vertices, new OrderedHashSet<Vertex>());
         var edge_copy = new List<Edge>(graph.Edges);
-        RemoveEdges(graph, edge_copy.Where(e=>!min_span_tree.ContainsEdge(e)).ToHashSet());
+        RemoveEdges(graph, new OrderedHashSet<Edge>(edge_copy.Where(e=>!min_span_tree.ContainsEdge(e))));
         return (min_span_tree, backing_dictionary);
     }
 
-    private void InnerReworkDegreeDistribution(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, Graph min_span_tree_copy, Dictionary<int, int> degree_percents, HashSet<Vertex> processed_vertices, HashSet<RoomEdge<Vector2>> processed_edges, HashSet<Vertex> deleted_vertices, HashSet<Vertex> new_vertices)
+    private void InnerReworkDegreeDistribution(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, Graph min_span_tree_copy, Dictionary<int, int> degree_percents, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<RoomEdge<Vector2>> processed_edges, OrderedHashSet<Vertex> deleted_vertices, OrderedHashSet<Vertex> new_vertices)
     {
         foreach ((Vertex next_vertex, int target_degree) in GetNextVertexDegreePair(min_span_tree_copy, new ConcurrentDictionary<Vector2, Vertex>(backing_dictionary), degree_percents))
         {
@@ -109,20 +109,20 @@ public class NodeTreeGenerator
         }
     }
 
-    private void TryTransplantEdges(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, HashSet<Vertex> processed_vertices, HashSet<RoomEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
+    private void TryTransplantEdges(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<RoomEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
     {
 
         while (degree < target_degree)
         {
-            var nearby_vertices = new HashSet<Vertex>(GetAdjacentVertices(backing_dictionary, next_vertex.Weight));
-            var connected_vertices = new HashSet<Vertex>(graph.AdjacentVertices(next_vertex));
+            var nearby_vertices = new OrderedHashSet<Vertex>(GetAdjacentVertices(backing_dictionary, next_vertex.Weight));
+            var connected_vertices = new OrderedHashSet<Vertex>(graph.AdjacentVertices(next_vertex));
 
             if (nearby_vertices.IsSubsetOf(connected_vertices))
             {
                 break;
             }
 
-            HashSet<Vertex> sacrificial_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
+            OrderedHashSet<Vertex> sacrificial_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
             sacrificial_vertices.ExceptWith(processed_vertices);
 
             if (sacrificial_vertices.Count != 0)
@@ -163,13 +163,13 @@ public class NodeTreeGenerator
         }
     }
 
-    private (HashSet<Vertex>, HashSet<Vertex>) TryTransplantVertices(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, HashSet<Vertex> processed_vertices, HashSet<RoomEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
+    private (OrderedHashSet<Vertex>, OrderedHashSet<Vertex>) TryTransplantVertices(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<RoomEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
     {
-        HashSet<Vertex> deleted_vertices = new HashSet<Vertex>();
-        HashSet<Vertex> new_vertices = new HashSet<Vertex>();
+        OrderedHashSet<Vertex> deleted_vertices = new OrderedHashSet<Vertex>();
+        OrderedHashSet<Vertex> new_vertices = new OrderedHashSet<Vertex>();
         while (degree < target_degree)
         {
-            HashSet<Vertex> sacrificial_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
+            OrderedHashSet<Vertex> sacrificial_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
 
             sacrificial_vertices.ExceptWith(processed_vertices);
             sacrificial_vertices.ExceptWith(GetAllVertices(processed_edges));
@@ -231,7 +231,7 @@ public class NodeTreeGenerator
         return new List<Edge>(edges);
     }
 
-    internal ISet<Vector2> GetAvailableDirections(Vertex node, ConcurrentDictionary<Vector2, Vertex> backing_dictionary)
+    internal IList<Vector2> GetAvailableDirections(Vertex node, ConcurrentDictionary<Vector2, Vertex> backing_dictionary)
     {
         ConcurrentDictionary<Vector2, bool> available_directions = new(Settings.ValidDirections.Distinct().Select((vect)=>new KeyValuePair<Vector2, bool>(vect, true)));
         
@@ -258,7 +258,7 @@ public class NodeTreeGenerator
         }
         });
 
-        return available_directions.Keys.ToHashSet();
+        return new List<Vector2>(available_directions.Keys);
     }
 
     private ISet<Vertex> GetAllVertices(IEnumerable<Edge> edges)
@@ -269,7 +269,7 @@ public class NodeTreeGenerator
             vertices.TryAdd(edge.Source, true);
             vertices.TryAdd(edge.Target, true);
         });
-        return vertices.Keys.ToHashSet();
+        return new OrderedHashSet<Vertex>(vertices.Keys);
     }
 
     private void TryGetExistingEdges(Graph min_span_tree, Vertex next_vertex, int target_degree, ref int degree)
@@ -333,7 +333,7 @@ public class NodeTreeGenerator
 
                 if (graph.AdjacentDegree(vertex) < max)
                 {
-                    HashSet<Vector2> current_directions = new HashSet<Vector2>();
+                    List<Vector2> current_directions = new List<Vector2>();
                     foreach (var edge in vertex.Edges)
                     {
                         current_directions.Add(edge.Weight);
@@ -468,10 +468,10 @@ public class NodeTreeGenerator
         List<Vector2> holes = new List<Vector2>();
         while (graph.VertexCount > target_number)
         {
-            HashSet<Vertex> disposable_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
+            OrderedHashSet<Vertex> disposable_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
             Vertex choice = ChooseWeightedRandom(disposable_vertices, Settings.degree_percents, Settings.WeightedVertexRemover, ((target_number*Settings.PruningSelectivityMultiplier)/5)+2);
 
-            RemoveEdges(graph, choice.Edges.ToHashSet());
+            RemoveEdges(graph, new OrderedHashSet<Edge>(choice.Edges));
             graph.RemoveVertex(choice);
             backing_dictionary.TryRemove(choice.Weight, out _);
             holes.Add(choice.Weight);
@@ -586,11 +586,11 @@ public class NodeTreeGenerator
         return [graph];
     }
 
-    internal HashSet<Vertex> GetTarjanNonArticulatingPoints(Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary)
+    internal OrderedHashSet<Vertex> GetTarjanNonArticulatingPoints(Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary)
     {
         Vertex? root = null;
         int discovery_time = 1;
-        HashSet<Vertex> articulation_points = new HashSet<Vertex>();
+        OrderedHashSet<Vertex> articulation_points = new OrderedHashSet<Vertex>();
         Dictionary<Vertex, (int, int)> visited_points = new Dictionary<Vertex, (int, int)>();
         
         (graph, backing_dictionary) = CheckForHolesAndPatch(graph, backing_dictionary);
@@ -690,7 +690,7 @@ public class NodeTreeGenerator
 
         search.Compute();
 
-        HashSet<Vertex> disposable_vertices = new HashSet<Vertex>(graph.Vertices);
+        OrderedHashSet<Vertex> disposable_vertices = new OrderedHashSet<Vertex>(graph.Vertices);
         disposable_vertices.ExceptWith(articulation_points);
         return disposable_vertices;
     }
@@ -755,15 +755,15 @@ public class NodeTreeGenerator
             return default(T);
         }
         int rand = Settings.Random.Next(coll.Count - 1);
-        T item = coll.ToArray()[rand];
+        T item = coll.OrderBy(i=>i.GetHashCode()).ToArray()[rand];
         coll.Remove(item);
         return item;
     }
 
-    private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3)
+    private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3) where T : IDedThing
     {
-        HashSet<T> collection_copy = new HashSet<T>(coll);
-        HashSet<T> choices = new HashSet<T>();
+        List<T> collection_copy = new List<T>(coll.OrderBy(v=>v.ID));
+        List<T> choices = new List<T>();
         for (int i = 0; i < iterations; i++)
         {
             if (collection_copy.Count == 0)
@@ -788,5 +788,38 @@ public class NodeTreeGenerator
         using var process = Process.Start("dot", $"-Tpng -n ../../{name}.dot -o ../../{name}.png");
         process.WaitForExit();
     }
+
+    internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : IDedThing
+    {
+
+        internal OrderedHashSet (IEnumerable<T> collection) : base(collection){}
+        internal OrderedHashSet (ICollection<T> collection) : base(collection){}
+        internal OrderedHashSet (ISet<T> collection) : base(collection){}
+        internal OrderedHashSet (IList<T> collection) : base(collection){}
+
+        internal OrderedHashSet () : base(){}
+
+        public new IEnumerator<T> GetEnumerator()
+        {
+            return this.OrderBy(item=>item.ID).GetEnumerator();
+        }
+
+        public IEnumerable<T> GetEnumerable()
+        {
+            return this.OrderBy(item=>item.ID);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.OrderBy(item=>item.ID).GetEnumerator();
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return this.OrderBy(item=>item.ID).GetEnumerator();
+        }
+    }
 }
+
+
 

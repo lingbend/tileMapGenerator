@@ -8,23 +8,24 @@ public class ConcurrentRandom
 {
 
     private int _seed = 0;
+    private const int MAX_INT = 0b1111111111111111111111111111111;
 
     public ConcurrentRandom(int seed)
     {
         _seed = seed;
     }
 
-    public int Next(object unique_state, int min = 0, int max = sizeof(int))
+    public int Next(object unique_state, int min = 0, int max = MAX_INT)
     {
         long xor = XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()!)) ^ _seed;
         int xor_mod = Int32.Abs((int) (xor % (max - min))) + min;
         return xor_mod;
     }
 
-    public Vector2 NextVector2(object unique_state, int min = 0, int max = sizeof(int))
+    public Vector2 NextVector2(object unique_state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT)
     {
-        int x = Next(unique_state.ToString() + 1, min, max);
-        int y = Next(unique_state.ToString() + 2, min, max);
+        int x = Next(unique_state.ToString() + 1, min_x, max_x);
+        int y = Next(unique_state.ToString() + 2, min_y, max_y);
         return new Vector2(x, y);
     }
 
@@ -39,10 +40,10 @@ public class ConcurrentRandom
         return modified_roll;
     }
 
-    public Vector2 RollMultipleVector2(object unique_state, int sides, int number)
+    public Vector2 RollMultipleVector2(object unique_state, int sides_x, int number_x, int sides_y, int number_y)
     {
-        int x = RollMultiple(unique_state.ToString() + 1, sides, number);
-        int y = RollMultiple(unique_state.ToString() + 2, sides, number);
+        int x = RollMultiple(unique_state.ToString() + 1, sides_x, number_x);
+        int y = RollMultiple(unique_state.ToString() + 2, sides_y, number_y);
         return new Vector2(x, y);
     }
 
@@ -58,10 +59,10 @@ public class ConcurrentRandom
         return modified_roll;
     }
 
-    public Vector2 BellCurvedVector2(object unique_state, int min_inclusive, int max_inclusive, uint curve_degree)
+    public Vector2 BellCurvedVector2(object unique_state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree)
     {
-        int x = BellCurved(unique_state.ToString() + 1, min_inclusive, max_inclusive, curve_degree);
-        int y = BellCurved(unique_state.ToString() + 2, min_inclusive, max_inclusive, curve_degree);
+        int x = BellCurved(unique_state.ToString() + 1, min_inclusive_x, max_inclusive_x, curve_degree);
+        int y = BellCurved(unique_state.ToString() + 2, min_inclusive_y, max_inclusive_y, curve_degree);
         return new Vector2(x, y);
     }
 

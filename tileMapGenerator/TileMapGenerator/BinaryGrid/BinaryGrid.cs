@@ -8,12 +8,15 @@ using System.Drawing.Imaging;
 namespace BinaryGrid;
 
 // 1 indexed
-public class BinaryGrid
+public class BinaryGrid : IDedThing
 {
     internal BinaryNumber _grid;
     private (uint, uint) _size;
     public uint RowSize{get{return _size.Item1;}}
     public uint ColSize{get{return _size.Item2;}}
+
+    public int ID { get => _id; set => _id = value; }
+
     private uint _border_num = 1;
     private int _id;
 
@@ -34,7 +37,7 @@ public class BinaryGrid
         {
             throw new ArgumentException("Value must be 0 or 1");
         }        
-        _id = UIDGenerator.GetNextID();
+        _id = UIDGenerator.GetNextID(rows * columns);
     }
 
     public void ChangeBorders(uint borders)
@@ -397,7 +400,7 @@ public class BinaryGrid
 
     public override int GetHashCode()
     {
-        return _grid.GetHashCode();
+        return ID;
     }
 
     public void ToBMP(string name = "")
