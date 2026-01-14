@@ -2,9 +2,10 @@ using System.Collections.Immutable;
 using System.Numerics;
 using QuikGraph;
 using BinaryGrid;
+using TileMapGenerator;
 
 
-namespace TileMapGenerator;
+namespace RoomAndEdges;
 
 internal interface IDedThing
 {

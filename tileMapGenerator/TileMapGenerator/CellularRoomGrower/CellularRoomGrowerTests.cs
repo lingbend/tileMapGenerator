@@ -1,9 +1,10 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numerics.Vector2>, TileMapGenerator.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
-using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
+using RoomAndEdges;
+using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using NodeTreeGenerator;
 using System.Diagnostics;
@@ -301,9 +302,10 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         var generator = new NodeTreeGenerator();
-        generator.Settings.Random = new Random(123);
+        generator.Settings.Random = new Random(6312313);
         generator.Settings.degree_percents = degree_weights;
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
+        CellularRoomGrowerSettings.Random = new Random(134534); 
         Graph graph = generator.GenerateNodeTree(25);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularCorrectCounts30_Valid");
@@ -325,7 +327,7 @@ public class CellularRoomGrowerTests
         room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CaveShapeChooser;
         CellularRoomGrowerSettings.Random = new Random(134534); 
         Graph graph = generator.GenerateNodeTree(25);
-        PrintGraphToPNG(graph, "Caves");
+        // PrintGraphToPNG(graph, "Caves");
         
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CaverCorrectCounts30_Valid");

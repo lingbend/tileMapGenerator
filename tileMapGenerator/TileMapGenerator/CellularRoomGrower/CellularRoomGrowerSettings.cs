@@ -1,9 +1,10 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numerics.Vector2>, TileMapGenerator.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
-using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
+using RoomAndEdges;
+using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using static Math;
 using ConcurrentRandom;
@@ -24,8 +25,8 @@ public class CellularRoomGrowerSettings
     public int MaxArea{get; set;} = 5_000;
 
     public Vector2 SideRatio{get; set;} = Vector2.One;
-
     public static Random Random{get;set;}
+    private static ConcurrentRandom _direction_random;
     
     public static Room? DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
     {
@@ -36,14 +37,19 @@ public class CellularRoomGrowerSettings
         IEnumerable<Room> small_rooms = rooms.Where(r=>(r.GetSides().Max(v=>v.X)-r.GetSides().Min(v=>v.X))<3 && (r.GetSides().Max(v=>v.Y)-r.GetSides().Min(v=>v.Y))<3);
         if (small_rooms.Count() > 0)
         {
-            return Random.GetItems(small_rooms.ToArray(), 1).Single();
+            return Random.GetItems(small_rooms.OrderBy(r=>r.ID).ToArray(), 1).Single();
         }
-        return Random.GetItems(rooms.ToArray(), 1).Single();
+        return Random.GetItems(rooms.OrderBy(r=>r.ID).ToArray(), 1).Single();
     }
 
     public static Vector2 DefaultDirectionChooser(IEnumerable<Vector2> directions, Room room)
     {
-        return Random.GetItems(directions.ToArray(), 1).Single();
+        if (_direction_random == null)
+        {
+             _direction_random = new ConcurrentRandom(Random.Next());
+        }
+        int index = _direction_random.Next(room.ID + directions.Aggregate((v1, v2)=>v1+v2).ToString() + (room.Locus.X % room.Locus.Y), 0, directions.Count());
+        return directions.OrderBy(v=>v.X + (5*v.Y)).ToArray()[index];
     }
 
     public static Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
@@ -187,12 +193,14 @@ public class CellularRoomGrowerSettings
             int i_max = 3;
             for (int i = 0; i < i_max + 1; i++)
             {
+                string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Order().Aggregate((v1, v2)=>v1+v2);
                 if (i != i_max)
                 {
                     ConcurrentRandom rand = new(Random.Next());
                     Parallel.For(0, (int) (Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .5))), (j) =>
                     {
-                        points.Add(rand.NextVector2(corners.Values.Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2)+j, (int) min.X, (int) max.X + 1, (int) min.Y, (int) max.Y));
+                        string corner_hashable_copy = corner_hashable;
+                        points.Add(rand.NextVector2(corner_hashable_copy+j, (int) min.X, (int) max.X + 1, (int) min.Y, (int) max.Y+1));
                     });
                 }
                 
@@ -201,7 +209,6 @@ public class CellularRoomGrowerSettings
                 {
                     test_grid.SetCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1), 1u);
                 }
-                HashSet<Vector2> temp_points = new(points);
                 points.Clear();
                 for (uint row = 1; row <= y_diameter; row++)
                 {

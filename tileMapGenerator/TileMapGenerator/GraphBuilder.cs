@@ -3,9 +3,10 @@ namespace TileMapGenerator;
 using QuikGraph;
 using System.Numerics;
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<RoomVertex<System.Numerics.Vector2>, RoomEdge<System.Numerics.Vector2>>;
-using Vertex = RoomVertex<System.Numerics.Vector2>;
-using Edge = RoomEdge<System.Numerics.Vector2>;
+using RoomAndEdges;
+using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 
 public class TileMapGenerator
 {

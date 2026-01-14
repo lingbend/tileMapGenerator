@@ -3,22 +3,56 @@ namespace ConcurrentRandom;
 using System.Text;
 using System.IO.Hashing;
 using System.Numerics;
+using System.ComponentModel;
+using Microsoft.VisualBasic;
 
 public class ConcurrentRandom
 {
 
-    private int _seed = 0;
+    private int _seed_1 = 0;
+    private int _seed_3 = 0;
+    private int _seed_2 = 0;
     private const int MAX_INT = 0b1111111111111111111111111111111;
 
     public ConcurrentRandom(int seed)
     {
-        _seed = seed;
+        _seed_1 = seed;
+        _seed_2 = new Random(seed).Next();
+        _seed_3 = new Random(_seed_2).Next();
     }
 
     public int Next(object unique_state, int min = 0, int max = MAX_INT)
     {
-        long xor = XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()!)) ^ _seed;
-        int xor_mod = Int32.Abs((int) (xor % (max - min))) + min;
+        ulong xor = XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()! + _seed_1));
+        // Console.WriteLine(xor + " init ");
+        xor *= (ulong) Math.Abs(_seed_3);
+        // Console.WriteLine(xor + " times seed 3 ");
+        xor ^= (ulong) Math.Pow(264, 59);
+        // Console.WriteLine(xor + " xor pow ");
+        xor += (ulong) Math.Abs(_seed_2);
+        // Console.WriteLine(xor + " add seed 2 ");
+        xor ^= 2147483647 >> 11;
+        // Console.WriteLine(xor + " shift 11 prime ");
+        xor += 1;
+        // Console.WriteLine(xor + " +1 ");
+        xor ^= xor << 7;
+        // Console.WriteLine(xor + " shift 7 ");
+        
+        xor = (ulong) (BigInteger.Multiply(xor, new BigInteger(Math.Pow(2, 64) - 59)) >> 64);
+        // Console.WriteLine(xor + " times pow ");
+        xor ^= xor >> 9;
+        // Console.WriteLine(xor + " 9 ");
+        xor += (uint) ((_seed_3 >> 1) +(_seed_1<<1) + 1);
+        xor ^= xor << 9;
+        xor += 1;
+
+        // Console.WriteLine(xor);
+        
+
+        int xor_mod = Int32.Abs((int) (((long) xor+1) % (max - min))) + min;
+        // Console.Write($"min: {min}, max: {max}, mod: ");
+        // Console.WriteLine(xor_mod);
+        
         return xor_mod;
     }
 

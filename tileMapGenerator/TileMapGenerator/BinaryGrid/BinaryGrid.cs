@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Dynamic;
 using TileMapGenerator;
 using System.Drawing.Imaging;
+using RoomAndEdges;
 
 namespace BinaryGrid;
 

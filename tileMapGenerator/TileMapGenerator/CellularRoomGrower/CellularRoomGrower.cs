@@ -1,11 +1,13 @@
 namespace CellularRoomGrower;
 
+using RoomAndEdges;
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numerics.Vector2>, TileMapGenerator.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
-using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using System.Diagnostics;
+using TileMapGenerator;
 
 public class CellularRoomGrower
 {
@@ -308,7 +310,7 @@ public class CellularRoomGrower
     }
 }
 
-public class Room
+public class Room : IDedThing
 {
     public Vector2 Locus {get; private set;}
     public Vertex Vertex {get; private set;}
@@ -317,6 +319,9 @@ public class Room
     public Dictionary<Vector2, Vector2> Corners {get; private set;} = new();
     private List<Side> sides = new();
     public List<string> Tags{get; set;} = new List<string>();
+    private int _room_id;
+    public int ID { get => _room_id; set => _room_id = value; }
+
     private Dictionary<Vector2, List<Side>> growth_cache = new();
     
 
@@ -324,6 +329,7 @@ public class Room
     {
         Vertex = vertex;
         Locus = center;
+        _room_id = UIDGenerator.GetNextID("room" + vertex.ID + center.X + center.Y);
         Corners.Add(new Vector2(-1, -1), Locus);
         Corners.Add(new Vector2(1, -1), Locus);
         Corners.Add(new Vector2(-1, 1), Locus);

@@ -1,16 +1,13 @@
 namespace NodeTreeGenerator;
 
-using TileMapGenerator;
-using QuikGraph;
-using QuikGraph.Algorithms;
+
 using System.Numerics;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Graph = QuikGraph.UndirectedGraph<TileMapGenerator.RoomVertex<System.Numerics.Vector2>, TileMapGenerator.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = TileMapGenerator.RoomVertex<System.Numerics.Vector2>;
-using Edge = TileMapGenerator.RoomEdge<System.Numerics.Vector2>;
+using RoomAndEdges;
+using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using QuikGraph.Graphviz;
-using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 
 [TestClass]
