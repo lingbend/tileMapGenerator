@@ -116,7 +116,7 @@ public class CellularRoomGrowerSettings
             };
     }
 
-    private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, Dictionary<Vector2, Vector2> corners)
+    private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, Dictionary<Vector2, Vector2> corners, int resolution = 1)
     {
         Vector2 center = corners.Values.Aggregate((v1, v2) => v1 + v2) / 4.0f;
         Vector2 min = corners.Values.Aggregate((v1, v2) => Vector2.Min(v1, v2));
@@ -128,7 +128,7 @@ public class CellularRoomGrowerSettings
 
         double x_diameter = (max.X - min.X);
         double y_diameter = (max.Y - min.Y);
-        double num_points = 2 * ((2 * x_diameter) + (2 * y_diameter));
+        double num_points = (2 * ((2 * x_diameter) + (2 * y_diameter))) / resolution;
         double x_radius = .5 * x_diameter;
         double y_radius = .5 * y_diameter;
 
@@ -174,13 +174,14 @@ public class CellularRoomGrowerSettings
             Vector2 center = corners.Values.Aggregate((v1, v2)=>v1+v2)/4.0f;
             Vector2 min = corners.Values.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
             Vector2 max = corners.Values.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
+            double x_diameter = (max.X - min.X);
+            double y_diameter = (max.Y - min.Y);
             float diagonal_length = (corners.Values.First() - center).Length();
             if (!(max.X - min.X >= 7 && max.Y - min.Y >= 8 || max.X - min.X >= 8 && max.Y - min.Y >= 7))
             {
                 return GetRectangleSides(length, direction, corners);
             }
-            HashSet<Vector2> circle_points = new(GetCircleSides(length, direction, corners));
-            circle_points = new(RoundPoints(circle_points));
+            HashSet<Vector2> circle_points = new(RoundPoints(GetCircleSides(length, direction, corners, 6)));
             HashSet<Vector2> points = new(circle_points);
             
             int i_max = 3;
@@ -188,263 +189,61 @@ public class CellularRoomGrowerSettings
             {
                 if (i != i_max)
                 {
-                    for (int j = 0; j < Pow((max-min).X * (max-min).Y, 1.5) / ((((max - min).X + (max-min).Y) * 2.25) + (i * .33)); j++)
+                    for (int j = 0; j < Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .5)); j++)
                     {
                         points.Add(new Vector2(Random.Next((int) min.X, (int) max.X + 1), Random.Next((int) min.Y, (int) max.Y + 1)));
                     }
                 }
                 
-                BinaryGrid test_grid = new BinaryGrid((uint) (max.Y - min.Y + 1), (uint) (max.X - min.X + 1), 0);
+                BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0);
                 foreach (Vector2 point in points)
                 {
                     test_grid.SetCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1), 1u);
                 }
                 HashSet<Vector2> temp_points = new(points);
                 points.Clear();
-                for (uint row = 1; row <= (max.Y - min.Y); row++)
+                for (uint row = 1; row <= y_diameter; row++)
                 {
-                    for (uint col = 1; col <= (max.X - min.X); col++)
+                    for (uint col = 1; col <= x_diameter; col++)
                     {
                         int num_neighbors = (int) test_grid.GetAllSetCellNeighbors(row, col);
-                        int center_modifier;
-                        float distance_from_center = (new Vector2(col, row) - center).Length();
-                        if (distance_from_center <= 5)
+                        int center_modifier = 0;
+                        Vector2 room_coord_vector = new Vector2(col+min.X - 1, row+min.Y - 1);
+                        float distance_from_center = (room_coord_vector - center).Length();
+
+                        if (distance_from_center < 2)
                         {
-                            center_modifier = -9;
+                            continue;
                         }
-                        else if (distance_from_center <= .15f * diagonal_length)
-                        {
-                            center_modifier = -2;
-                        }
-                        else if (distance_from_center <= .4f * diagonal_length)
+                        if (distance_from_center < 3)
                         {
                             center_modifier = -1;
                         }
-                        else
+                        else if (i == 0 && distance_from_center <= diagonal_length * .9 && distance_from_center >= diagonal_length * .80 && (Abs((room_coord_vector - center).X) < .5 || Abs((room_coord_vector - center).Y) < 1))
                         {
-                            center_modifier = 0;
+                            center_modifier = -1;
                         }
-                        if (circle_points.Contains(new Vector2(col+min.X - 1, row+min.Y - 1)) && (num_neighbors + center_modifier) >= 3)
+
+                        num_neighbors += center_modifier;
+
+                        if (circle_points.Contains(room_coord_vector) && num_neighbors >= 3)
                         {
-                            points.Add(new Vector2(col+min.X - 1, row+min.Y - 1));   
+                            points.Add(room_coord_vector);   
                         }
-                        else if ((num_neighbors + center_modifier) >= 4)
+                        else if (num_neighbors >= 4)
                         {
-                            points.Add(new Vector2(col+min.X - 1, row+min.Y - 1));
+                            points.Add(room_coord_vector);
                         }
-                        else if(num_neighbors + i >= 8 && center_modifier != -9)
+                        else if(num_neighbors + i - center_modifier >= 8)
                         {
-                            points.Add(new Vector2(col+min.X - 1, row+min.Y - 1));
+                            points.Add(room_coord_vector);
                         }
                     }
                 }
             }
-            
-
-
-            // List<Vector2> relevant_corners = new(corners.Values);
-            // Vector2 start = relevant_corners[0];
-            // Vector2 end = relevant_corners[1];
-            // Vector2 false_end = end  + (direction * new Vector2(-5));
-            // HashSet<Vector2> points = new(){start};
-            // Vector2 current = start;
-            // int stagger_counter = 0;
-            // Vector2 last_direction = Vector2.Zero;
-            // double temp_target;
-            // while (current != false_end)
-            // {
-            //     Vector2 stagger_direction;
-            //     List<Vector2> directions = GetDrunkenOptions(current, center, start, end, last_direction);
-            //     if (directions.Any())
-            //     {
-            //         stagger_direction = directions[Random.Next(directions.Count)];
-            //     }
-            //     else
-            //     {
-            //         stagger_direction = Vector2.Normalize(false_end - current);
-            //     }
-                
-            //     if (stagger_counter == 1)
-            //     {
-            //         stagger_direction += Vector2.Normalize((false_end - start) + (direction * new Vector2(Random.Next(-4, 14) + Random.Next(-4, 14))));
-            //         if (Abs(stagger_direction.X) > 1)
-            //         {
-            //             stagger_direction.X /= Abs(stagger_direction.X);
-            //         }
-            //         if (Abs(stagger_direction.Y) > 1)
-            //         {
-            //             stagger_direction.Y /= Abs(stagger_direction.Y);
-            //         }
-            //     }
-            //     if (stagger_counter >= 3)
-            //     {
-            //         stagger_direction += Vector2.Normalize(false_end - current);
-            //         if (Abs(stagger_direction.X) > 1)
-            //         {
-            //             stagger_direction.X /= Abs(stagger_direction.X);
-            //         }
-            //         if (Abs(stagger_direction.Y) > 1)
-            //         {
-            //             stagger_direction.Y /= Abs(stagger_direction.Y);
-            //         }
-            //         stagger_counter = 0;
-            //     }
-            //     if (stagger_direction == Vector2.Normalize(false_end - start) || stagger_direction == Vector2.Normalize(false_end - current))
-            //     {
-            //         stagger_counter = 0;
-            //     }
-                
-            //     stagger_direction = new Vector2((float) Round(stagger_direction.X, MidpointRounding.AwayFromZero), (float) Round(stagger_direction.Y, MidpointRounding.AwayFromZero));
-            //     current += stagger_direction;
-            //     points.Add(current);
-            //     last_direction = stagger_direction;
-            //     stagger_counter++;
-            // }
-
-            // // HashSet<Vector2> temp_points = new(points);
-            // // points.Clear();
-            // // Vector2 last_point = Vector2.Zero;
-            // // foreach (var point in temp_points.OrderBy(v=> (v * direction).Length()))
-            // // {
-            // //     if (last_point != Vector2.Zero)
-            // //     {
-            // //         points.Add(Vector2.Lerp(last_point, point, .5f));
-            // //     }
-            // //     else
-            // //     {
-            // //         points.Add(point);
-            // //     }
-            // //     last_point = point;
-            // // }
-            // // points.Add(last_point);
-
-            // // temp_points = new(points);
-            // // points.Clear();
-            // // last_point = Vector2.Zero;
-            // // foreach (var point in temp_points.OrderBy(v=> (v * direction).Length()))
-            // // {
-            // //     if (last_point != Vector2.Zero)
-            // //     {
-            // //         points.Add(Vector2.Lerp(last_point, point, .5f));
-            // //     }
-            // //     else
-            // //     {
-            // //         points.Add(point);
-            // //     }
-            // //     last_point = point;
-            // // }
-            // // points.Add(last_point);
-
-
-            // HashSet<Vector2> temp_points = new(points);
-            // points.Clear();
-            // foreach (var point in temp_points)
-            // {
-            //     points.Add(new Vector2((float) Round(point.X), (float) Round(point.Y)));
-            // }
-            // return points;
-            return RoundPoints(points);
+            return points;
         };
     }
-
-    private static List<Vector2> GetDrunkenOptions(Vector2 current_point, Vector2 center, Vector2 start, Vector2 end, Vector2 last, float step = 1f)
-    {
-        List<Vector2> directions = new(){Vector2.UnitX, -Vector2.UnitX, Vector2.UnitY, -Vector2.UnitY, new Vector2(1, 1), new Vector2(-1, 1), new Vector2(1, -1), new Vector2(-1, -1)};
-        Vector2 wrong_direction = Vector2.Normalize(start-end);
-        directions.Remove(wrong_direction);
-
-        foreach (Vector2 direction in new List<Vector2>(directions))
-        {
-            if (!InQuarter(current_point + (direction * step), center, start, end))
-            {
-                directions.Remove(direction);
-            }
-            else if (last != Vector2.Zero)
-            {
-                if (direction == last)
-                {
-                    directions.AddRange([last, last]);
-                }
-                else if ((direction - last).LengthSquared() <= 1)
-                {
-                    directions.Add(direction);
-                }
-                else if (direction == Vector2.Normalize(end - start))
-                {
-                    directions.Add(direction);
-                }
-                else
-                {
-                    if (start.X == end.X && direction.Y == wrong_direction.Y)
-                    {
-                        directions.Remove(direction);
-                    }
-                    else if (start.Y == end.Y && direction.X == wrong_direction.X)
-                    {
-                        directions.Remove(direction);
-                    }
-                }
-            }
-        }
-        return directions;
-    }
-
-
-    private static bool InQuarter(Vector2 point, Vector2 center, Vector2 corner1, Vector2 corner2)
-    {
-        Vector2 max = Vector2.Max(Vector2.Max(corner1, corner2), center);
-        Vector2 min = Vector2.Min(Vector2.Min(corner1, corner2), center);
-
-        float end_padding_x = .5f * (max.X - min.X);
-        float end_padding_y = .5f * (max.Y-min.Y);
-
-        if (corner1.X == corner2.X && corner1.X == 1)
-        {
-            max.X += end_padding_x;
-        }
-        else if (corner1.X == corner2.X && corner1.X == -1)
-        {
-            min.X -= end_padding_x;
-        }
-        else if (corner1.Y == corner2.Y && corner1.Y == 1)
-        {
-            max.Y += end_padding_y;
-        }
-        else if (corner1.Y == corner2.Y && corner1.Y == -1)
-        {
-            min.Y -= end_padding_y;
-        }
-        
-
-        Vector2 average_corner = (corner1 + corner2) / 2f;
-        Vector2 vec_to_average = (average_corner - point);
-        Vector2 corner_prime_1, corner_prime_2;
-
-        if (corner1.X == corner2.X)
-        {
-            corner_prime_1 = new Vector2(center.X, corner1.Y);
-            corner_prime_2 = new Vector2(center.X, corner2.Y);
-        }
-        else
-        {
-            corner_prime_1 = new Vector2(corner1.X, center.Y);
-            corner_prime_2 = new Vector2(corner2.X, center.Y);
-        }
-
-        Vector2 vec_to_prime_1 = (corner_prime_1 - point);
-        Vector2 vec_to_prime_2 = (corner_prime_2 - point);
-
-        if (point.X >= min.X && point.X <= max.X && point.Y >= min.Y && point.Y <= max.Y
-        && vec_to_average.LengthSquared() <= vec_to_prime_1.LengthSquared()
-        && vec_to_average.LengthSquared() <= vec_to_prime_2.LengthSquared())
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-
 
     public static IEnumerable<string> DefaultTagger(Graph graph, Vertex vertex)
     {
