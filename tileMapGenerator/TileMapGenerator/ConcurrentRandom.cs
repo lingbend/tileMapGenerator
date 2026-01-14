@@ -44,7 +44,7 @@ public class ConcurrentRandom
         // Console.WriteLine(xor + " 9 ");
         xor += (uint) ((_seed_3 >> 1) +(_seed_1<<1) + 1);
         xor ^= xor << 9;
-        xor += 1;
+        // xor += 1;
 
         // Console.WriteLine(xor);
         
@@ -58,8 +58,8 @@ public class ConcurrentRandom
 
     public Vector2 NextVector2(object unique_state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT)
     {
-        int x = Next(unique_state.ToString() + 1, min_x, max_x);
-        int y = Next(unique_state.ToString() + 2, min_y, max_y);
+        int x = Next(unique_state.ToString() + "homo 13 neanderthalis", min_x, max_x);
+        int y = Next(unique_state.ToString() + "teq 13 uila", min_y, max_y);
         return new Vector2(x, y);
     }
 
@@ -76,8 +76,8 @@ public class ConcurrentRandom
 
     public Vector2 RollMultipleVector2(object unique_state, int sides_x, int number_x, int sides_y, int number_y)
     {
-        int x = RollMultiple(unique_state.ToString() + 1, sides_x, number_x);
-        int y = RollMultiple(unique_state.ToString() + 2, sides_y, number_y);
+        int x = RollMultiple(unique_state.ToString() + "homo 13 neanderthalis", sides_x, number_x);
+        int y = RollMultiple(unique_state.ToString() + "teq 13 uila", sides_y, number_y);
         return new Vector2(x, y);
     }
 
@@ -95,8 +95,8 @@ public class ConcurrentRandom
 
     public Vector2 BellCurvedVector2(object unique_state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree)
     {
-        int x = BellCurved(unique_state.ToString() + 1, min_inclusive_x, max_inclusive_x, curve_degree);
-        int y = BellCurved(unique_state.ToString() + 2, min_inclusive_y, max_inclusive_y, curve_degree);
+        int x = BellCurved(unique_state.ToString() + "homo 13 neanderthalis", min_inclusive_x, max_inclusive_x, curve_degree);
+        int y = BellCurved(unique_state.ToString() + "teq 13 uila", min_inclusive_y, max_inclusive_y, curve_degree);
         return new Vector2(x, y);
     }
 

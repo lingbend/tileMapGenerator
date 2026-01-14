@@ -196,8 +196,17 @@ public class CellularRoomGrower
         List<Room> growable_rooms = new((int) (rooms.Count()*.5));
         foreach (Room room in rooms)
         {
+            float x_to_y_ratio = CalculateSideRatio(room);
             foreach (Vector2 direction in Settings.ValidDirections)
             {
+                if (x_to_y_ratio >= CellularRoomGrowerSettings.MaxRatio.X / CellularRoomGrowerSettings.MaxRatio.Y && direction.X != 0)
+                {
+                    continue;
+                }
+                else if (x_to_y_ratio <= CellularRoomGrowerSettings.MaxRatio.Y / CellularRoomGrowerSettings.MaxRatio.X && direction.Y != 0)
+                {
+                    continue;
+                }
                 if (CheckDirection(grid, direction, room) && !room.Tags.Contains("_grow_error_"))
                 {
                     growable_rooms.Add(room);
@@ -206,6 +215,14 @@ public class CellularRoomGrower
             }
         }
         return growable_rooms;
+    }
+
+    private float CalculateSideRatio(Room room)
+    {
+        Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
+        Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
+
+        return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
     internal (BinaryGrid, Room) GrowRoom(BinaryGrid grid, Room room, Func<IEnumerable<Vector2>, Room, Vector2> direction_chooser)
@@ -283,6 +300,15 @@ public class CellularRoomGrower
             {
                 return false;
             }
+        }
+        float x_to_y_ratio = CalculateSideRatio(room);
+        if (x_to_y_ratio >= CellularRoomGrowerSettings.MaxRatio.X / CellularRoomGrowerSettings.MaxRatio.Y && direction.X != 0)
+        {
+            return false;
+        }
+        else if (x_to_y_ratio <= CellularRoomGrowerSettings.MaxRatio.Y / CellularRoomGrowerSettings.MaxRatio.X && direction.Y != 0)
+        {
+            return false;
         }
 
         var old_sides = room.GetSides();
