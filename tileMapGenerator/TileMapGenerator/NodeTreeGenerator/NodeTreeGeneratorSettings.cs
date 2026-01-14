@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 
 public class NodeTreeGeneratorSettings
 {
-    public HashSet<Vector2> ValidDirections {get; set;}= [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
+    public List<Vector2> ValidDirections {get; set;}= [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
      -Vector2.UnitY];
     public Random Random{get; set;} = new Random();
 
@@ -31,7 +31,7 @@ public class NodeTreeGeneratorSettings
             enum_numbering.Add(degree,(int) (weight[degree]*.01 * size));
         }
         int size_error = size - enum_numbering.Values.Sum();
-        foreach(int degree in enum_numbering.Keys)
+        foreach(int degree in enum_numbering.Keys.OrderDescending())
         {
             for(int i = 0; i < enum_numbering[degree]; i++)
             {
@@ -42,7 +42,7 @@ public class NodeTreeGeneratorSettings
         {
             nums.Add(weight.Keys.First());
         }
-        return backing.Values.Zip(nums);
+        return backing.Values.OrderBy(v=>v.ID).Zip(nums);
     });
 
     public static Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> RadialShaper{get;} = ((graph, backing, weight) =>
@@ -55,7 +55,7 @@ public class NodeTreeGeneratorSettings
             enum_numbering.Add(degree,(int) (weight[degree]*.01 * size));
         }
         int size_error = size - enum_numbering.Values.Sum();
-        foreach(int degree in enum_numbering.Keys)
+        foreach(int degree in enum_numbering.Keys.OrderDescending())
         {
             for(int i = 0; i < enum_numbering[degree]; i++)
             {
@@ -73,7 +73,7 @@ public class NodeTreeGeneratorSettings
         int max_size_y = (int) backing.Keys.MaxBy((v)=>v.Y).Y;
         Vector2 middle = new Vector2((max_size_x + min_size_x)/2, (max_size_y+min_size_y)/2);
         List<(int, Vertex)> vertices = new List<(int, Vertex)>();
-        foreach (Vertex vertex in backing.Values)
+        foreach (Vertex vertex in backing.Values.OrderBy(v=>v.ID))
         {
             vertices.Add(((int) Math.Abs((vertex.Weight - middle).Length()), vertex));
         }
@@ -98,7 +98,7 @@ public class NodeTreeGeneratorSettings
             enum_numbering.Add(degree,(int) (weight[degree]*.01 * size));
         }
         int size_error = size - enum_numbering.Values.Sum();
-        foreach(int degree in enum_numbering.Keys)
+        foreach(int degree in enum_numbering.Keys.Order())
         {
             for(int i = 0; i < enum_numbering[degree]; i++)
             {
@@ -116,7 +116,7 @@ public class NodeTreeGeneratorSettings
         int max_size_y = (int) backing.Keys.MaxBy((v)=>v.Y).Y;
         Vector2 middle = new Vector2((max_size_x + min_size_x)/2, (max_size_y+min_size_y)/2);
         List<(int, Vertex)> vertices = new List<(int, Vertex)>();
-        foreach (Vertex vertex in backing.Values)
+        foreach (Vertex vertex in backing.Values.OrderBy(v=>v.ID))
         {
             vertices.Add(((int) Math.Abs(vertex.Weight.X - middle.X), vertex));
         }
@@ -141,7 +141,7 @@ public class NodeTreeGeneratorSettings
             enum_numbering.Add(degree,(int) (weight[degree]*.01 * size));
         }
         int size_error = size - enum_numbering.Values.Sum();
-        foreach(int degree in enum_numbering.Keys)
+        foreach(int degree in enum_numbering.Keys.OrderDescending())
         {
             for(int i = 0; i < enum_numbering[degree]; i++)
             {
@@ -150,7 +150,7 @@ public class NodeTreeGeneratorSettings
         }
         for (int i = 0; i < size_error; i++)
         {
-            nums.Add(weight.Keys.First());
+            nums.Add(weight.Keys.Order().First());
         }
 
         int min_size_x = (int) backing.Keys.MinBy((v)=>v.X).X;
@@ -159,7 +159,7 @@ public class NodeTreeGeneratorSettings
         int max_size_y = (int) backing.Keys.MaxBy((v)=>v.Y).Y;
         Vector2 middle = new Vector2((max_size_x + min_size_x)/2, (max_size_y+min_size_y)/2);
         List<(int, Vertex)> vertices = new List<(int, Vertex)>();
-        foreach (Vertex vertex in backing.Values)
+        foreach (Vertex vertex in backing.Values.OrderBy(v=>v.ID))
         {
             vertices.Add(((int) Math.Abs(vertex.Weight.Y - middle.Y), vertex));
         }
@@ -220,7 +220,7 @@ public class NodeTreeGeneratorSettings
         if (vert.Degree == 1 || vert.Degree == 2)
         {
             List<int> neighboring_degrees = new List<int>(vert.Degree);
-            foreach (Edge edge in vert.Edges)
+            foreach (Edge edge in vert.Edges.OrderBy(e=>e.ID))
             {
                 if (vert == edge.Source)
                 {
@@ -297,7 +297,7 @@ public class NodeTreeGeneratorSettings
         List<(Vertex, Vertex)> possible_connection_pairs = new List<(Vertex, Vertex)>();
         foreach (Vertex vertex in median_list)
         {
-            foreach (Edge edge in vertex.Edges)
+            foreach (Edge edge in vertex.Edges.OrderBy(e=>e.ID))
             {
                 if (extra != null && vertex.Weight == extra?.Weight)
                 {
@@ -352,7 +352,7 @@ public class NodeTreeGeneratorSettings
                 }
             }
         }
-        List<Graph> connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+        List<Graph> connected_components = new(NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
         int counter = connected_components.Count*3;
         Graph unified_graph = new Graph(false);
         while (connected_components.Count > 1 && counter > 0)
@@ -468,7 +468,7 @@ public class NodeTreeGeneratorSettings
         List<(Vertex, Vertex)> possible_connection_pairs = new List<(Vertex, Vertex)>();
         foreach (Vertex vertex in median_list)
         {
-            foreach (Edge edge in vertex.Edges)
+            foreach (Edge edge in vertex.Edges.OrderBy(e=>e.ID))
             {
                 if (extra != null && vertex.Weight == extra?.Weight)
                 {
@@ -523,7 +523,7 @@ public class NodeTreeGeneratorSettings
                 }
             }
         }
-        List<Graph> connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+        List<Graph> connected_components = new (NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
         int counter = connected_components.Count*3;
         Graph unified_graph = new Graph(false);
         while (connected_components.Count > 1 && counter > 0)

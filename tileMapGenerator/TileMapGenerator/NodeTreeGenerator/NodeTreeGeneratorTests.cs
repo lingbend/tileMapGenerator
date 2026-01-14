@@ -18,7 +18,7 @@ public class GraphBuilderTests
 {
     Dictionary<int, int> degree_weights = new Dictionary<int, int>([KeyValuePair.Create(1, 5), KeyValuePair.Create(2, 25), KeyValuePair.Create(3, 30), KeyValuePair.Create(4, 40)]);
 
-    // Currently non-deterministic
+    // Appears to be deterministic
     [TestMethod]
     public void GraphBuilderTreePhase_PossibleConnectedness_Valid()
     {
@@ -27,10 +27,10 @@ public class GraphBuilderTests
         generator.Settings.Random = new Random(112346);
         // generator.Settings.Shaper = NodeTreeGeneratorSettings.RadialShaper;
         generator.Settings.Shaper = NodeTreeGeneratorSettings.RadialShaper;
-        // generator.Settings.InitialRatio = new Vector2(.333f, 3);
+        generator.Settings.InitialRatio = new Vector2(.333f, 3);
         generator.Settings.InitialPaddingPercent = 70;
-        // generator.Settings.PostProcessors.Add(NodeTreeGeneratorSettings.HorizontalSymmetryPostProcessor);
-        // generator.Settings.PostProcessors.Add(NodeTreeGeneratorSettings.VerticalSymmetryPostProcessor);   
+        generator.Settings.PostProcessors.Add(NodeTreeGeneratorSettings.HorizontalSymmetryPostProcessor);
+        generator.Settings.PostProcessors.Add(NodeTreeGeneratorSettings.VerticalSymmetryPostProcessor);   
         generator.Settings.WeightedVertexRemover = generator.Settings.AntiStrandingWeightedVertexRemover;
         generator.Settings.PruningSelectivityMultiplier = 2;
         // generator._random = new Random(13513251);
