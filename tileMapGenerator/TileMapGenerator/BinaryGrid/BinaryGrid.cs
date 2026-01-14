@@ -20,6 +20,7 @@ public class BinaryGrid : IDedThing
 
     private uint _border_num = 1;
     private int _id;
+    private bool[] _queue;
 
     public BinaryGrid(uint rows, uint columns, uint borders = 1)
     {
@@ -28,6 +29,7 @@ public class BinaryGrid : IDedThing
             throw new IndexOutOfRangeException();
         }
         _grid = new BinaryNumber((int) ((rows + 2)*(columns + 2)), 0);
+        _queue = new bool[(rows + 2)*(columns + 2)];
 
         _size = (rows, columns);
         if (borders == 1)
@@ -73,6 +75,21 @@ public class BinaryGrid : IDedThing
         }
 
         SetCellInternal(row, col, val);
+    }
+
+    public void QueueFillCell(uint row, uint col)
+    {
+        if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
+        {
+            throw new IndexOutOfRangeException("Bad Cell Index");
+        }
+        _queue[GetCellIndex(row, col)] = true;
+    }
+
+    public void RunQueue()
+    {
+        _grid |= new BinaryNumber(new BitArray(_queue));
+        _queue = new bool[_queue.Length];
     }
 
     private void SetCellInternal(uint row, uint col, uint val)

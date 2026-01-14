@@ -223,7 +223,7 @@ public class CellularRoomGrowerSettings
             {
                 if (i != i_max)
                 {
-                    string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Order().Aggregate((v1, v2)=>v1+v2);
+                    string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2) + vertex.ID;
                     ConcurrentRandom rand = new(Random.Next());
                     Parallel.For(0, (int) (Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .3))), (j) =>
                     {
@@ -233,10 +233,11 @@ public class CellularRoomGrowerSettings
                 }
                 
                 BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0u);
-                foreach (Vector2 point in points)
+                Parallel.ForEach(points, point =>
                 {
-                    test_grid.SetCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1), 1u);
-                }
+                    test_grid.QueueFillCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1));
+                });
+                test_grid.RunQueue();
                 points.Clear();
                 Parallel.For(1u, (int) y_diameter + 1, row=>
                 {
