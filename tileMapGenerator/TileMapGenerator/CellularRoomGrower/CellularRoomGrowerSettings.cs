@@ -88,10 +88,12 @@ public class CellularRoomGrowerSettings
 
     private static float CalculateSideRatio(IEnumerable<Vector2> corners)
     {
-        Vector2 max = Vector2Ext.MaxRange(corners);
-        Vector2 min = Vector2Ext.MinRange(corners);
+        Vector2 range = Vector2Ext.SpanRange(corners) + Vector2.One;
+        return range.X / range.Y;
+        // Vector2 max = Vector2Ext.MaxRange(corners);
+        // Vector2 min = Vector2Ext.MinRange(corners);
 
-        return (max.X-min.X+1) / (max.Y - min.Y+1); 
+        // return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
     public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
@@ -104,19 +106,23 @@ public class CellularRoomGrowerSettings
     {
 
         List<Vector2> shape = new();
-        Vector2 max = Vector2Ext.MaxRange(corners.Values);
-        Vector2 min = Vector2Ext.MinRange(corners.Values);
+
+        Vector2 range = Vector2Ext.SpanRange(corners.Values);
+        // Vector2 max = Vector2Ext.MaxRange(corners.Values);
+        // Vector2 min = Vector2Ext.MinRange(corners.Values);
 
         foreach (Vector2 dir in new Vector2[] { Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN })
         {
             int temp_length;
             if (dir.X == 0)
             {
-                temp_length = (int) (max.X - min.X) + 1;
+                temp_length = (int) (range.X + 1.0);
+                // temp_length = (int) (max.X - min.X) + 1;
             }
             else
             {
-                temp_length = (int) (max.Y - min.Y) + 1;
+                temp_length = (int) (range.Y + 1.0);
+                // temp_length = (int) (max.Y - min.Y) + 1;
             }
             shape.AddRange(GetRectangleSide(temp_length, dir, corners));
         }
@@ -168,15 +174,20 @@ public class CellularRoomGrowerSettings
     private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners, float resolution = 1)
     {
         Vector2 center = corners.Values.Aggregate((v1, v2) => v1 + v2) / 4.0f;
+
         Vector2 min = Vector2Ext.MinRange(corners.Values);
         Vector2 max = Vector2Ext.MaxRange(corners.Values);
-        if (!(max.X - min.X >= 5 && max.Y - min.Y >= 6 || max.X - min.X >= 6 && max.Y - min.Y >= 5))
+        Vector2 range = Vector2Ext.SpanRange(corners.Values);
+        if (!(range.X >= 5 && range.Y >= 6 || range.X >= 6 && range.Y >= 5))
+        // if (!(max.X - min.X >= 5 && max.Y - min.Y >= 6 || max.X - min.X >= 6 && max.Y - min.Y >= 5))
         {
             return GetRectangleSides(length, direction, corners);
         }
 
-        double x_diameter = (max.X - min.X);
-        double y_diameter = (max.Y - min.Y);
+        double x_diameter = range.X;
+        double y_diameter = range.Y;
+        // double x_diameter = (max.X - min.X);
+        // double y_diameter = (max.Y - min.Y);
         double num_points = (Clamp(Max(Abs(1-CalculateSideRatio(corners.Values)), Abs(1-(1/CalculateSideRatio(corners.Values)))), 1, 5) * 2 * ((2 * x_diameter) + (2 * y_diameter))) / resolution;
         double x_radius = .5 * x_diameter;
         double y_radius = .5 * y_diameter;

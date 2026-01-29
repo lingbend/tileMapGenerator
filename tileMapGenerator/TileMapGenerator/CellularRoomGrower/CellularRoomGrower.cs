@@ -7,6 +7,7 @@ using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using System.Collections.Concurrent;
 using Vector2Extensions;
+using ILGPU.Algorithms.ScanReduceOperations;
 
 public class CellularRoomGrower
 {
@@ -63,12 +64,17 @@ public class CellularRoomGrower
     {
         foreach (Room room in rooms)
         {
-            Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-            Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
-            if (max.X - min.X < 2 || max.Y - min.Y < 2)
+            Vector2 range = Vector2Ext.SpanRange(room.Corners.Values);
+            if (range.X < 2 || range.Y < 2)
             {
                 return true;
             }
+            // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+            // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
+            // if (max.X - min.X < 2 || max.Y - min.Y < 2)
+            // {
+            //     return true;
+            // }
         }
         return false;
     }
@@ -279,10 +285,13 @@ public class CellularRoomGrower
     //thread safe
     private float CalculateSideRatio(Room room)
     {
-        Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-        Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
+        Vector2 range = Vector2Ext.SpanRange(room.Corners.Values) + Vector2.One;
+        return range.X / range.Y;
 
-        return (max.X-min.X+1) / (max.Y - min.Y+1); 
+        // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+        // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
+
+        // return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
     // thread safe
@@ -306,9 +315,11 @@ public class CellularRoomGrower
         }
 
         Vector2 chosen_direction;
-        Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-        Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
-        if (max.X - min.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
+        Vector2 range = Vector2Ext.SpanRange(room.Corners.Values);
+        // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+        // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
+        if (range.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
+        // if (max.X - min.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
         {
             List<Vector2> payload = new();
             if (open_directions.Contains(Vector2Ext.RIGHT))
@@ -321,7 +332,8 @@ public class CellularRoomGrower
             }
             chosen_direction = direction_chooser(payload, room);
         }
-        else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
+        else if (range.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
+        // else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
         {
             List<Vector2> payload = new();
             if (open_directions.Contains(Vector2Ext.UP))

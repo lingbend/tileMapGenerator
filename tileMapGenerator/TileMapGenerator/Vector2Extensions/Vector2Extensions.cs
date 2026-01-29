@@ -14,9 +14,14 @@ public static class Vector2Ext
         return vectors.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
     }
 
-    public static Vector2 MinRange(IEnumerable<Vector2> vector2)
+    public static Vector2 MinRange(IEnumerable<Vector2> vectors)
     {
-        return vector2.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
+        return vectors.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
+    }
+
+    public static Vector2 SpanRange(IEnumerable<Vector2> vectors)
+    {
+        return MaxRange(vectors) - MinRange(vectors);
     }
 
     public static Vector2 UP = new Vector2(0, 1);
