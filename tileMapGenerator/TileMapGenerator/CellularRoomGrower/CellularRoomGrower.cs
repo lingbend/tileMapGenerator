@@ -7,7 +7,6 @@ using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using System.Collections.Concurrent;
 using Vector2Extensions;
-using ILGPU.Algorithms.ScanReduceOperations;
 
 public class CellularRoomGrower
 {
