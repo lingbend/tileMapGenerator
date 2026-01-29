@@ -151,12 +151,13 @@ public struct BinaryGrid : IDedThing
 
     private void SetCellInternal(uint row, uint col, uint val)
     {
+        
         if (val == 1){
-            _grid |= BinaryNumber.ONE <<  (int) GetCellIndex(row, col);
+            _grid.SetBit((int) GetCellIndex(row, col), true);
         }
         else
         {
-            _grid &= ~((BinaryNumber.ONE <<  (int) GetCellIndex(row, col))&_grid);
+            _grid.SetBit((int) GetCellIndex(row, col), false);
         }
     }
 
@@ -183,7 +184,7 @@ public struct BinaryGrid : IDedThing
 
     private uint GetCellInternal(uint row, uint col)
     {
-        return ((_grid >> (int) GetCellIndex(row, col)) & BinaryNumber.ONE).ContainsOne();
+        return _grid.GetBit((int) GetCellIndex(row, col));
     }
 
     private void InsertEmptyCellInternal(uint row, uint col)
@@ -592,6 +593,23 @@ internal struct BinaryNumber
                 copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
                 copy._backing_array.And(n2._backing_array);
                 return copy;
+            }
+        }
+
+        public void SetBit(int index, bool value)
+        {
+            _backing_array[index] = value;
+        }
+
+        public uint GetBit(int index)
+        {
+            if (_backing_array[index])
+            {
+                return 1u;
+            }
+            else
+            {
+                return 0u;
             }
         }
 

@@ -4,11 +4,6 @@ namespace Vector2Extensions;
 
 public static class Vector2Ext
 {
-    public static int Testing(this Vector2 vec)
-    {
-        return 0;
-    }
-
     public static Vector2 MaxRange(IEnumerable<Vector2> vectors)
     {
         return vectors.Aggregate((v1, v2)=>Vector2.Max(v1, v2));

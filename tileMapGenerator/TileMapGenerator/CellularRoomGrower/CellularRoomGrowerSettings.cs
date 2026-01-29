@@ -47,7 +47,8 @@ public class CellularRoomGrowerSettings
         {
              _prioritizer_random = new ConcurrentRandom(Random.Next());
         }
-        IEnumerable<Room> small_rooms = rooms.Where(r=>(r.GetSides().Max(v=>v.X)-r.GetSides().Min(v=>v.X))<3 && (r.GetSides().Max(v=>v.Y)-r.GetSides().Min(v=>v.Y))<3);
+        IEnumerable<Room> small_rooms = rooms.Where(r=>Vector2Ext.SpanRange(r.GetSides()).X < 3 && Vector2Ext.SpanRange(r.GetSides()).Y<3);
+        // IEnumerable<Room> small_rooms = rooms.Where(r=>(r.GetSides().Max(v=>v.X)-r.GetSides().Min(v=>v.X))<3 && (r.GetSides().Max(v=>v.Y)-r.GetSides().Min(v=>v.Y))<3);
         if (small_rooms.Count() > 0)
         {
             int index = _prioritizer_random.Next(small_rooms.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, small_rooms.Count());

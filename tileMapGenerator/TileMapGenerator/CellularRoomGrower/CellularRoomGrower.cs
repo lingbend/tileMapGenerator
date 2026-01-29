@@ -118,38 +118,6 @@ public class CellularRoomGrower
         double width_modifier = (Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 1.0) / old_relative_size.X;
         double height_modifier = (Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 1.0) / old_relative_size.Y;
 
-        if (width_modifier <= 1)
-        {
-            if (width_modifier < -1)
-            {
-                width_modifier = (int) Math.Abs(width_modifier);
-            }
-            else if (width_modifier < 0)
-            {
-                width_modifier = (int) Math.Abs(width_modifier) + 1;
-            }
-            else
-            {
-                width_modifier++;
-            }
-        }
-
-        if (height_modifier <= 1)
-        {
-            if (height_modifier < -1)
-            {
-                height_modifier = (int) Math.Abs(height_modifier);
-            }
-            else if (height_modifier < 0)
-            {
-                height_modifier = (int) Math.Abs(height_modifier) + 1;
-            }
-            else
-            {
-                height_modifier++;
-            }
-        }
-
         return new Vector2((float) Math.Ceiling(locus.X * width_modifier) + 1, (float) Math.Ceiling(locus.Y * height_modifier) + 1);
     }
 
