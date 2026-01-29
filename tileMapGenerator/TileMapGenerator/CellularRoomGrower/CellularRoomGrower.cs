@@ -6,6 +6,7 @@ using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
 using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using System.Collections.Concurrent;
+using Vector2Extensions;
 
 public class CellularRoomGrower
 {
@@ -62,8 +63,8 @@ public class CellularRoomGrower
     {
         foreach (Room room in rooms)
         {
-            Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
-            Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
+            Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+            Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
             if (max.X - min.X < 2 || max.Y - min.Y < 2)
             {
                 return true;
@@ -75,9 +76,8 @@ public class CellularRoomGrower
     // Thread safe
     private Vector2 GetOldRelativeSize(Graph graph)
     {
-        float max_x = graph.Vertices.Select(v=>v.Weight).MaxBy(v=>v.X).X;
-        float max_y = graph.Vertices.Select(v=>v.Weight).MaxBy(v=>v.Y).Y;
-        return new Vector2(max_x, max_y);
+        Vector2 max = Vector2Ext.MaxRange(graph.Vertices.Select(v=>v.Weight));
+        return max;
     }
 
 
@@ -158,12 +158,12 @@ public class CellularRoomGrower
     {
         double width = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 5.0);
         double height = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 5.0);
-        BinaryGrid grid = new BinaryGrid((uint) height, (uint) width);
+        BinaryGrid grid = new BinaryGrid((uint)height, (uint)width);
         using var preprocess_rooms = new Task(() =>
         {
-            Parallel.ForEach(rooms, (room)=>
+            Parallel.ForEach(rooms, (room) =>
             {
-                grid.QueueFillCell((uint) room.Locus.Y, (uint) room.Locus.X);
+                grid.QueueFillCell((uint)room.Locus.Y, (uint)room.Locus.X);
             });
         });
 
@@ -171,28 +171,11 @@ public class CellularRoomGrower
         {
             Parallel.ForEach(halls, hall =>
             {
-                grid.QueueFillCell((uint) hall.Locus.Y, (uint) hall.Locus.X);
+                grid.QueueFillCell((uint)hall.Locus.Y, (uint)hall.Locus.X);
             });
         });
 
-        using var check_locs = new Task(() =>
-        {
-            foreach (Room room in rooms)
-            {
-                if (grid.GetCell((uint) room.Locus.Y, (uint) room.Locus.X) == 1U)
-                {
-                    throw new Exception("Locus already occupied: Room failed");
-                }
-            }
-
-            foreach (Hall hall in halls)
-            {
-                if (grid.GetCell((uint) hall.Locus.Y, (uint) hall.Locus.X) == 1U)
-                {
-                    throw new Exception("Locus already occupied: Hall failed");
-                }
-            }
-        });
+        using var check_locs = new Task(()=>CheckAreasOccupied(rooms, halls, ref grid));
 
         check_locs.Start();
         preprocess_rooms.Start();
@@ -203,6 +186,25 @@ public class CellularRoomGrower
         grid.RunQueue();
 
         return grid;
+    }
+
+    private void CheckAreasOccupied(IEnumerable<Room> rooms, IEnumerable<Hall> halls, ref BinaryGrid grid)
+    {
+            foreach (Room room in rooms)
+            {
+                if (grid.GetCell((uint)room.Locus.Y, (uint)room.Locus.X) == 1U)
+                {
+                    throw new Exception("Locus already occupied: Room failed");
+                }
+            }
+
+            foreach (Hall hall in halls)
+            {
+                if (grid.GetCell((uint)hall.Locus.Y, (uint)hall.Locus.X) == 1U)
+                {
+                    throw new Exception("Locus already occupied: Hall failed");
+                }
+            }
     }
 
     // Not thread safe
@@ -277,8 +279,8 @@ public class CellularRoomGrower
     //thread safe
     private float CalculateSideRatio(Room room)
     {
-        Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
-        Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
+        Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+        Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
 
         return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
@@ -304,31 +306,31 @@ public class CellularRoomGrower
         }
 
         Vector2 chosen_direction;
-        Vector2 max = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y)));
-        Vector2 min = room.Corners.Values.Aggregate((v1, v2)=>new Vector2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y)));
-        if (max.X - min.X < 2 && (open_directions.Contains(Vector2.UnitX) || open_directions.Contains(-Vector2.UnitX)))
+        Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
+        Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
+        if (max.X - min.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
         {
             List<Vector2> payload = new();
-            if (open_directions.Contains(Vector2.UnitX))
+            if (open_directions.Contains(Vector2Ext.RIGHT))
             {
-                payload.Add(Vector2.UnitX);
+                payload.Add(Vector2Ext.RIGHT);
             }
-            if (open_directions.Contains(-Vector2.UnitX))
+            if (open_directions.Contains(Vector2Ext.LEFT))
             {
-                payload.Add(-Vector2.UnitX);
+                payload.Add(Vector2Ext.LEFT);
             }
             chosen_direction = direction_chooser(payload, room);
         }
-        else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2.UnitY) || open_directions.Contains(-Vector2.UnitY)))
+        else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
         {
             List<Vector2> payload = new();
-            if (open_directions.Contains(Vector2.UnitY))
+            if (open_directions.Contains(Vector2Ext.UP))
             {
-                payload.Add(Vector2.UnitY);
+                payload.Add(Vector2Ext.UP);
             }
-            if (open_directions.Contains(-Vector2.UnitY))
+            if (open_directions.Contains(Vector2Ext.DOWN))
             {
-                payload.Add(-Vector2.UnitY);
+                payload.Add(Vector2Ext.DOWN);
             }
             chosen_direction = direction_chooser(payload, room);
         }

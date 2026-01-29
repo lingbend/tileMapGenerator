@@ -13,14 +13,15 @@ using System.Drawing;
 using ILGPU;
 using ILGPU.Algorithms;
 using ILGPU.Runtime;
+using Vector2Extensions;
 
 public class CellularRoomGrowerSettings
 {
     public Func<Graph, IEnumerable<Room>, IEnumerable<Room>> Prioritizer{get; set;} = DefaultPrioritizer;
     public Func<IEnumerable<Vector2>, Room, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
     internal List<Vector2> ValidDirections{get; set;} = DefaultValidDirections;
-    public static List<Vector2> DefaultValidDirections{get;} = [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
-     -Vector2.UnitY];
+    public static List<Vector2> DefaultValidDirections{get;} = [Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT,
+     Vector2Ext.DOWN];
 
     public Func<Graph, Vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
     public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
@@ -87,8 +88,8 @@ public class CellularRoomGrowerSettings
 
     private static float CalculateSideRatio(IEnumerable<Vector2> corners)
     {
-        Vector2 max = corners.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
-        Vector2 min = corners.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
+        Vector2 max = Vector2Ext.MaxRange(corners);
+        Vector2 min = Vector2Ext.MinRange(corners);
 
         return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
@@ -103,9 +104,10 @@ public class CellularRoomGrowerSettings
     {
 
         List<Vector2> shape = new();
-        Vector2 max = corners.Values.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
-        Vector2 min = corners.Values.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
-        foreach (Vector2 dir in new Vector2[] { Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX, -Vector2.UnitY })
+        Vector2 max = Vector2Ext.MaxRange(corners.Values);
+        Vector2 min = Vector2Ext.MinRange(corners.Values);
+
+        foreach (Vector2 dir in new Vector2[] { Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN })
         {
             int temp_length;
             if (dir.X == 0)
@@ -166,8 +168,8 @@ public class CellularRoomGrowerSettings
     private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners, float resolution = 1)
     {
         Vector2 center = corners.Values.Aggregate((v1, v2) => v1 + v2) / 4.0f;
-        Vector2 min = corners.Values.Aggregate((v1, v2) => Vector2.Min(v1, v2));
-        Vector2 max = corners.Values.Aggregate((v1, v2) => Vector2.Max(v1, v2));
+        Vector2 min = Vector2Ext.MinRange(corners.Values);
+        Vector2 max = Vector2Ext.MaxRange(corners.Values);
         if (!(max.X - min.X >= 5 && max.Y - min.Y >= 6 || max.X - min.X >= 6 && max.Y - min.Y >= 5))
         {
             return GetRectangleSides(length, direction, corners);
@@ -223,8 +225,8 @@ public class CellularRoomGrowerSettings
         return (length, direction, corners) =>
         {
             Vector2 center = corners.Values.Aggregate((v1, v2)=>v1+v2)/4.0f;
-            Vector2 min = corners.Values.Aggregate((v1, v2)=>Vector2.Min(v1, v2));
-            Vector2 max = corners.Values.Aggregate((v1, v2)=>Vector2.Max(v1, v2));
+            Vector2 min = Vector2Ext.MinRange(corners.Values);
+            Vector2 max = Vector2Ext.MaxRange(corners.Values);
             double x_diameter = (max.X - min.X);
             double y_diameter = (max.Y - min.Y);
             float diagonal_length = (corners.Values.First() - center).Length();
@@ -308,7 +310,7 @@ public class CellularRoomGrowerSettings
             {
                 temp_results.Add(point);
             }
-            temp_results.Remove(new Vector2(0));
+            temp_results.Remove(Vector2Ext.CENTER);
             // return temp_results;
             return points;
         };
