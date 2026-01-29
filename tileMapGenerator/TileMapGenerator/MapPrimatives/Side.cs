@@ -1,4 +1,4 @@
-namespace CellularRoomGrower;
+namespace MapPrimatives;
 
 using System.Numerics;
 using System.Collections.Concurrent;

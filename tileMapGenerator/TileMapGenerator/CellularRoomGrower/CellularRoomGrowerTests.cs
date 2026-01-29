@@ -1,14 +1,14 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using RoomAndEdges;
-using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
-using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<MapPrimatives.RoomVertex<System.Numerics.Vector2>, MapPrimatives.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = MapPrimatives.RoomVertex<System.Numerics.Vector2>;
+using Edge = MapPrimatives.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using NodeTreeGenerator;
 using System.Diagnostics;
 using QuikGraph.Graphviz;
+using MapPrimatives;
 
 [TestClass]
 public class CellularRoomGrowerTests

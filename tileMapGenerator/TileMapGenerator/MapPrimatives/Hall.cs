@@ -1,8 +1,7 @@
-namespace CellularRoomGrower;
-using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
-using Edge = RoomAndEdges.RoomEdge<System.Numerics.Vector2>;
+namespace MapPrimatives;
+using Vertex = RoomVertex<System.Numerics.Vector2>;
+using Edge = RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
-using RoomAndEdges;
 using TileMapGenerator;
 
 public class Hall : IDedThing

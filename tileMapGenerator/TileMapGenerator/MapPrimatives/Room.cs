@@ -1,11 +1,11 @@
-namespace CellularRoomGrower;
+namespace MapPrimatives;
 
-using RoomAndEdges;
-using Graph = QuikGraph.UndirectedGraph<RoomAndEdges.RoomVertex<System.Numerics.Vector2>, RoomAndEdges.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = RoomAndEdges.RoomVertex<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<RoomVertex<System.Numerics.Vector2>, RoomEdge<System.Numerics.Vector2>>;
+using Vertex = RoomVertex<System.Numerics.Vector2>;
 using System.Numerics;
 using TileMapGenerator;
 using System.Collections.Concurrent;
+using CellularRoomGrower;
 
 public class Room : IDedThing
 {
