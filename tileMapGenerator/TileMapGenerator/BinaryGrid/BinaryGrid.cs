@@ -1,15 +1,14 @@
 ﻿using System.Numerics;
 using System.Collections;
 using System.Drawing;
-using System.Dynamic;
 using TileMapGenerator;
-using System.Drawing.Imaging;
 using RoomAndEdges;
+using System.Collections.Concurrent;
 
 namespace BinaryGrid;
 
 // 1 indexed
-public class BinaryGrid : IDedThing
+public struct BinaryGrid : IDedThing
 {
     internal BinaryNumber _grid;
     private (uint, uint) _size;
@@ -20,16 +19,38 @@ public class BinaryGrid : IDedThing
 
     private uint _border_num = 1;
     private int _id;
-    private bool[] _queue;
+    private bool[] _queue_fill;
+    private bool[] _queue_empty;
+    private BinaryNumber _clear_state_empty;
+    private BinaryNumber _clear_state_bordered;
 
     public BinaryGrid(uint rows, uint columns, uint borders = 1)
+    {
+        InnerConstructor(rows, columns, borders);
+        _id = UIDGenerator.GetNextID(rows * columns);
+    }
+
+    public BinaryGrid(BinaryGrid old_grid)
+    {
+        InnerConstructor(old_grid._size.Item1, old_grid._size.Item2, old_grid._border_num);
+        _id = UIDGenerator.GetNextID(old_grid._size.Item1 * old_grid._size.Item2 + old_grid._grid.ToString());
+        _grid = new BinaryNumber(old_grid._grid);
+    }
+
+    public void Clear()
+    {
+        InnerConstructor(_size.Item1, _size.Item2, _border_num);
+    }
+
+    private void InnerConstructor(uint rows, uint columns, uint borders)
     {
         if (rows == 0 || columns == 0)
         {
             throw new IndexOutOfRangeException();
         }
-        _grid = new BinaryNumber((int) ((rows + 2)*(columns + 2)), 0);
-        _queue = new bool[(rows + 2)*(columns + 2)];
+        _grid = new BinaryNumber((int)((rows + 2) * (columns + 2)), 0);
+        _queue_fill = new bool[(rows + 2) * (columns + 2)];
+        _queue_empty = new bool[(rows + 2) * (columns + 2)];
 
         _size = (rows, columns);
         if (borders == 1)
@@ -39,8 +60,8 @@ public class BinaryGrid : IDedThing
         else if (borders != 0)
         {
             throw new ArgumentException("Value must be 0 or 1");
-        }        
-        _id = UIDGenerator.GetNextID(rows * columns);
+        }
+        
     }
 
     public void ChangeBorders(uint borders)
@@ -83,13 +104,49 @@ public class BinaryGrid : IDedThing
         {
             throw new IndexOutOfRangeException("Bad Cell Index");
         }
-        _queue[GetCellIndex(row, col)] = true;
+        _queue_fill[GetCellIndex(row, col)] = true;
+    }
+
+    // Runs after Fill
+    public void QueueEmptyCell(uint row, uint col)
+    {
+        if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
+        {
+            throw new IndexOutOfRangeException("Bad Cell Index");
+        }
+        _queue_empty[GetCellIndex(row, col)] = true;
     }
 
     public void RunQueue()
     {
-        _grid |= new BinaryNumber(new BitArray(_queue));
-        _queue = new bool[_queue.Length];
+        _grid |= new BinaryNumber(new BitArray(_queue_fill));
+        _queue_fill = new bool[_queue_fill.Length];
+        _grid &= (~new BinaryNumber(new BitArray(_queue_empty))) &_grid;
+        _queue_empty = new bool[_queue_empty.Length];
+    }
+
+    public void CombineGrids(IEnumerable<BinaryGrid> other_grids)
+    {
+        // if (other_grids.Any((g)=>g.ColSize != ColSize || g.RowSize != RowSize))
+        // {
+        //     throw new Exception("Grids must be same dimensions to combine");
+        // }
+        foreach (var o_grid in other_grids)
+        {
+            _grid |= o_grid._grid;
+        }
+
+        // _grid |= other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2);
+    }
+
+    public void DifferenceGrids(IEnumerable<BinaryGrid> other_grids)
+    {
+        // if (other_grids.Any((g)=>g.ColSize != ColSize || g.RowSize != RowSize))
+        // {
+        //     throw new Exception("Grids must be same dimensions to difference");
+        // }
+        _grid |= other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2);
+        _grid &= (~other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2)) &_grid;
     }
 
     private void SetCellInternal(uint row, uint col, uint val)
@@ -444,13 +501,18 @@ public class BinaryGrid : IDedThing
     }
 }
 
-internal class BinaryNumber
+internal struct BinaryNumber
     {
         private BitArray _backing_array;
         public BinaryNumber(ulong value)
         {
             _backing_array = ToBitArray(value);
         } 
+
+        public BinaryNumber(BinaryNumber old_number)
+        {
+            _backing_array = new BitArray(old_number._backing_array);
+        }
 
         public static BinaryNumber ZERO{get;} = new BinaryNumber(0);
         public static BinaryNumber ONE{get;} = new BinaryNumber(1);

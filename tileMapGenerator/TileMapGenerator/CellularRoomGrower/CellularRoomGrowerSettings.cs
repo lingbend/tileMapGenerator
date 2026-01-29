@@ -9,16 +9,20 @@ using System.Numerics;
 using static Math;
 using ConcurrentRandom;
 using System.Collections.Concurrent;
+using System.Drawing;
+using ILGPU;
+using ILGPU.Algorithms;
+using ILGPU.Runtime;
 
 public class CellularRoomGrowerSettings
 {
-    public Func<Graph, IEnumerable<Room>, Room?> Prioritizer{get; set;} = DefaultPrioritizer;
+    public Func<Graph, IEnumerable<Room>, IEnumerable<Room>> Prioritizer{get; set;} = DefaultPrioritizer;
     public Func<IEnumerable<Vector2>, Room, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
     internal List<Vector2> ValidDirections{get; set;} = DefaultValidDirections;
     public static List<Vector2> DefaultValidDirections{get;} = [Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX,
      -Vector2.UnitY];
 
-    public Func<Graph, Vertex, Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
+    public Func<Graph, Vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
     public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
 
     internal int MapArea{get; set;}
@@ -28,19 +32,28 @@ public class CellularRoomGrowerSettings
     public static Vector2 MaxRatio{get; set;} = new Vector2(2.5f, 1);
     public static Random Random{get;set;}
     private static ConcurrentRandom _direction_random;
+
+    private static ConcurrentRandom _prioritizer_random;
+    private static ConcurrentRandom _shaper_random;
     
-    public static Room? DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
+    public static IEnumerable<Room> DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
     {
         if (rooms.Count() == 0)
         {
-            return null;
+            return [];
+        }
+        if (_prioritizer_random == null)
+        {
+             _prioritizer_random = new ConcurrentRandom(Random.Next());
         }
         IEnumerable<Room> small_rooms = rooms.Where(r=>(r.GetSides().Max(v=>v.X)-r.GetSides().Min(v=>v.X))<3 && (r.GetSides().Max(v=>v.Y)-r.GetSides().Min(v=>v.Y))<3);
         if (small_rooms.Count() > 0)
         {
-            return Random.GetItems(small_rooms.OrderBy(r=>r.ID).ToArray(), 1).Single();
+            int index = _prioritizer_random.Next(small_rooms.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, small_rooms.Count());
+            return [small_rooms.OrderBy(r=>r.ID).ElementAt(index)];
         }
-        return Random.GetItems(rooms.OrderBy(r=>r.ID).ToArray(), 1).Single();
+        int room_index = _prioritizer_random.Next(rooms.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, rooms.Count());
+        return [rooms.OrderBy(r=>r.ID).ElementAt(room_index)];
     }
 
     public static Vector2 DefaultDirectionChooser(IEnumerable<Vector2> directions, Room room)
@@ -63,7 +76,7 @@ public class CellularRoomGrowerSettings
         {
             directions_copy = new(directions);
         }
-        int index = _direction_random.Next(room.ID + directions_copy.Aggregate((v1, v2)=>v1+v2).ToString() + (room.Locus.X % room.Locus.Y), 0, directions_copy.Count());
+        int index = _direction_random.Next(room.ID + room.Corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v=>v.ToString()).Aggregate((s1, s2)=>s1+s2), 0, directions_copy.Count());
         return directions.OrderBy(v=>v.X + (5*v.Y)).ToArray()[index];
     }
 
@@ -80,13 +93,13 @@ public class CellularRoomGrowerSettings
         return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
-    public static Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
     {
         return GetRectangleSides;
 
     }
 
-    private static IEnumerable<Vector2> GetRectangleSides(int length, Vector2 direction, Dictionary<Vector2, Vector2> corners)
+    private static IEnumerable<Vector2> GetRectangleSides(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners)
     {
 
         List<Vector2> shape = new();
@@ -109,7 +122,7 @@ public class CellularRoomGrowerSettings
 
     }
 
-    public static IEnumerable<Vector2> GetRectangleSide(int length, Vector2 direction, Dictionary<Vector2, Vector2> corners)
+    public static IEnumerable<Vector2> GetRectangleSide(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners)
     {
         List<Vector2> relevant_corners = new();
 
@@ -141,7 +154,7 @@ public class CellularRoomGrowerSettings
         return shape;
     }
 
-    public static Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> CircularShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CircularShapeChooser(Graph graph, Vertex vertex)
     {
         
         return (length, direction, corners)=>{
@@ -150,7 +163,7 @@ public class CellularRoomGrowerSettings
             };
     }
 
-    private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, Dictionary<Vector2, Vector2> corners, float resolution = 1)
+    private static IEnumerable<Vector2> GetCircleSides(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners, float resolution = 1)
     {
         Vector2 center = corners.Values.Aggregate((v1, v2) => v1 + v2) / 4.0f;
         Vector2 min = corners.Values.Aggregate((v1, v2) => Vector2.Min(v1, v2));
@@ -201,8 +214,12 @@ public class CellularRoomGrowerSettings
         return new_points.Keys;
     }
 
-    public static Func<int, Vector2, Dictionary<Vector2, Vector2>, IEnumerable<Vector2>> CaveShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CaveShapeChooser(Graph graph, Vertex vertex)
     {
+        if (_shaper_random is null)
+        {
+            _shaper_random = new ConcurrentRandom(Random.Next());
+        }
         return (length, direction, corners) =>
         {
             Vector2 center = corners.Values.Aggregate((v1, v2)=>v1+v2)/4.0f;
@@ -215,76 +232,123 @@ public class CellularRoomGrowerSettings
             {
                 return RoundPoints(GetCircleSides(length, direction, corners));
             }
-            HashSet<Vector2> circle_points = new(RoundPoints(GetCircleSides(length, direction, corners, 7)));
-            ConcurrentBag<Vector2> points = new(circle_points);
+            ConcurrentBag<Vector2> points  = new(RoundPoints(GetCircleSides(length, direction, corners, 9)));
+            ConcurrentRandom rand = new(_shaper_random.Next(center.ToString() + vertex.ID));
+            BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0u);
+            Vector2[,] test_points = new Vector2[1,1];
             
-            int i_max = 3;
+            int i_max = 1;
             for (int i = 0; i < i_max + 1; i++)
             {
                 if (i != i_max)
                 {
-                    string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2) + vertex.ID;
-                    ConcurrentRandom rand = new(Random.Next());
-                    Parallel.For(0, (int) (Pow(x_diameter * y_diameter, 1.5) / (((x_diameter + y_diameter) * 2.25) + (i * .3))), (j) =>
+                    string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2) + i;
+                    Parallel.For(0, (int) (.85 * Pow(x_diameter * y_diameter, 1.5) / (x_diameter + y_diameter)), (j) =>
                     {
                         string corner_hashable_copy = corner_hashable;
-                        points.Add(rand.NextVector2(corner_hashable_copy+j, (int) min.X, (int) max.X, (int) min.Y, (int) max.Y));
+                        points.Add(rand.NextVector2(corner_hashable_copy+j, (int) min.X, (int) max.X+1, (int) min.Y, (int) max.Y+1));
                     });
                 }
                 
-                BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0u);
+                test_grid.Clear();
                 Parallel.ForEach(points, point =>
                 {
                     test_grid.QueueFillCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1));
                 });
                 test_grid.RunQueue();
                 points.Clear();
-                Parallel.For(1u, (int) y_diameter + 1, row=>
+                test_points = new Vector2[(int) y_diameter + 1, (int) x_diameter + 1];
+                // Parallel.For(1u, (int) y_diameter + 1, row=>
+                for (uint row = 1u; row < (int) y_diameter + 1; row++)
                 {
-                    Parallel.For(1u, (int) x_diameter + 1, col=>
+                    // Parallel.For(1u, (int) x_diameter + 1, (col, state)=>
+                    for (uint col = 1u; col < (int) x_diameter + 1; col++)
                     {
-                        int num_neighbors = (int) test_grid.GetAllSetCellNeighbors((uint) row, (uint) col);
-                        int center_modifier = 0;
-                        Vector2 room_coord_vector = new Vector2(col+min.X - 1, row+min.Y - 1);
+                        Vector2 room_coord_vector = new Vector2(col + min.X - 1, row + min.Y - 1);
                         float distance_from_center = (room_coord_vector - center).Length();
+                        int num_neighbors = (int)test_grid.GetAllSetCellNeighbors((uint)row, (uint)col);
+                    
+                        num_neighbors += (int) Clamp(distance_from_center - 3.75, -1, 0);
+                        num_neighbors += (int) Clamp(distance_from_center - (.7 * diagonal_length) + 1, 0, 1);
+                        room_coord_vector *= Vector2.Clamp(new Vector2((int) ((.8 * diagonal_length) + 1 - distance_from_center)), Vector2.Zero, Vector2.One);
+                        room_coord_vector *= Vector2.Clamp(new Vector2((int) (distance_from_center - 1)), Vector2.Zero, Vector2.One);
+                        room_coord_vector *= Vector2.Clamp(new Vector2(num_neighbors + i - 3), Vector2.Zero, Vector2.One);
+                        test_points[row, col] = room_coord_vector;
 
-                        if (distance_from_center < 2)
-                        {
-                            center_modifier += -13;
-                        }
-                        if (distance_from_center < 3)
-                        {
-                            center_modifier = -1;
-                        }
-                        else if (i == 0 && distance_from_center <= diagonal_length * .8 && distance_from_center >= diagonal_length * .7 && (Abs((room_coord_vector - center).X) < .5 || Abs((room_coord_vector - center).Y) < 1))
-                        {
-                            center_modifier = -1;
-                        }
-                        if ((row == 1 || col == 1 || col == x_diameter || row == y_diameter) && num_neighbors <= 2)
-                        {
-                            center_modifier += 1;
-                        }
+                        
+                        // Vector2 room_coord_vector = new Vector2(col+min.X - 1, row+min.Y - 1);
+                        // float distance_from_center = (room_coord_vector - center).Length();
+                        
+                        // if (distance_from_center <= .8 * diagonal_length && distance_from_center >= 2)
+                        // {
+                  
+                        //     num_neighbors = (int) test_grid.GetAllSetCellNeighbors((uint) row, (uint) col);
 
-                        num_neighbors += center_modifier;
-
-                        if (circle_points.Contains(room_coord_vector) && num_neighbors >= 3)
-                        {
-                            points.Add(room_coord_vector);   
-                        }
-                        else if (num_neighbors >= 4)
-                        {
-                            points.Add(room_coord_vector);
-                        }
-                        else if(num_neighbors + i - center_modifier >= 7)
-                        {
-                            points.Add(room_coord_vector);
-                        }
-                    });
-                });
+                        //     switch (distance_from_center)
+                        //     {
+                        //         case < 2.75f:
+                        //             num_neighbors--;
+                        //             break;
+                        //         case float f when f >= .7 * diagonal_length:
+                        //             num_neighbors++;
+                        //             break;
+                        //     }
+                        //     if (num_neighbors + i >= 4)
+                        //     {
+                        //         test_points[row, col] = room_coord_vector;
+                        //         points.Add(room_coord_vector);
+                        //     }
+                        // }
+                    };
+                };
+                points = new(test_points.Cast<Vector2>().Distinct().Where(v=>v!=Vector2.Zero));
             }
+            HashSet<Vector2> temp_results = new();
+            foreach (var point in test_points)
+            {
+                temp_results.Add(point);
+            }
+            temp_results.Remove(new Vector2(0));
+            // return temp_results;
             return points;
         };
     }
+
+    public void GPUCellularAutomata(int y_diameter, int x_diameter, Vector2 min, Vector2 max, Vector2 center, float diagonal_length, BinaryGrid test_grid, int iteration)
+    {
+        Context context = Context.CreateDefaultAutoDebug();
+        Accelerator acc = context.GetPreferredDevice(false).CreateAccelerator(context);
+        Index2D[] index_array = new Index2D[y_diameter*x_diameter];
+        Parallel.For(1, y_diameter+1, row =>
+        {
+            Parallel.For(1, x_diameter+1, col =>
+            {
+                index_array[((row-1)*x_diameter)+(col - 1)] =  new Index2D(col, row);
+            });
+        });
+        
+        MemoryBuffer1D<Index2D, Stride1D.Dense> indexes = acc.Allocate1D(index_array);
+        // Action<Index1D, ArrayView2D<Vector2,Stride2D.General>> kernel = acc.LoadAutoGroupedStreamKernel<Index1D, ArrayView2D<Vector2,Stride2D.General>>(GPUCellularAutomataInner);
+
+        Vector2[,] points = new Vector2[y_diameter, x_diameter];
+        // GPUCellularAutomataInner(y_diameter, x_diameter, min, center, diagonal_length, test_grid, points, iteration);
+    }
+
+    // private static void GPUCellularAutomataInner(Index1D address_ref, Vector2 min, Vector2 center, float diagonal_length, BinaryGrid test_grid, Vector2[,] points, int i)
+    // {
+    //     // Index2D address = new Index2D().
+    //     Vector2 room_coord_vector = new Vector2(address.X + min.X - 1, address.Y + min.Y - 1);
+    //     float distance_from_center = (room_coord_vector - center).Length();
+    //     int num_neighbors = (int)test_grid.GetAllSetCellNeighbors((uint)address.Y, (uint)address.X);
+    
+    //     num_neighbors += (int) Clamp(distance_from_center - 3.75, -1, 0);
+    //     num_neighbors += (int) Clamp(distance_from_center - (.7 * diagonal_length) + 1, 0, 1);
+    //     room_coord_vector *= Vector2.Clamp(new Vector2((int) ((.8 * diagonal_length) + 1 - distance_from_center)), Vector2.Zero, Vector2.One);
+    //     room_coord_vector *= Vector2.Clamp(new Vector2((int) (distance_from_center - 1)), Vector2.Zero, Vector2.One);
+    //     room_coord_vector *= Vector2.Clamp(new Vector2(num_neighbors + i - 3), Vector2.Zero, Vector2.One);
+    //     points[address.Y, address.X] = room_coord_vector;
+        
+    // }
 
     public static IEnumerable<string> DefaultTagger(Graph graph, Vertex vertex)
     {
