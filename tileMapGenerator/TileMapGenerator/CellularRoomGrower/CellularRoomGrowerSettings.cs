@@ -1,15 +1,15 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<MapPrimatives.RoomVertex<System.Numerics.Vector2>, MapPrimatives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimatives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimatives.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using static Math;
 using ConcurrentRandom;
 using System.Collections.Concurrent;
 using Vector2Extensions;
-using MapPrimatives;
+using MapPrimitives;
 
 public class CellularRoomGrowerSettings
 {
@@ -143,7 +143,7 @@ public class CellularRoomGrowerSettings
         shape = new();
         foreach (Vector2 point in temp_shape)
         {
-            shape.AddLast(new Vector2((float)Math.Round((point + center).X, MidpointRounding.ToPositiveInfinity), (float)Math.Round((point + center).Y, MidpointRounding.ToPositiveInfinity)));
+            shape.AddLast((point+center).Ceil());
         }
         return shape;
     }
