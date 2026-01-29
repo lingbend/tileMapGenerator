@@ -1,9 +1,9 @@
 namespace NodeTreeGenerator;
 using System.Numerics;
-using MapPrimatives;
-using Graph = QuikGraph.UndirectedGraph<MapPrimatives.RoomVertex<System.Numerics.Vector2>, MapPrimatives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimatives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimatives.RoomEdge<System.Numerics.Vector2>;
+using MapPrimitives;
+using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
 using System.Collections.Concurrent;
 
 

@@ -1,13 +1,13 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<MapPrimatives.RoomVertex<System.Numerics.Vector2>, MapPrimatives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimatives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimatives.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using System.Collections.Concurrent;
 using Vector2Extensions;
-using MapPrimatives;
+using MapPrimitives;
 
 public class CellularRoomGrower
 {

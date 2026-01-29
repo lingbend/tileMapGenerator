@@ -1,14 +1,14 @@
 namespace CellularRoomGrower;
 
 using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<MapPrimatives.RoomVertex<System.Numerics.Vector2>, MapPrimatives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimatives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimatives.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using NodeTreeGenerator;
 using System.Diagnostics;
 using QuikGraph.Graphviz;
-using MapPrimatives;
+using MapPrimitives;
 
 [TestClass]
 public class CellularRoomGrowerTests
@@ -125,6 +125,7 @@ public class CellularRoomGrowerTests
         var room_grower = new CellularRoomGrower();
         var generator = new NodeTreeGenerator();
         generator.Settings.Random = new Random(123);
+        CellularRoomGrowerSettings.Random = new Random(123);
         generator.Settings.degree_percents = degree_weights;
         Graph graph = generator.GenerateNodeTree(30);
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);

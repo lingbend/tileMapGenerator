@@ -1,4 +1,4 @@
-namespace MapPrimatives;
+namespace MapPrimitives;
 
 using System.Numerics;
 using System.Collections.Concurrent;

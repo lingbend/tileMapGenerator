@@ -1,4 +1,4 @@
-namespace MapPrimatives;
+namespace MapPrimitives;
 using Vertex = RoomVertex<System.Numerics.Vector2>;
 using Edge = RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;

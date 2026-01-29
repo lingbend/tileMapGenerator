@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Drawing;
 using TileMapGenerator;
-using MapPrimatives;
+using MapPrimitives;
 using System.Collections.Concurrent;
 
 namespace BinaryGrid;

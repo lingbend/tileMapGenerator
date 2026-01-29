@@ -4,7 +4,7 @@ using QuikGraph;
 using BinaryGrid;
 using TileMapGenerator;
 
-namespace MapPrimatives;
+namespace MapPrimitives;
 
 public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>, IDedThing
 {
