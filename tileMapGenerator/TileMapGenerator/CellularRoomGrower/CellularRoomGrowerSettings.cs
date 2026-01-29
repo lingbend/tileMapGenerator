@@ -90,16 +90,11 @@ public class CellularRoomGrowerSettings
     {
         Vector2 range = Vector2Ext.SpanRange(corners) + Vector2.One;
         return range.X / range.Y;
-        // Vector2 max = Vector2Ext.MaxRange(corners);
-        // Vector2 min = Vector2Ext.MinRange(corners);
-
-        // return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
     public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
     {
         return GetRectangleSides;
-
     }
 
     private static IEnumerable<Vector2> GetRectangleSides(int length, Vector2 direction, ConcurrentDictionary<Vector2, Vector2> corners)
@@ -108,8 +103,6 @@ public class CellularRoomGrowerSettings
         List<Vector2> shape = new();
 
         Vector2 range = Vector2Ext.SpanRange(corners.Values);
-        // Vector2 max = Vector2Ext.MaxRange(corners.Values);
-        // Vector2 min = Vector2Ext.MinRange(corners.Values);
 
         foreach (Vector2 dir in new Vector2[] { Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN })
         {
@@ -117,12 +110,10 @@ public class CellularRoomGrowerSettings
             if (dir.X == 0)
             {
                 temp_length = (int) (range.X + 1.0);
-                // temp_length = (int) (max.X - min.X) + 1;
             }
             else
             {
                 temp_length = (int) (range.Y + 1.0);
-                // temp_length = (int) (max.Y - min.Y) + 1;
             }
             shape.AddRange(GetRectangleSide(temp_length, dir, corners));
         }
@@ -177,37 +168,32 @@ public class CellularRoomGrowerSettings
 
         Vector2 min = Vector2Ext.MinRange(corners.Values);
         Vector2 max = Vector2Ext.MaxRange(corners.Values);
-        Vector2 range = Vector2Ext.SpanRange(corners.Values);
-        if (!(range.X >= 5 && range.Y >= 6 || range.X >= 6 && range.Y >= 5))
-        // if (!(max.X - min.X >= 5 && max.Y - min.Y >= 6 || max.X - min.X >= 6 && max.Y - min.Y >= 5))
+        Vector2 diameters = Vector2Ext.SpanRange(corners.Values);
+        Vector2 radii = diameters * .5f;
+
+        if (!(diameters.X >= 5 && diameters.Y >= 6 || diameters.X >= 6 && diameters.Y >= 5))
         {
             return GetRectangleSides(length, direction, corners);
         }
 
-        double x_diameter = range.X;
-        double y_diameter = range.Y;
-        // double x_diameter = (max.X - min.X);
-        // double y_diameter = (max.Y - min.Y);
-        double num_points = (Clamp(Max(Abs(1-CalculateSideRatio(corners.Values)), Abs(1-(1/CalculateSideRatio(corners.Values)))), 1, 5) * 2 * ((2 * x_diameter) + (2 * y_diameter))) / resolution;
-        double x_radius = .5 * x_diameter;
-        double y_radius = .5 * y_diameter;
+        double num_points = (Clamp(Max(Abs(1-CalculateSideRatio(corners.Values)), Abs(1-(1/CalculateSideRatio(corners.Values)))), 1, 5) * 2 * ((2 * diameters.X) + (2 * diameters.Y))) / resolution;
 
         ConcurrentBag<Vector2> points = new();
 
         Parallel.For(0, (int) (num_points + 1), i=>
         {
-            double num = ((i / num_points) * x_diameter) + min.X;
+            double num = ((i / num_points) * diameters.X) + min.X;
             double offset = num - center.X;
-            double parametric_term = y_radius * Sqrt(1 - (Pow(offset, 2) / Pow(x_radius, 2)));
+            double parametric_term = radii.Y * Sqrt(1 - (Pow(offset, 2) / Pow(radii.X, 2)));
             points.Add(new Vector2((float)num, center.Y + (float)(parametric_term)));
             points.Add(new Vector2((float)num, center.Y + (float)(-parametric_term)));            
         });
 
         Parallel.For(0, (int) (num_points + 1), i=>
         {
-            double num = ((i / num_points) * y_diameter) + min.Y;
+            double num = ((i / num_points) * diameters.Y) + min.Y;
             double offset = num - center.Y;
-            double parametric_term = x_radius * Sqrt(1 - (Pow(offset, 2) / Pow(y_radius, 2)));
+            double parametric_term = radii.X * Sqrt(1 - (Pow(offset, 2) / Pow(radii.Y, 2)));
             points.Add(new Vector2(center.X + (float)(parametric_term), (float)num));
             points.Add(new Vector2(center.X + (float)(-parametric_term), (float)num));          
         });
@@ -222,7 +208,7 @@ public class CellularRoomGrowerSettings
         // foreach (var point in temp_points)
         Parallel.ForEach(points, point=>
         {
-            new_points.TryAdd(new Vector2((float)Round(point.X), (float)Round(point.Y)), true);
+            new_points.TryAdd(point.Round(), true);
         });
         return new_points.Keys;
     }
@@ -238,16 +224,16 @@ public class CellularRoomGrowerSettings
             Vector2 center = corners.Values.Aggregate((v1, v2)=>v1+v2)/4.0f;
             Vector2 min = Vector2Ext.MinRange(corners.Values);
             Vector2 max = Vector2Ext.MaxRange(corners.Values);
-            double x_diameter = (max.X - min.X);
-            double y_diameter = (max.Y - min.Y);
+            Vector2 diameters = Vector2Ext.SpanRange(corners.Values);
+
             float diagonal_length = (corners.Values.First() - center).Length();
-            if (!(x_diameter >= 5 && y_diameter >= 6 || x_diameter >= 6 && y_diameter >= 5))
+            if (!(diameters.X >= 5 && diameters.Y >= 6 || diameters.X >= 6 && diameters.Y >= 5))
             {
                 return RoundPoints(GetCircleSides(length, direction, corners));
             }
             ConcurrentBag<Vector2> points  = new(RoundPoints(GetCircleSides(length, direction, corners, 9)));
             ConcurrentRandom rand = new(_shaper_random.Next(center.ToString() + vertex.ID));
-            BinaryGrid test_grid = new BinaryGrid((uint) (y_diameter + 1), (uint) (x_diameter + 1), 0u);
+            BinaryGrid test_grid = new BinaryGrid((uint) (diameters.Y + 1), (uint) (diameters.X + 1), 0u);
             Vector2[,] test_points = new Vector2[1,1];
             
             int i_max = 1;
@@ -256,7 +242,7 @@ public class CellularRoomGrowerSettings
                 if (i != i_max)
                 {
                     string corner_hashable = corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v => v.ToString()).Aggregate((v1, v2)=>v1+v2) + i;
-                    Parallel.For(0, (int) (.85 * Pow(x_diameter * y_diameter, 1.5) / (x_diameter + y_diameter)), (j) =>
+                    Parallel.For(0, (int) (.85 * Pow(diameters.X * diameters.Y, 1.5) / (diameters.X + diameters.Y)), (j) =>
                     {
                         string corner_hashable_copy = corner_hashable;
                         points.Add(rand.NextVector2(corner_hashable_copy+j, (int) min.X, (int) max.X+1, (int) min.Y, (int) max.Y+1));
@@ -270,12 +256,12 @@ public class CellularRoomGrowerSettings
                 });
                 test_grid.RunQueue();
                 points.Clear();
-                test_points = new Vector2[(int) y_diameter + 1, (int) x_diameter + 1];
+                test_points = new Vector2[(int) diameters.Y + 1, (int) diameters.X + 1];
                 // Parallel.For(1u, (int) y_diameter + 1, row=>
-                for (uint row = 1u; row < (int) y_diameter + 1; row++)
+                for (uint row = 1u; row < (int) diameters.Y + 1; row++)
                 {
                     // Parallel.For(1u, (int) x_diameter + 1, (col, state)=>
-                    for (uint col = 1u; col < (int) x_diameter + 1; col++)
+                    for (uint col = 1u; col < (int) diameters.X + 1; col++)
                     {
                         Vector2 room_coord_vector = new Vector2(col + min.X - 1, row + min.Y - 1);
                         float distance_from_center = (room_coord_vector - center).Length();

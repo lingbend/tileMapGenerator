@@ -24,6 +24,21 @@ public static class Vector2Ext
         return MaxRange(vectors) - MinRange(vectors);
     }
 
+    public static Vector2 Round(this Vector2 vector)
+    {
+        return new Vector2((float) Math.Round(vector.X), (float) Math.Round(vector.Y));
+    }
+
+    public static Vector2 Ceil(this Vector2 vector)
+    {
+        return new Vector2((float) Math.Ceiling(vector.X), (float) Math.Ceiling(vector.Y));
+    }
+
+    public static Vector2 Floor(this Vector2 vector)
+    {
+        return new Vector2((float) Math.Floor(vector.X), (float) Math.Floor(vector.Y));
+    }
+
     public static Vector2 UP = new Vector2(0, 1);
     public static Vector2 DOWN = new Vector2(0, -1);
     public static Vector2 LEFT = new Vector2(-1, 0);

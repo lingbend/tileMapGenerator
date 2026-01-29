@@ -69,12 +69,6 @@ public class CellularRoomGrower
             {
                 return true;
             }
-            // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-            // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
-            // if (max.X - min.X < 2 || max.Y - min.Y < 2)
-            // {
-            //     return true;
-            // }
         }
         return false;
     }
@@ -287,11 +281,6 @@ public class CellularRoomGrower
     {
         Vector2 range = Vector2Ext.SpanRange(room.Corners.Values) + Vector2.One;
         return range.X / range.Y;
-
-        // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-        // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
-
-        // return (max.X-min.X+1) / (max.Y - min.Y+1); 
     }
 
     // thread safe
@@ -316,10 +305,7 @@ public class CellularRoomGrower
 
         Vector2 chosen_direction;
         Vector2 range = Vector2Ext.SpanRange(room.Corners.Values);
-        // Vector2 max = Vector2Ext.MaxRange(room.Corners.Values);
-        // Vector2 min = Vector2Ext.MinRange(room.Corners.Values);
         if (range.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
-        // if (max.X - min.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
         {
             List<Vector2> payload = new();
             if (open_directions.Contains(Vector2Ext.RIGHT))
@@ -333,7 +319,6 @@ public class CellularRoomGrower
             chosen_direction = direction_chooser(payload, room);
         }
         else if (range.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
-        // else if (max.Y - min.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
         {
             List<Vector2> payload = new();
             if (open_directions.Contains(Vector2Ext.UP))
