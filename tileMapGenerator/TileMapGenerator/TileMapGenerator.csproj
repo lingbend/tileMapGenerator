@@ -6,12 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="GoRogue" Version="2.6.4" />
     <PackageReference Include="Graphviz" Version="2.38.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="ILGPU" Version="1.5.3" />
     <PackageReference Include="ILGPU.Algorithms" Version="1.5.3" />
+    <PackageReference Include="RogueSharp" Version="4.2.0" />
     <PackageReference Include="System.IO.Hashing" Version="9.0.11" />
     <PackageReference Include="MSTest" Version="4.0.2" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />

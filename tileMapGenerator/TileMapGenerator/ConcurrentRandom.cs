@@ -6,7 +6,7 @@ using System.Numerics;
 using System.ComponentModel;
 using Microsoft.VisualBasic;
 
-public class ConcurrentRandom
+public class ConcurrentRandom : Troschuetz.Random.IGenerator
 {
 
     private int _seed_1 = 0;
@@ -14,11 +14,14 @@ public class ConcurrentRandom
     private int _seed_2 = 0;
     private const int MAX_INT = 0b1111111111111111111111111111111;
 
+    public object global_state;
+
     public ConcurrentRandom(int seed)
     {
         _seed_1 = seed;
         _seed_2 = new Random(seed).Next();
         _seed_3 = new Random(_seed_2).Next();
+        global_state = _seed_1 + _seed_2 + _seed_3;
     }
 
     public int Next(object unique_state, int min = 0, int max = MAX_INT)
@@ -104,7 +107,92 @@ public class ConcurrentRandom
     {
         return original;
     }
-    
+
+
+    // For GoRogue. Implement as needed.
+    public bool CanReset => throw new NotImplementedException();
+
+    public uint Seed => throw new NotImplementedException();
+
+    public int Next()
+    {
+        throw new NotImplementedException();
+    }
+
+    public int Next(int maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int Next(int minValue, int maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool NextBoolean()
+    {
+        return Next(global_state) % 2 == 1;
+    }
+
+    public void NextBytes(byte[] buffer)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double NextDouble()
+    {
+        throw new NotImplementedException();
+    }
+
+    public double NextDouble(double maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public double NextDouble(double minValue, double maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int NextInclusiveMaxValue()
+    {
+        throw new NotImplementedException();
+    }
+
+    public uint NextUInt()
+    {
+        throw new NotImplementedException();
+    }
+
+    public uint NextUInt(uint maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public uint NextUInt(uint minValue, uint maxValue)
+    {
+        throw new NotImplementedException();
+    }
+
+    public uint NextUIntExclusiveMaxValue()
+    {
+        throw new NotImplementedException();
+    }
+
+    public uint NextUIntInclusiveMaxValue()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Reset()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Reset(uint seed)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 
