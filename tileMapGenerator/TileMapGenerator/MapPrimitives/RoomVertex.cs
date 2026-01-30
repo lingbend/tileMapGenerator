@@ -15,7 +15,6 @@ public class RoomVertex<TWeight> : IDed
     private Dictionary<string, object?> _data = new Dictionary<string, object?>();
     public int Degree{get{return Edges.Count;}}
     public TWeight? Weight {get; internal set;}
-
     public RoomVertex(TWeight weight)
     {
         Weight = weight;
