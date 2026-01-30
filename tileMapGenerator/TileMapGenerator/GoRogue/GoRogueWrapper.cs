@@ -8,6 +8,8 @@ using GoRogue.MapViews;
 using GoRogue.Random;
 using Vector2Extensions;
 using ConcurrentRandom;
+using GoRogue.Pathing;
+using BinaryGrid;
 
 public static class GoRogueWrapper
 {
@@ -32,6 +34,43 @@ public static class GoRogueWrapper
         }
         
         return view.points;
+    }
+
+    public static bool IsConnected(Vector2 start, Vector2 end, BinaryGrid grid)
+    {
+        float distance = Vector2Ext.SpanRange([start, end]).Length();
+        BinaryMapViewer view = new BinaryMapViewer(grid);
+        var fast_astar = new FastAStar(view, Distance.MANHATTAN);
+        return fast_astar.ShortestPath((int) start.X, (int) start.Y, (int) end.X, (int) end.Y) is not null;
+    }
+
+    internal class BinaryMapViewer : ISettableMapView<bool>
+    {
+
+        public int Height{get;}
+        public int Width {get;}
+        public HashSet<Vector2> points = new();
+        private BinaryGrid Grid;
+
+        public BinaryMapViewer(BinaryGrid grid)
+        {
+            Height = (int) grid.RowSize;
+            Width = (int) grid.ColSize;
+            Grid = new BinaryGrid(grid);
+        }
+
+        public bool this[Coord pos] { 
+            get => Grid.GetCell((uint) pos.X, (uint) pos.Y) == 0;
+            set => Grid.SetCell((uint) pos.X, (uint) pos.Y, value ? 0u : 1u); 
+        }
+        public bool this[int index1D] { 
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException(); 
+        }
+        public bool this[int x, int y] { 
+            get => Grid.GetCell((uint) x, (uint) y) == 0;
+            set => Grid.SetCell((uint) x, (uint) y, value ? 0u : 1u); 
+        }  
     }
 
     internal class SimpleMapViewer : ISettableMapView<bool>
