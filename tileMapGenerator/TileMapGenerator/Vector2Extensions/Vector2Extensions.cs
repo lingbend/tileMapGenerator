@@ -34,6 +34,30 @@ public static class Vector2Ext
         return new Vector2((float) Math.Floor(vector.X), (float) Math.Floor(vector.Y));
     }
 
+    public static IEnumerable<Vector2> GetNeighbors(this Vector2 vector)
+    {
+        return [
+            vector + UP,
+            vector + DOWN,
+            vector + LEFT,
+            vector + RIGHT,
+            vector + UPLEFT,
+            vector + UPRIGHT,
+            vector + DOWNLEFT,
+            vector + DOWNRIGHT
+        ];
+    }
+
+    public static IEnumerable<Vector2> GetCartesianNeighbors(this Vector2 vector)
+    {
+        return [
+            vector + UP,
+            vector + DOWN,
+            vector + LEFT,
+            vector + RIGHT
+        ];
+    }
+
     public static Vector2 UP = new Vector2(0, 1);
     public static Vector2 DOWN = new Vector2(0, -1);
     public static Vector2 LEFT = new Vector2(-1, 0);
