@@ -6,7 +6,7 @@ using TileMapGenerator;
 
 namespace TileMapGenerator;
 
-internal interface IDedThing
+internal interface IDed
 {
     int ID{get; internal set;}
 }

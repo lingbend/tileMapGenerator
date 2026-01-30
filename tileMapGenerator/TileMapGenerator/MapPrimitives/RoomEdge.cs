@@ -6,7 +6,7 @@ using TileMapGenerator;
 
 namespace MapPrimitives;
 
-public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>, IDedThing
+public class RoomEdge<TWeight> : IEdge<RoomVertex<TWeight>>, IDed
 {
     public int _edge_id;
 

@@ -6,7 +6,7 @@ using TileMapGenerator;
 
 namespace MapPrimitives;
 
-public class RoomVertex<TWeight> : IDedThing
+public class RoomVertex<TWeight> : IDed
 {
     private int _vertex_id;
 

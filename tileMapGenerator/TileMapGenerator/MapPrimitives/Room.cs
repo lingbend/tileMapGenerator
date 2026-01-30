@@ -7,7 +7,7 @@ using TileMapGenerator;
 using System.Collections.Concurrent;
 using CellularRoomGrower;
 
-public class Room : IDedThing
+public class Room : IDed
 {
     public Vector2 Locus {get; private set;}
     public Vertex Vertex {get; private set;}
@@ -110,5 +110,10 @@ public class Room : IDedThing
         }   
         growth_cache.AddOrUpdate(growing_side, (_)=>grown_sides_copy, (_ ,_)=>grown_sides_copy);
         return (grown_sides_copy, temp_corners);
+    }
+
+    public IEnumerable<Vector2> GetInsides()
+    {
+        
     }
 }

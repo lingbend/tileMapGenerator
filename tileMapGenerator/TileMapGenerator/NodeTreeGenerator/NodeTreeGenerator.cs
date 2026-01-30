@@ -761,7 +761,7 @@ public class NodeTreeGenerator
         return item;
     }
 
-    private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3) where T : IDedThing
+    private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3) where T : IDed
     {
         List<T> collection_copy = new List<T>(coll.OrderBy(v=>v.ID));
         List<T> choices = new List<T>();
@@ -790,7 +790,7 @@ public class NodeTreeGenerator
         process.WaitForExit();
     }
 
-    internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : IDedThing
+    internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : IDed
     {
 
         internal OrderedHashSet (IEnumerable<T> collection) : base(collection){}

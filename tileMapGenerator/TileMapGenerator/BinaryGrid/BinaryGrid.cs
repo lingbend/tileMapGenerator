@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 namespace BinaryGrid;
 
 // 1 indexed
-public struct BinaryGrid : IDedThing
+public struct BinaryGrid : IDed
 {
     internal BinaryNumber _grid;
     private (uint, uint) _size;

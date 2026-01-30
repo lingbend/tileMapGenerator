@@ -4,19 +4,11 @@ using Edge = RoomEdge<System.Numerics.Vector2>;
 using System.Numerics;
 using TileMapGenerator;
 
-public class Hall : IDedThing
+public class Hall : IDed
 {
     public int ID{get; set;}
     public Vector2 Locus{get;}
-    public Vertex? Vertex{get;} = null;
-    public Edge? Edge{get;} = null;
-
-    internal Hall(Vertex vertex, Vector2 center)
-    {
-        ID = UIDGenerator.GetNextID("hall" + vertex.ID + center.X + center.Y);
-        Vertex = vertex;
-        Locus = center;
-    }
+    public Edge Edge{get;}
 
     internal Hall(Edge edge, Vector2 center)
     {
