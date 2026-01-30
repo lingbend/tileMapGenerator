@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Numerics;
 
 namespace Vector2Extensions;
@@ -56,6 +57,24 @@ public static class Vector2Ext
             vector + LEFT,
             vector + RIGHT
         ];
+    }
+
+    public static IEnumerable<Vector2> Enumerate(Vector2 to_exclusive)
+    {
+        return Enumerate(Vector2.Zero, to_exclusive);
+    }
+
+    public static IEnumerable<Vector2> Enumerate(Vector2 from_inclusive, Vector2 to_exclusive, float step = 1.0f)
+    {
+        HashSet<Vector2> vectors = new();
+        for (float x = from_inclusive.X; x < to_exclusive.X; x += step)
+        {
+            for (float y = from_inclusive.Y; y < to_exclusive.Y; y += step)
+            {
+                vectors.Add(new Vector2(x, y));
+            }
+        }
+        return vectors;
     }
 
     public static Vector2 UP = new Vector2(0, 1);
