@@ -98,6 +98,11 @@ public struct BinaryGrid : IDed
         SetCellInternal(row, col, val);
     }
 
+    public void SetCell(Vector2 coords, uint val)
+    {
+        SetCell((uint) coords.Y, (uint) coords.X, val);
+    }
+
     public void QueueFillCell(uint row, uint col)
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
@@ -180,6 +185,11 @@ public struct BinaryGrid : IDed
         }
 
         return GetCellInternal(row, col);
+    }
+
+    public uint GetCell(Vector2 coords)
+    {
+        return GetCell((uint) coords.Y, (uint) coords.X);
     }
 
     private uint GetCellInternal(uint row, uint col)
