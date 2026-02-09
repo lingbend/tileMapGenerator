@@ -11,6 +11,8 @@ public class Hall : IDed
     public Vector2 SourceLocus{get;}
     public Vector2 TargetLocus{get;}
     public Edge Edge{get;}
+    public HashSet<Vector2> InsidePoints{get; set;} = new();
+    public HashSet<Vector2> WallPoints{get; set;} = new();
 
     internal Hall(Edge edge, Vector2 center, Vector2 source_locus, Vector2 target_locus)
     {

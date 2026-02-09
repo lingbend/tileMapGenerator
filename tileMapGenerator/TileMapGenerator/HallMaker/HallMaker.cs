@@ -41,22 +41,24 @@ public class HallMaker
     private BinaryGrid AddHallAlone(in BinaryGrid grid, in IEnumerable<Vector2> room_points, in Hall hall)
     {
         BinaryGrid temp_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
-        temp_grid = AddHallInner(room_points, hall, temp_grid);
+        (temp_grid, _, _) = AddHallInner(room_points, hall, temp_grid);
 
         return temp_grid;
     }
 
     private BinaryGrid AddHallToAll(BinaryGrid grid, IEnumerable<Vector2> room_points, Hall hall)
     {
-        grid = AddHallInner(room_points, hall, grid);
+        (grid, var inner_points, var wall_points) = AddHallInner(room_points, hall, grid);
+        hall.InsidePoints = new(inner_points);
+        hall.WallPoints = new(wall_points);
 
         return grid;
     }
 
-    private BinaryGrid AddHallInner(IEnumerable<Vector2> room_points, Hall hall, BinaryGrid grid)
+    private (BinaryGrid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Hall hall, BinaryGrid grid)
     {
         var (inner_points, wall_points) = GenerateHall(hall, room_points);
-        foreach (var wall_point in wall_points)
+        foreach (var wall_point in wall_points.Except(room_points))
         {
             if (InBounds(wall_point, grid))
             {
@@ -70,7 +72,7 @@ public class HallMaker
         }
         
 
-        return grid;
+        return (grid, inner_points, wall_points);
     }
 
     private IEnumerable<Vector2> GetRoomInnerPoints(IEnumerable<Room> rooms)
@@ -88,7 +90,7 @@ public class HallMaker
         HashSet<Vector2> inner_points = new(GenerateInsideHall(hall.Locus, hall.SourceLocus));
         inner_points.UnionWith(GenerateInsideHall(hall.Locus, hall.TargetLocus));
         var wall_points = GenerateHallWalls(inner_points);
-        return (inner_points, wall_points.Except(room_inner));
+        return (inner_points, wall_points);
     }
 
     private IEnumerable<Vector2> GenerateInsideHall(Vector2 source, Vector2 target)
