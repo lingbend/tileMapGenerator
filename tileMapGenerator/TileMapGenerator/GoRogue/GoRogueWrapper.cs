@@ -36,12 +36,11 @@ public static class GoRogueWrapper
         return view.points;
     }
 
-    public static bool IsConnected(Vector2 start, Vector2 end, BinaryGrid grid)
+    public static bool IsConnected(Vector2 start, Vector2 end, BinaryGrid grid, Vector2? locus = null)
     {
-        float distance = Vector2Ext.SpanRange([start, end]).Length();
-        BinaryMapViewer view = new BinaryMapViewer(grid);
+        BinaryMapViewer view = new BinaryMapViewer(grid, locus);
         var fast_astar = new FastAStar(view, Distance.MANHATTAN);
-        return fast_astar.ShortestPath((int) start.X, (int) start.Y, (int) end.X, (int) end.Y) is not null;
+        return fast_astar.ShortestPath((int) start.X, (int) start.Y, (int) end.X, (int) end.Y, false) != null;
     }
 
     internal class BinaryMapViewer : ISettableMapView<bool>
@@ -51,26 +50,47 @@ public static class GoRogueWrapper
         public int Width {get;}
         public HashSet<Vector2> points = new();
         private BinaryGrid Grid;
+        private Vector2 Locus;
 
-        public BinaryMapViewer(BinaryGrid grid)
+        public BinaryMapViewer(BinaryGrid grid, Vector2? locus = null)
         {
             Height = (int) grid.RowSize;
             Width = (int) grid.ColSize;
             Grid = new BinaryGrid(grid);
+            if (locus is not null)
+            {
+                Locus = (Vector2) locus;
+            }
+            else
+            {
+                Locus = Vector2.Zero;
+            }
+            
         }
 
         public bool this[Coord pos] { 
-            get => Grid.GetCell((uint) pos.X, (uint) pos.Y) == 0;
-            set => Grid.SetCell((uint) pos.X, (uint) pos.Y, value ? 0u : 1u); 
+            get => InBounds(pos.X, pos.Y) ? Grid.GetCell((uint) pos.Y, (uint) pos.X) == 0 || (pos.X == Locus.X && pos.Y == Locus.Y) : false;
+            set => Grid.SetCell((uint) pos.Y, (uint) pos.X, (value && InBounds(pos.X, pos.Y)) ? 0u : 1u); 
         }
         public bool this[int index1D] { 
             get => throw new NotImplementedException();
             set => throw new NotImplementedException(); 
         }
         public bool this[int x, int y] { 
-            get => Grid.GetCell((uint) x, (uint) y) == 0;
-            set => Grid.SetCell((uint) x, (uint) y, value ? 0u : 1u); 
+            get => InBounds(x, y) ? Grid.GetCell((uint) y, (uint) x) == 0 || (x == Locus.X && y == Locus.Y): false;
+            set => Grid.SetCell((uint) y, (uint) x, (value && InBounds(x, y)) ? 0u : 1u); 
         }  
+        private bool InBounds(float x, float y)
+        {
+            if (x <= 0 || y <= 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 
     internal class SimpleMapViewer : ISettableMapView<bool>

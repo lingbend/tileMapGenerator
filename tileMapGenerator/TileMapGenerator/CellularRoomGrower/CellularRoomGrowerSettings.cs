@@ -19,7 +19,7 @@ public class CellularRoomGrowerSettings
     public static List<Vector2> DefaultValidDirections{get;} = [Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT,
      Vector2Ext.DOWN];
 
-    public Func<Graph, Vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
+    public Func<Graph, Vertex, Vector2, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
     public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
 
     internal int MapArea{get; set;}
@@ -88,7 +88,7 @@ public class CellularRoomGrowerSettings
         return range.X / range.Y;
     }
 
-    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> DefaultShapeChooser(Graph graph, Vertex vertex, Vector2 locus)
     {
         return GetRectangleSides;
     }
@@ -148,7 +148,7 @@ public class CellularRoomGrowerSettings
         return shape;
     }
 
-    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CircularShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CircularShapeChooser(Graph graph, Vertex vertex, Vector2 locus)
     {
         return (length, direction, corners)=>{
             var circle_points = GetCircleSides(length, direction, corners);
@@ -207,7 +207,7 @@ public class CellularRoomGrowerSettings
         return new_points.Keys;
     }
 
-    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CaveShapeChooser(Graph graph, Vertex vertex)
+    public static Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> CaveShapeChooser(Graph graph, Vertex vertex, Vector2 locus)
     {
         if (_shaper_random is null)
         {
@@ -277,7 +277,9 @@ public class CellularRoomGrowerSettings
                     };
                 };
             }
-            return points;
+            var neighbors = locus.GetNeighbors();
+            // return points;
+            return points.Where(v=>v != locus && !neighbors.Contains(v));
         };
     }
 

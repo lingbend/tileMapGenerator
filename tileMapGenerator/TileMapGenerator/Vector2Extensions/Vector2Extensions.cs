@@ -77,6 +77,11 @@ public static class Vector2Ext
         return vectors;
     }
 
+    public static Vector2 Reverse(this Vector2 vector)
+    {
+        return new Vector2(vector.Y, vector.X);
+    }
+
     public static Vector2 UP = new Vector2(0, 1);
     public static Vector2 DOWN = new Vector2(0, -1);
     public static Vector2 LEFT = new Vector2(-1, 0);

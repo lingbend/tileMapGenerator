@@ -100,7 +100,7 @@ public struct BinaryGrid : IDed
 
     public void SetCell(Vector2 coords, uint val)
     {
-        SetCell((uint) coords.Y, (uint) coords.X, val);
+        SetCell((uint) coords.X, (uint) coords.Y, val);
     }
 
     public void QueueFillCell(uint row, uint col)
@@ -189,7 +189,7 @@ public struct BinaryGrid : IDed
 
     public uint GetCell(Vector2 coords)
     {
-        return GetCell((uint) coords.Y, (uint) coords.X);
+        return GetCell((uint) coords.X, (uint) coords.Y);
     }
 
     private uint GetCellInternal(uint row, uint col)
@@ -489,12 +489,13 @@ public struct BinaryGrid : IDed
         return ID;
     }
 
-    public void ToBMP(string name = "")
+    public void ToBMP(string name = "", string color = "0xFF000000")
     {
         using Bitmap image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
         image.SetResolution(300, 300);
         using var graphic = Graphics.FromImage(image);
-        using var brush = new SolidBrush(Color.Black);
+        using var brush = new SolidBrush(Color.FromArgb(Convert.ToInt32(color, 16)));
+        // using var brush = new SolidBrush(Color.Black);
 
         graphic.Clear(Color.White);
         for(int row = 1; row <= _size.Item1; row++)

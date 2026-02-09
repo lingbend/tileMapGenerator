@@ -88,7 +88,7 @@ public class CellularRoomGrowerTests
         generator.Settings.degree_percents = degree_weights;
         var graph = generator.GenerateNodeTree(1);
         var vertex = new Vertex(new Vector2(10, 10));
-        var room = new Room(vertex, CellularRoomGrowerSettings.DefaultShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
+        var room = new Room(vertex, CellularRoomGrowerSettings.DefaultShapeChooser(graph, vertex, new Vector2(10, 10)), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
         BinaryGrid grid = new BinaryGrid(100, 100);
         new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(1, 0));
         grid.ToBMP("CellularRoomGrowerGrowRoom_CorrectGrowth1Room_ValidGrow1");
@@ -175,7 +175,7 @@ public class CellularRoomGrowerTests
         var (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
         Assert.HasCount(25, rooms, "Bad Direction Chooser case");
         room_grower.Settings.DirectionChooser = CellularRoomGrowerSettings.DefaultDirectionChooser;
-        room_grower.Settings.ShapeChooser = (_, _)=>(_, _, _)=>[];
+        room_grower.Settings.ShapeChooser = (_, _, _)=>(_, _, _)=>[];
         (graph, _) = generator.GenerateFilledGraph(5, 5);
         (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 250);
         Assert.HasCount(25, rooms, "Bad Shape Chooser case");
@@ -219,15 +219,15 @@ public class CellularRoomGrowerTests
     {
         var room_grower = new CellularRoomGrower();
         room_grower.Settings.MapArea = 300 * 5;
-        List<Room> rooms = new(){new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex()), room_grower.Settings.ValidDirections, Vector2.One)};
+        List<Room> rooms = new(){new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(), Vector2.Zero), room_grower.Settings.ValidDirections, Vector2.One)};
         for (int i = 0; i < 5; i++)
         {
-            rooms.Add(new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex()), room_grower.Settings.ValidDirections, new Vector2((i+2)*5, (i+2)*5)));
+            rooms.Add(new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(), Vector2.Zero), room_grower.Settings.ValidDirections, new Vector2((i+2)*5, (i+2)*5)));
         }
         List<Hall> halls = new();
         for (int i = 0; i < rooms.Count -1; i++)
         {
-            halls.Add(new Hall(new Edge(rooms[i].Vertex, rooms[i+1].Vertex), ((rooms[i].Locus + rooms[i+1].Locus)/2)));
+            halls.Add(new Hall(new Edge(rooms[i].Vertex, rooms[i+1].Vertex), ((rooms[i].Locus + rooms[i+1].Locus)/2), rooms[i].Vertex.Weight, rooms[i+1].Vertex.Weight));
         }
 
         var grid = room_grower.BuildGrid(rooms, halls);
@@ -252,7 +252,7 @@ public class CellularRoomGrowerTests
 
         BinaryGrid grid = new BinaryGrid(100, 100);
         var vertex = new Vertex(new Vector2(10, 10));
-        var room = new Room(vertex, CellularRoomGrowerSettings.CircularShapeChooser(graph, vertex), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
+        var room = new Room(vertex, CellularRoomGrowerSettings.CircularShapeChooser(graph, vertex, new Vector2(10, 10)), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
         // (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(-1, 0));
         // grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularShaper_Valid1");
         // (grid, room) = new CellularRoomGrower().GrowRoom(grid, room, (_, _)=>new Vector2(0, 1));

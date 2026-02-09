@@ -93,9 +93,11 @@ public class CellularRoomGrower
                 tags = new(Settings.Tagger(graph, vertex));
             }
 
-            var shape = Settings.ShapeChooser(graph, vertex);
-            Room new_room = new Room(vertex, shape, Settings.ValidDirections, AdjustLocus(vertex.Weight, graph.VertexCount), tags);
+            Vector2 locus = AdjustLocus(vertex.Weight, graph.VertexCount);
+            var shape = Settings.ShapeChooser(graph, vertex, locus);
+            Room new_room = new Room(vertex, shape, Settings.ValidDirections, locus, tags);
             rooms.Add(new_room);
+            vertex["room"] = new_room;
         }
         return rooms;
     }
@@ -106,7 +108,10 @@ public class CellularRoomGrower
         List<Hall> halls = new(graph.EdgeCount);
         foreach (Edge edge in graph.Edges)
         {
-            halls.Add(new Hall(edge, AdjustLocus((edge.Source.Weight + edge.Target.Weight) * new Vector2(.5f, .5f), graph.VertexCount)));
+            var new_hall = new Hall(edge, AdjustLocus((edge.Source.Weight + edge.Target.Weight) * new Vector2(.5f, .5f), graph.VertexCount),
+            ((Room)edge.Source["room"]!).Locus,
+            ((Room)edge.Target["room"]!).Locus);
+            halls.Add(new_hall);
         }
         return halls;
     }

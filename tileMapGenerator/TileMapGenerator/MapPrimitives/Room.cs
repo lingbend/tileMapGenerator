@@ -41,7 +41,7 @@ public class Room : IDed
             var result = shaper(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
             if (result.Count() == 0 || result is null)
             {
-                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex)(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
+                return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex, Locus)(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
             }
             else
             {
@@ -84,13 +84,13 @@ public class Room : IDed
         Vector2 min = Vector2Ext.MinRange(Corners.Values);
         Vector2 range = Vector2Ext.SpanRange(Corners.Values) + Vector2.One;
 
-        LocalGrid = new BinaryGrid((uint) range.X, (uint) range.Y);
+        LocalGrid = new BinaryGrid((uint) range.Y, (uint) range.X);
 
         foreach (var side in new_sides)
         {
             foreach (var point in side.Points)
             {
-                LocalGrid.SetCell(point-min+Vector2.One, 1u);
+                LocalGrid.SetCell((point-min+Vector2.One).Reverse(), 1u);
             }
         }
         
@@ -135,6 +135,7 @@ public class Room : IDed
     public IEnumerable<Vector2> GetInsidePoints()
     {
         ConcurrentDictionary<Vector2, bool> inside = new();
+        inside.TryAdd(Locus, true);
         Vector2 min_corner = Vector2Ext.MinRange(Corners.Values);
         Vector2 max_corner = Vector2Ext.MaxRange(Corners.Values);
         Parallel.ForEach(Vector2Ext.Enumerate(min_corner, max_corner+Vector2.One), point =>
@@ -142,13 +143,14 @@ public class Room : IDed
             bool broken = false;
             foreach (var neighbor in point.GetCartesianNeighbors())
             {
-                if (inside.ContainsKey(neighbor))
+                if (inside.ContainsKey(neighbor) && LocalGrid.GetCell((neighbor-min_corner+Vector2.One).Reverse()) == 0)
                 {
                     inside.TryAdd(point, true);
+                    broken = true;
                     break;
                 }
             }
-            if (!broken && GoRogueWrapper.IsConnected(Locus, point+min_corner-Vector2.One, LocalGrid))
+            if (!broken && GoRogueWrapper.IsConnected(Locus-min_corner+Vector2.One, point-min_corner+Vector2.One, LocalGrid, Locus))
             {
                 inside.TryAdd(point, true);
             }

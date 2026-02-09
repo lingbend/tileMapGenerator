@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using Vector2Extensions;
 using MapPrimitives;
 using GoRogueWrapper;
+using System.Diagnostics;
 
 public class HallMaker
 {
@@ -17,36 +18,57 @@ public class HallMaker
     public (Graph, BinaryGrid, IEnumerable<Room>, IEnumerable<Hall>) GenerateHalls(Graph graph, BinaryGrid grid, IEnumerable<Room> rooms, IEnumerable<Hall> halls)
     {
         var room_points = GetRoomInnerPoints(rooms);
-        HashSet<Vertex> processed_vertices = new();
         foreach (Hall hall in halls)
         {
-            if (!processed_vertices.Contains(hall.Edge.Source))
-            {
-                processed_vertices.Add(hall.Edge.Source);
-                grid = AddHall(grid, room_points, hall, hall.Edge.Source.Weight);
-            }
-
-            if (!processed_vertices.Contains(hall.Edge.Target))
-            {
-                processed_vertices.Add(hall.Edge.Target);
-                grid = AddHall(grid, room_points, hall, hall.Edge.Target.Weight);
-            }
+            grid = AddHallToAll(grid, room_points, hall);
         }
 
         return (graph, grid, rooms, halls);
     }
 
-    private BinaryGrid AddHall(BinaryGrid grid, IEnumerable<Vector2> room_points, Hall hall, Vector2 target_weight)
+    public BinaryGrid GenerateOnlyHalls(in Graph graph, in BinaryGrid grid, in IEnumerable<Room> rooms, in IEnumerable<Hall> halls)
     {
-        var (inner_points, wall_points) = GenerateHall(hall.Locus, target_weight, room_points);
-        foreach (var inner_point in inner_points)
+        var out_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
+        var room_points = GetRoomInnerPoints(rooms);
+        foreach (Hall hall in halls)
         {
-            grid.SetCell(inner_point, 0u);
+            out_grid.CombineGrids([AddHallAlone(grid, room_points, hall)]);
+
         }
+        return out_grid;
+    }
+
+    private BinaryGrid AddHallAlone(in BinaryGrid grid, in IEnumerable<Vector2> room_points, in Hall hall)
+    {
+        BinaryGrid temp_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
+        temp_grid = AddHallInner(room_points, hall, temp_grid);
+
+        return temp_grid;
+    }
+
+    private BinaryGrid AddHallToAll(BinaryGrid grid, IEnumerable<Vector2> room_points, Hall hall)
+    {
+        grid = AddHallInner(room_points, hall, grid);
+
+        return grid;
+    }
+
+    private BinaryGrid AddHallInner(IEnumerable<Vector2> room_points, Hall hall, BinaryGrid grid)
+    {
+        var (inner_points, wall_points) = GenerateHall(hall, room_points);
         foreach (var wall_point in wall_points)
         {
-            grid.SetCell(wall_point, 1u);
+            if (InBounds(wall_point, grid))
+            {
+                grid.SetCell(wall_point.Reverse(), 1u);
+            }
+
         }
+        foreach (var inner_point in inner_points)
+        {
+            grid.SetCell(inner_point.Reverse(), 0u);
+        }
+        
 
         return grid;
     }
@@ -61,10 +83,12 @@ public class HallMaker
         return new HashSet<Vector2>(points.SelectMany(i=>i));
     }
 
-    private (IEnumerable<Vector2>, IEnumerable<Vector2>) GenerateHall(Vector2 source, Vector2 target, IEnumerable<Vector2> room_inner)
+    private (IEnumerable<Vector2>, IEnumerable<Vector2>) GenerateHall(Hall hall, IEnumerable<Vector2> room_inner)
     {
-        var inner_points = GenerateInsideHall(source, target);
+        HashSet<Vector2> inner_points = new(GenerateInsideHall(hall.Locus, hall.SourceLocus));
+        inner_points.UnionWith(GenerateInsideHall(hall.Locus, hall.TargetLocus));
         var wall_points = GenerateHallWalls(inner_points);
+        // return (inner_points, wall_points);
         return (inner_points, wall_points.Except(room_inner));
     }
 
@@ -83,6 +107,11 @@ public class HallMaker
                 wall_points.TryAdd(neighbor, true);
             }
         });
-        return wall_points.Keys.Except(inner_points);
+        return wall_points.Keys;
+    }
+
+    private bool InBounds(Vector2 location, BinaryGrid grid)
+    {
+        return location.X > 0 && location.Y > 0 && location.X <= grid.ColSize && location.Y <= grid.RowSize;
     }
 }
