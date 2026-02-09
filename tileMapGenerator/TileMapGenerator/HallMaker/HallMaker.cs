@@ -88,7 +88,6 @@ public class HallMaker
         HashSet<Vector2> inner_points = new(GenerateInsideHall(hall.Locus, hall.SourceLocus));
         inner_points.UnionWith(GenerateInsideHall(hall.Locus, hall.TargetLocus));
         var wall_points = GenerateHallWalls(inner_points);
-        // return (inner_points, wall_points);
         return (inner_points, wall_points.Except(room_inner));
     }
 

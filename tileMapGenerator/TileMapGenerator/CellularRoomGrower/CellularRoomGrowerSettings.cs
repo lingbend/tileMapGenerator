@@ -10,6 +10,7 @@ using ConcurrentRandom;
 using System.Collections.Concurrent;
 using Vector2Extensions;
 using MapPrimitives;
+using GoRogueWrapper;
 
 public class CellularRoomGrowerSettings
 {
@@ -243,7 +244,8 @@ public class CellularRoomGrowerSettings
                 }
                 
                 test_grid.Clear();
-                Parallel.ForEach(points, point =>
+                var neighbors = locus.GetNeighbors();
+                Parallel.ForEach(points.Where(v=>v != locus && !neighbors.Contains(v)), point =>
                 {
                     test_grid.QueueFillCell((uint) (point.Y - min.Y + 1), (uint) (point.X-min.X + 1));
                 });
@@ -277,9 +279,23 @@ public class CellularRoomGrowerSettings
                     };
                 };
             }
-            var neighbors = locus.GetNeighbors();
-            // return points;
-            return points.Where(v=>v != locus && !neighbors.Contains(v));
+
+            BinaryGrid patch_grid = new BinaryGrid(test_grid.RowSize+2, test_grid.ColSize+2, 0u);
+            Parallel.ForEach(points, point =>
+            {
+                patch_grid.QueueFillCell((uint) (point.Y - min.Y + 2), (uint) (point.X-min.X + 2));
+            });
+            HashSet<Vector2> sides_connected_center = new();
+            foreach (Vector2 point in RoundPoints(GetCircleSides(length, direction, corners).OrderBy(v=> Vector2.DistanceSquared(v, center))))
+            {
+                if (GoRogueWrapper.IsConnected(point-min+Vector2.One, locus-min+Vector2.One, patch_grid, locus-min+Vector2.One))
+                {
+                    points.Add(point);
+                    sides_connected_center.Add(point);
+                }
+            }
+
+            return points;
         };
     }
 
