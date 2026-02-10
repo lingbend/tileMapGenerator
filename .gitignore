@@ -5,3 +5,6 @@ tileMapGenerator/TileMapGenerator/obj/project.assets.json
 C:\Projects\Projects\tileMapGenerator\.vscode
 obj
 Debug
+images
+samples
+*.png
