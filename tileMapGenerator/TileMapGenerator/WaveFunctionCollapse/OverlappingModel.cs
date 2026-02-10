@@ -3,6 +3,7 @@
 namespace WaveFunctionCollapse;
 using System;
 using System.Collections.Generic;
+using BinaryGrid;
 
 class OverlappingModel : Model
 {
@@ -105,6 +106,18 @@ class OverlappingModel : Model
 
     public override void Save(string filename)
     {
+        int[] bitmap = GenerateBitmap();
+        BitmapHelper.SaveBitmap(bitmap, MX, MY, filename);
+    }
+
+    public override BinaryGrid SaveToBinaryGrid()
+    {
+        int[] bitmap = GenerateBitmap();
+        return BitmapHelper.SaveBinaryGrid(bitmap, MX, MY);
+    }
+
+    private int[] GenerateBitmap()
+    {
         int[] bitmap = new int[MX * MY];
         if (observed[0] >= 0)
         {
@@ -146,6 +159,8 @@ class OverlappingModel : Model
                 bitmap[i] = unchecked((int)0xff000000 | ((r / contributors) << 16) | ((g / contributors) << 8) | b / contributors);
             }
         }
-        BitmapHelper.SaveBitmap(bitmap, MX, MY, filename);
+
+        return bitmap;
     }
+
 }

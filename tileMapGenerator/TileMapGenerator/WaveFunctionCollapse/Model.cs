@@ -2,6 +2,7 @@
 // Modified by Benjamin Lingwall 2026
 namespace WaveFunctionCollapse;
 using System;
+using BinaryGrid;
 
 internal abstract class Model
 {
@@ -227,6 +228,8 @@ internal abstract class Model
     }
 
     public abstract void Save(string filename);
+
+    public abstract BinaryGrid SaveToBinaryGrid();
 
     protected static int[] dx = { -1, 0, 1, 0 };
     protected static int[] dy = { 0, 1, 0, -1 };

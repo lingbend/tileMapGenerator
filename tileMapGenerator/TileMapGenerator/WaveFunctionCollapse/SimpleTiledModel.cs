@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Xml.Linq;
 using System.Collections.Generic;
+using BinaryGrid;
 
 class SimpleTiledModel : Model
 {
@@ -201,6 +202,18 @@ class SimpleTiledModel : Model
 
     public override void Save(string filename)
     {
+        int[] bitmapData = GenerateBitmap();
+        BitmapHelper.SaveBitmap(bitmapData, MX * tilesize, MY * tilesize, filename);
+    }
+
+    public override BinaryGrid SaveToBinaryGrid()
+    {
+        int[] bitmap = GenerateBitmap();
+        return BitmapHelper.SaveBinaryGrid(bitmap, MX, MY);
+    }
+
+    private int[] GenerateBitmap()
+    {
         int[] bitmapData = new int[MX * MY * tilesize * tilesize];
         if (observed[0] >= 0)
         {
@@ -239,8 +252,10 @@ class SimpleTiledModel : Model
                 }
             }
         }
-        BitmapHelper.SaveBitmap(bitmapData, MX * tilesize, MY * tilesize, filename);
+
+        return bitmapData;
     }
+
 
     public string TextOutput()
     {

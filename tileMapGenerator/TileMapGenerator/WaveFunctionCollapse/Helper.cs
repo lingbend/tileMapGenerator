@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using BinaryGrid;
 
 static class Helper
 {
@@ -60,5 +61,23 @@ static class BitmapHelper
             using var image = Image.WrapMemory<Bgra32>(pData, width, height);
             image.SaveAsPng(filename);
         }
+    }
+
+    unsafe public static BinaryGrid SaveBinaryGrid(int[] data, int width, int height)
+    {
+        BinaryGrid grid = new((uint) width, (uint) height);
+
+        for (uint i = 0; i < width; i++)
+        {
+            Parallel.For(0u, height, j =>
+            {        
+                if (data[(i*width)+j].ToString("x")[2] != '0' )
+                {
+                    grid.QueueFillCell((uint) j + 1u, i + 1u);
+                }  
+            });      
+        }
+        grid.RunQueue();
+        return grid;
     }
 }

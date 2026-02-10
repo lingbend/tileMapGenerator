@@ -64,7 +64,9 @@ public class WaveFunctionCollapse
                 bool success = Settings.Model.Run((int) seed, limit);
                 if (success)
                 {
-                    Settings.Model.Save($"../../../WaveFunctionCollapse/output/{Settings.Name} {seed}.png");
+                    // Settings.Model.Save($"../../../WaveFunctionCollapse/output/{Settings.Name} {seed}.png");
+                    var grid = Settings.Model.SaveToBinaryGrid();
+                    grid.ToBMP($"{Settings.Name}_{seed}");
                     break;
                 }
             }
