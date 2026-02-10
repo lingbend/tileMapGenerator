@@ -21,9 +21,17 @@ public class WaveFunctionCollapse
         }
     }
 
-    public WaveFunctionCollapse(string name, string heuristicString, int seed = 0)
+    public WaveFunctionCollapse(string name, string heuristicString="", int seed = 0)
     {
-        Settings = new WaveFunctionCollapseSettings(name, heuristicString);
+        if (heuristicString == "")
+        {
+            Settings = new WaveFunctionCollapseSettings(name);
+        }
+        else
+        {
+            Settings = new WaveFunctionCollapseSettings(name, heuristicString);
+        }
+        
         Settings.InitializeSimple();
         if (seed == 0)
         {
@@ -37,11 +45,12 @@ public class WaveFunctionCollapse
 
     public WaveFunctionCollapse()
     {
-        Settings = new WaveFunctionCollapseSettings("default", "something");
+        Settings = new WaveFunctionCollapseSettings("default", "Scanline");
         Settings.InitializeSimple();
         Random = Random = new Random();
     }
 
+    // This should be thread determinant iff a thread determinant seed is provided
     public void Run(int? seed = null, int screenshots = 2, int limit = -1)
     {
         if (seed is null)
@@ -55,7 +64,7 @@ public class WaveFunctionCollapse
                 bool success = Settings.Model.Run((int) seed, limit);
                 if (success)
                 {
-                    Settings.Model.Save($"output/{Settings.Name} {seed}.png");
+                    Settings.Model.Save($"../../../WaveFunctionCollapse/output/{Settings.Name} {seed}.png");
                     break;
                 }
             }

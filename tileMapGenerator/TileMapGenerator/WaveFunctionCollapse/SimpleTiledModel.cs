@@ -16,7 +16,7 @@ class SimpleTiledModel : Model
     public SimpleTiledModel(string name, string subsetName, int width, int height, bool periodic, bool blackBackground, Heuristic heuristic) : base(width, height, 1, periodic, heuristic)
     {
         this.blackBackground = blackBackground;
-        XElement xroot = XDocument.Load($"tilesets/{name}.xml").Root;
+        XElement xroot = XDocument.Load($"../../../WaveFunctionCollapse/tilesets/{name}.xml").Root;
         bool unique = xroot.Get("unique", false);
 
         List<string> subset = null;
@@ -116,7 +116,7 @@ class SimpleTiledModel : Model
                 for (int t = 0; t < cardinality; t++)
                 {
                     int[] bitmap;
-                    (bitmap, tilesize, tilesize) = BitmapHelper.LoadBitmap($"tilesets/{name}/{tilename} {t}.png");
+                    (bitmap, tilesize, tilesize) = BitmapHelper.LoadBitmap($"../../../WaveFunctionCollapse/tilesets/{name}/{tilename} {t}.png");
                     tiles.Add(bitmap);
                     tilenames.Add($"{tilename} {t}");
                 }
@@ -124,7 +124,7 @@ class SimpleTiledModel : Model
             else
             {
                 int[] bitmap;
-                (bitmap, tilesize, tilesize) = BitmapHelper.LoadBitmap($"tilesets/{name}/{tilename}.png");
+                (bitmap, tilesize, tilesize) = BitmapHelper.LoadBitmap($"../../../WaveFunctionCollapse/tilesets/{name}/{tilename}.png");
                 tiles.Add(bitmap);
                 tilenames.Add($"{tilename} 0");
 

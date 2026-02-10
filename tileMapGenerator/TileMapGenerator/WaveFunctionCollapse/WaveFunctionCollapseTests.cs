@@ -9,5 +9,11 @@ public class WaveFunctionCollapseTests
     [TestMethod]
     public void WaveFunctionCollapse_Valid()
     {
+        //  <overlapping name="NotKnot" N="3" periodic="True" periodicInput="False"/>
+        var WaveSettings = new WaveFunctionCollapseSettings("Knots");
+        WaveSettings.Periodic = true;
+        WaveSettings.InitializeSimple("Standard");
+        var WaveGenerator = new WaveFunctionCollapse("Knots");
+        WaveGenerator.Run();
     }
 }
