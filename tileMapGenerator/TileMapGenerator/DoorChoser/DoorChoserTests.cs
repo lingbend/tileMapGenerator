@@ -32,9 +32,14 @@ public class DoorChoserTests
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         (_, grid, rooms, halls) = new HallMaker().GenerateHalls(new_graph, grid, rooms, halls);
         var doors = DoorChoser.ChooseDoors(rooms, halls);
+        var patches = DoorChoser.PatchDoorframes(doors, grid);
         grid.ToBMP("DoorChoser_CorrectCounts30_Valid");
         BinaryGrid door_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
         foreach (var point in doors)
+        {
+            door_grid.SetCell(point.Reverse(), 1);
+        }
+        foreach (var point in patches)
         {
             door_grid.SetCell(point.Reverse(), 1);
         }
@@ -55,9 +60,14 @@ public class DoorChoserTests
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         (_, grid, rooms, halls) = new HallMaker().GenerateHalls(new_graph, grid, rooms, halls);
         var doors = DoorChoser.ChooseDoors(rooms, halls);
+        var patches = DoorChoser.PatchDoorframes(doors, grid);
         grid.ToBMP("DoorChoser_CircularCorrectCounts30_Valid");
         BinaryGrid door_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
         foreach (var point in doors)
+        {
+            door_grid.SetCell(point.Reverse(), 1);
+        }
+        foreach (var point in patches)
         {
             door_grid.SetCell(point.Reverse(), 1);
         }
@@ -79,9 +89,14 @@ public class DoorChoserTests
         var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
         (_, grid, rooms, halls) = new HallMaker().GenerateHalls(new_graph, grid, rooms, halls);
         var doors = DoorChoser.ChooseDoors(rooms, halls);
+        var patches = DoorChoser.PatchDoorframes(doors, grid);
         grid.ToBMP("DoorChoser_CaveCorrectCounts30_Valid");
         BinaryGrid door_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
         foreach (var point in doors)
+        {
+            door_grid.SetCell(point.Reverse(), 1);
+        }
+        foreach (var point in patches)
         {
             door_grid.SetCell(point.Reverse(), 1);
         }

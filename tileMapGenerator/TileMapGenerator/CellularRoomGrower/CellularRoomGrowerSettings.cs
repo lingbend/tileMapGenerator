@@ -279,21 +279,9 @@ public class CellularRoomGrowerSettings
                     };
                 };
             }
+            var direct_hall = GoRogueWrapper.GetSimpleDirectHall(center, locus);
 
-            BinaryGrid patch_grid = new BinaryGrid(test_grid.RowSize+2, test_grid.ColSize+2, 0u);
-            Parallel.ForEach(points, point =>
-            {
-                patch_grid.QueueFillCell((uint) (point.Y - min.Y + 2), (uint) (point.X-min.X + 2));
-            });
-            HashSet<Vector2> sides_connected_center = new();
-            foreach (Vector2 point in RoundPoints(GetCircleSides(length, direction, corners).OrderBy(v=> Vector2.DistanceSquared(v, center))))
-            {
-                if (GoRogueWrapper.IsConnected(point-min+Vector2.One, locus-min+Vector2.One, patch_grid, locus-min+Vector2.One))
-                {
-                    points.Add(point);
-                    sides_connected_center.Add(point);
-                }
-            }
+            points = new(points.Union(RoundPoints(GetCircleSides(length, direction, corners))).Except(GoRogueWrapper.GetSimpleDirectHall(center, locus)));
 
             return points;
         };

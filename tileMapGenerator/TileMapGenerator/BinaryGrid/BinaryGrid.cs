@@ -256,6 +256,17 @@ public struct BinaryGrid : IDed
         return (uint) BitOperations.PopCount(GetCellNeighbors(row, col));
     }
 
+    public uint GetAllSetCartesianNeighbors(uint row, uint col)
+    {
+        uint neighbors = 0;
+        neighbors += GetCellInternal(row, col);
+        neighbors += GetCellInternal(row, col+1);
+        neighbors += GetCellInternal(row-1, col);
+        neighbors += GetCellInternal(row, col-1);
+        neighbors += GetCellInternal(row+1, col);
+        return neighbors;
+    }
+
     private void CheckIndexValidity(uint row, uint col)
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
@@ -490,6 +501,24 @@ public struct BinaryGrid : IDed
         return ID;
     }
 
+    public bool InBounds(uint row, uint col)
+    {
+        if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public bool InBounds(Vector2 coords)
+    {
+        if (coords.X < 0 || coords.Y < 0)
+        {
+            return false;
+        }
+        return InBounds((uint) coords.X, (uint) coords.Y);
+    }
+
     public void ToBMP(string name = "", string color = "0xFF000000", bool overlay = false)
     {
         Image image;
@@ -497,7 +526,6 @@ public struct BinaryGrid : IDed
         if (!overlay)
         {
             image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
-            // image.SetResolution(300, 300);
             graphic = Graphics.FromImage(image);
         }
         else
@@ -506,7 +534,6 @@ public struct BinaryGrid : IDed
             image = Image.FromFile($"../../__temp__{name}Grid.bmp");
             graphic = Graphics.FromImage(image);
         }
-        Console.WriteLine("init");
         
         using var brush = new SolidBrush(Color.FromArgb(Convert.ToInt32(color, 16)));
 
@@ -525,21 +552,17 @@ public struct BinaryGrid : IDed
                 }
             }
         }
-        Console.WriteLine("wrote");
         if (overlay)
         {
             File.Delete($"../../{name}Grid.bmp");
         }
         image.Save($"../../{name}Grid.bmp");
-        Console.WriteLine("saved");
         graphic.Dispose();
         image.Dispose();
         if (overlay)
         {
             File.Delete($"../../__temp__{name}Grid.bmp");
-        }
-        Console.WriteLine("disposed");
-        
+        }     
     }
 }
 

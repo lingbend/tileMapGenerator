@@ -1,15 +1,9 @@
 using System.Numerics;
 
-using BinaryGrid;
-using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
-using System.Numerics;
+using Grid = BinaryGrid.BinaryGrid;
 using System.Collections.Concurrent;
-using Vector2Extensions;
 using MapPrimitives;
-using GoRogueWrapper;
-using System.Diagnostics;
+using Vector2Extensions;
 
 namespace DoorChoser;
 
@@ -49,6 +43,35 @@ public static class DoorChoser
         }
 
         return door_locations;
+    }
+
+    public static IEnumerable<Vector2> PatchDoorframes(IEnumerable<Vector2> doors, Grid grid)
+    {
+        HashSet<Vector2> patches = new();
+        foreach (Vector2 door in doors)
+        {
+            if (grid.GetAllSetCartesianNeighbors((uint) door.Y, (uint) door.X) <= 1)
+            {
+                
+                if (grid.InBounds((door + Vector2Ext.DOWN).Reverse()) && grid.GetCell((door + Vector2Ext.DOWN).Reverse()) == 1)
+                {
+                    patches.Add(door + Vector2Ext.UP);
+                }
+                else if (grid.InBounds((door + Vector2Ext.UP).Reverse()) && grid.GetCell((door + Vector2Ext.UP).Reverse()) == 1)
+                {
+                    patches.Add(door + Vector2Ext.DOWN);
+                }
+                else if (grid.InBounds((door + Vector2Ext.LEFT).Reverse()) && grid.GetCell((door + Vector2Ext.LEFT).Reverse()) == 1)
+                {
+                    patches.Add(door + Vector2Ext.RIGHT);
+                }
+                else if (grid.InBounds((door + Vector2Ext.RIGHT).Reverse()) && grid.GetCell((door + Vector2Ext.RIGHT).Reverse()) == 1)
+                {
+                    patches.Add(door + Vector2Ext.LEFT);
+                }
+            }
+        }
+        return patches;
     }
 
 }
