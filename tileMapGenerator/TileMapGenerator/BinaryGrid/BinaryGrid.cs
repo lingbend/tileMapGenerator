@@ -60,7 +60,7 @@ public struct BinaryGrid : IDed
         }
         else if (borders != 0)
         {
-            throw new ArgumentException("Value must be 0 or 1");
+            throw new ArgumentException("Value must be 0 or 1. Value was: " + borders);
         }
         
     }
@@ -69,7 +69,7 @@ public struct BinaryGrid : IDed
     {
         if (borders != 1 && borders != 0)
         {
-            throw new ArgumentException("Value must be 0 or 1");
+            throw new ArgumentException("Value must be 0 or 1, not: " + borders);
         }
         SetRowInternal(0, _size.Item2+1, borders, _size.Item2+1 + 1);
         SetRowInternal(_size.Item1+1, _size.Item2+1, borders, _size.Item2+1 + 1);
@@ -89,11 +89,11 @@ public struct BinaryGrid : IDed
     {
         if (val != 0 && val != 1)
         {
-            throw new ArgumentException("Value must be 0 or 1");
+            throw new ArgumentException("Value must be 0 or 1, not: " + val);
         } 
         else if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
-            throw new IndexOutOfRangeException("Bad Cell Index");
+            throw new IndexOutOfRangeException("Bad Cell Index: (" + row + ", " + col + ")");
         }
 
         SetCellInternal(row, col, val);
@@ -108,7 +108,7 @@ public struct BinaryGrid : IDed
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
-            throw new IndexOutOfRangeException("Bad Cell Index");
+            throw new IndexOutOfRangeException("Bad Cell Index: (" + row + ", " + col + ")");
         }
         _queue_fill[GetCellIndex(row, col)] = true;
     }
@@ -118,7 +118,7 @@ public struct BinaryGrid : IDed
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
-            throw new IndexOutOfRangeException("Bad Cell Index");
+            throw new IndexOutOfRangeException("Bad Cell Index: (" + row + ", " + col + ")");
         }
         _queue_empty[GetCellIndex(row, col)] = true;
     }
@@ -182,7 +182,7 @@ public struct BinaryGrid : IDed
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
-            throw new IndexOutOfRangeException("Bad Cell Index");
+            throw new IndexOutOfRangeException("Bad Cell Index: (" + row + ", " + col + ")");
         }
 
         return GetCellInternal(row, col);
@@ -271,7 +271,7 @@ public struct BinaryGrid : IDed
     {
         if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
         {
-            throw new IndexOutOfRangeException("Bad Cell Index");
+            throw new IndexOutOfRangeException("Bad Cell Index: (" + row + ", " + col + ")");
         }
     }
 
@@ -325,7 +325,7 @@ public struct BinaryGrid : IDed
     {
         if (val != 0 && val != 1)
         {
-            throw new ArgumentException("Value must be 0 or 1");
+            throw new ArgumentException("Value must be 0 or 1, not: " + val);
         } 
         CheckIndexValidity(row1, col1);
         CheckIndexValidity(row2, col2);
