@@ -341,6 +341,17 @@ public class CellularRoomGrowerTests
     }
 
     [TestMethod]
+    public void RandomCurrent()
+    {
+        var rand = new ConcurrentRandom.ConcurrentRandom(134534);
+        for (int i = 0; i < 1000; i++)
+        {
+            Console.WriteLine("rand:" + rand.Next(i, 0, 160));
+            Console.WriteLine("vec:" + rand.NextVector2(i, 0, 160, 0, 160));
+        }
+    }
+
+    [TestMethod]
     public void CellularRoomGrowerGrowRooms_MaxSizeUsed_Valid()
     {
         var room_grower = new CellularRoomGrower();

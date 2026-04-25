@@ -16,46 +16,40 @@ public class ConcurrentRandom : Troschuetz.Random.IGenerator
 
     public object global_state;
 
+    int[] backing;
+
     public ConcurrentRandom(int seed)
     {
+        if (seed == 0)
+        {
+            seed += 1;
+        }
         _seed_1 = seed;
-        _seed_2 = new Random(seed).Next();
-        _seed_3 = new Random(_seed_2).Next();
+        _seed_2 = new Random(seed).Next(1);
+        _seed_3 = new Random(_seed_2).Next(1);
         global_state = _seed_1 + _seed_2 + _seed_3;
-    }
+        backing = new int[4]{_seed_1, _seed_2, _seed_3, global_state.GetHashCode()};
+    } 
 
     public int Next(object unique_state, int min = 0, int max = MAX_INT)
     {
-        ulong xor = XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()! + _seed_1));
-        // Console.WriteLine(xor + " init ");
-        xor *= (ulong) Math.Abs(_seed_3);
-        // Console.WriteLine(xor + " times seed 3 ");
-        xor ^= (ulong) Math.Pow(264, 59);
-        // Console.WriteLine(xor + " xor pow ");
-        xor += (ulong) Math.Abs(_seed_2);
-        // Console.WriteLine(xor + " add seed 2 ");
-        xor ^= 2147483647 >> 11;
-        // Console.WriteLine(xor + " shift 11 prime ");
-        xor += 1;
-        // Console.WriteLine(xor + " +1 ");
-        xor ^= xor << 7;
-        // Console.WriteLine(xor + " shift 7 ");
-        
-        xor = (ulong) (BigInteger.Multiply(xor, new BigInteger(Math.Pow(2, 64) - 59)) >> 64);
-        // Console.WriteLine(xor + " times pow ");
-        xor ^= xor >> 9;
-        // Console.WriteLine(xor + " 9 ");
-        xor += (uint) ((_seed_3 >> 1) +(_seed_1<<1) + 1);
-        xor ^= xor << 9;
-        // xor += 1;
 
-        // Console.WriteLine(xor);
-        
+        int[] backingCopy = (backing.Select(u=>(int) XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()! + u)))).ToArray();
+        int t = backingCopy[1] << 9;
 
-        int xor_mod = Int32.Abs((int) (((long) xor+1) % (max - min))) + min;
-        // Console.Write($"min: {min}, max: {max}, mod: ");
-        // Console.WriteLine(xor_mod);
+        backingCopy[2] ^= backingCopy[0];
+        backingCopy[3] ^= backingCopy[1];
+        backingCopy[1] ^= backingCopy[2];
+        backingCopy[0] ^= backingCopy[3];
+
+        backingCopy[2] ^= t;
+
+        backingCopy[3] = (int) BitOperations.RotateLeft((uint) backingCopy[3], 11);
         
+        int result = Math.Abs((int) BitOperations.RotateLeft((uint) backingCopy[0] + (uint) backingCopy[3], 7) + backingCopy[0]);
+
+        int xor_mod = Int32.Abs((int) (((long) result+1) % (max - min))) + min;
+
         return xor_mod;
     }
 
