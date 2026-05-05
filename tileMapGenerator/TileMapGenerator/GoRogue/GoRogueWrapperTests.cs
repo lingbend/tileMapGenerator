@@ -1,22 +1,23 @@
-namespace GoRogueWrapper;
-
-using System.Numerics;
-using ConcurrentRandom;
-
-
-[TestClass]
-public class GoRogueWrapperTests
+namespace GoRogueWrapper
 {
-    [TestMethod]
-    public void GetSimpleDirectHallTest()
-    {
-        GoRogueWrapper.GetSimpleDirectHall(new Vector2(2, 2), new Vector2(9, 6));
-    }
+    using System.Numerics;
+    using ConcurrentRandom;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    [TestMethod]
-    public void GetSimpleHorizontalVerticalHallTest()
+    [TestClass]
+    public class GoRogueWrapperTests
     {
-        GoRogueWrapper.GetSimpleHorizontalVerticalHall(new Vector2(2, 2), new Vector2(9, 6), "chicken", new ConcurrentRandom(123));
-    }
+        [TestMethod]
+        public void GetSimpleDirectHallTest()
+        {
+            GoRogueWrapper.GetSimpleDirectHall(new Vector2(2, 2), new Vector2(9, 6));
+        }
 
+        [TestMethod]
+        public void GetSimpleHorizontalVerticalHallTest()
+        {
+            GoRogueWrapper.GetSimpleHorizontalVerticalHall(new Vector2(2, 2), new Vector2(9, 6), "chicken", new ConcurrentRandom(123));
+        }
+
+    }
 }

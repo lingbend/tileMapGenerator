@@ -1,95 +1,97 @@
-using System.Collections.Immutable;
 using System.Numerics;
 using QuikGraph;
 using BinaryGrid;
 using TileMapGenerator;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace MapPrimitives;
-
-public class RoomVertex<TWeight> : IDed
+namespace MapPrimitives
 {
-    private int _vertex_id;
-
-    public int ID { get => _vertex_id; set => _vertex_id = value; }
-    public HashSet<RoomEdge<TWeight>> Edges{get; private set;} = new HashSet<RoomEdge<TWeight>>();
-    private Dictionary<string, object?> _data = new Dictionary<string, object?>();
-    public int Degree{get{return Edges.Count;}}
-    public TWeight? Weight {get; internal set;}
-    public RoomVertex(TWeight weight)
+    public class RoomVertex<Vector2> : IDed where Vector2 : struct
     {
-        Weight = weight;
-        _vertex_id = UIDGenerator.GetNextID(Weight!.ToString());
-    }
+        private int _vertex_id;
 
-    internal RoomVertex()
-    {
-        _vertex_id = UIDGenerator.GetNextID(" ");
-    }
-
-    // public RoomVertex(Dictionary<string, object?> data)
-    // {
-    //     _data = data;
-    //     _vertex_id = UIDGenerator.GetNextID();
-    // }
-
-    public void RemoveEdge(RoomEdge<TWeight> edge)
-    {
-        lock (Edges)
+        public int ID { get => _vertex_id; set => _vertex_id = value; }
+        public HashSet<RoomEdge<Vector2>> Edges{get; private set;} = new HashSet<RoomEdge<Vector2>>();
+        private Dictionary<string, object?> _data = new Dictionary<string, object?>();
+        public int Degree{get{return Edges.Count;}}
+        public Vector2? Weight {get; internal set;}
+        public RoomVertex(Vector2 weight)
         {
-            Edges.Remove(edge);
+            Weight = weight;
+            _vertex_id = UIDGenerator.GetNextID(Weight!.ToString());
         }
-    }
 
-    public RoomEdge<TWeight> ConnectToVertex(RoomVertex<TWeight> vertex, TWeight weight)
-    {
-        RoomEdge<TWeight> new_edge = new RoomEdge<TWeight>(this, vertex);
-        lock (Edges)
+        internal RoomVertex()
         {
-            Edges.Add(new_edge);
+            _vertex_id = UIDGenerator.GetNextID(" ");
         }
-        lock (vertex.Edges) {
-            vertex.Edges.Add(new_edge);
-        }
-        
-        new_edge.Weight = (TWeight) weight;
-        
-        return new_edge;
-    }
 
-    public ImmutableDictionary<string, object?> GetData()
-    {
-        return _data.ToImmutableDictionary();
-    }
+        // public RoomVertex(Dictionary<string, object?> data)
+        // {
+        //     _data = data;
+        //     _vertex_id = UIDGenerator.GetNextID();
+        // }
 
-    public object? this[string key]
-    {
-        get {
-            if (_data.TryGetValue(key, out object? value))
+        public void RemoveEdge(RoomEdge<Vector2> edge)
+        {
+            lock (Edges)
             {
-                return value;
+                Edges.Remove(edge);
             }
-            else
+        }
+
+        public RoomEdge<Vector2> ConnectToVertex(RoomVertex<Vector2> vertex, Vector2 weight)
+        {
+            RoomEdge<Vector2> new_edge = new RoomEdge<Vector2>(this, vertex);
+            lock (Edges)
             {
-                return null;
+                Edges.Add(new_edge);
             }
-              }
-        set
-        {
-            _data[key] = value;
+            lock (vertex.Edges) {
+                vertex.Edges.Add(new_edge);
+            }
+        
+            new_edge.Weight = (Vector2) weight;
+        
+            return new_edge;
         }
-    }
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is not null && obj is RoomVertex<TWeight> edge)
+        public Dictionary<string, object?> GetData()
         {
-            return _vertex_id == ((RoomVertex<TWeight>) obj)._vertex_id;
+            return new Dictionary<string, object?>(_data);
         }
-        return base.Equals(obj);
-    }
 
-    public override int GetHashCode()
-    {
-        return _vertex_id;
+        public object? this[string key]
+        {
+            get {
+                if (_data.TryGetValue(key, out object? value))
+                {
+                    return value;
+                }
+                else
+                {
+                    return null;
+                }
+                  }
+            set
+            {
+                _data[key] = value;
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj != null && obj is RoomVertex<Vector2> edge)
+            {
+                return _vertex_id == ((RoomVertex<Vector2>) obj)._vertex_id;
+            }
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _vertex_id;
+        }
     }
 }
