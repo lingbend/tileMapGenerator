@@ -761,7 +761,7 @@ namespace BinaryGrid
             {
                 ulong num = (ulong) num_obj;
                 BitArray temp_array = new BitArray(BitConverter.GetBytes(num));
-                temp_array.Length = num.ToString("b").Length;
+                // temp_array.Length = num.ToString("B").Length;
                 return temp_array;
             }
 
