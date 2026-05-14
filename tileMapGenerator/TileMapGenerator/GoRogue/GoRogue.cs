@@ -35,12 +35,12 @@ namespace GoRogueWrapper
 
         public static bool IsConnected(Vector2 start, Vector2 end, Grid grid, Vector2? locus = null)
         {
-            BinaryMapViewer view = new BinaryMapViewer(grid, locus);
+            GridMapViewer view = new GridMapViewer(grid, locus);
             var fast_astar = new FastAStar(view, SadRogue.Primitives.Distance.Manhattan);
             return fast_astar.ShortestPath((int) start.X, (int) start.Y, (int) end.X, (int) end.Y, false) != null;
         }
 
-        internal class BinaryMapViewer : ISettableGridView<bool>
+        internal class GridMapViewer : ISettableGridView<bool>
         {
 
             public int Height{get;}
@@ -57,7 +57,7 @@ namespace GoRogueWrapper
             private Grid Grid;
             private Vector2 Locus;
 
-            public BinaryMapViewer(Grid grid, Vector2? locus = null)
+            public GridMapViewer(Grid grid, Vector2? locus = null)
             {
                 Height = (int) grid.NRows;
                 Width = (int) grid.NCols;

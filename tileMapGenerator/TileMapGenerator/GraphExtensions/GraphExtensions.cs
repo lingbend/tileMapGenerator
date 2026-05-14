@@ -1,3 +1,4 @@
+// For testing only
 #if DEBUG
 using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
 using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;

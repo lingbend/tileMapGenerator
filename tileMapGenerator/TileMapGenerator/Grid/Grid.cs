@@ -582,6 +582,7 @@ namespace Grid
         }
 
         #if DEBUG
+        // For testing only
         public void ToBMP(string name = "", string color = "0xFF000000", bool overlay = false)
         {
             Image image;
