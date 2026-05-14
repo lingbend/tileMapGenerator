@@ -1,3 +1,4 @@
+#nullable enable
 namespace NodeTreeGenerator
 {
     using TileMapGenerator;
@@ -9,9 +10,6 @@ namespace NodeTreeGenerator
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using DFS = QuikGraph.Algorithms.Search.UndirectedDepthFirstSearchAlgorithm<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
     using System.Collections.Concurrent;
-    #if DEBUG
-    using QuikGraph.Graphviz;
-    #endif
     using System.Diagnostics;
     using System.Collections;
     using System;
@@ -20,6 +18,7 @@ namespace NodeTreeGenerator
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using static Polyfills.Polyfill;
 
     public class NodeTreeGenerator
     {
@@ -790,22 +789,6 @@ namespace NodeTreeGenerator
             return choices.First();
             // return choices.MaxBy((item)=>weighter(item, weight_percents));
         }
-
-        #if DEBUG
-        private void PrintToPNG(Graph graph, string name)
-        {
-            var visualizer = new GraphvizAlgorithm<Vertex, Edge>(graph);
-            visualizer.FormatVertex += (_, args) =>
-            {
-                args.VertexFormat.Position = new QuikGraph.Graphviz.Dot.GraphvizPoint((int) args.Vertex.Weight?.X * 72, (int) args.Vertex.Weight?.Y * 72);
-                // args.VertexFormat.Label = args.Vertex.VertexID.ToString();
-            };
-            string file = visualizer.Generate()[..^1] + "layout=neato;\n}";
-            File.WriteAllText($"../../{name}.dot", file);
-            using var process = Process.Start("dot", $"-Tpng -n ../../{name}.dot -o ../../{name}.png");
-            process.WaitForExit();
-        }
-        #endif
 
         internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : IDed
         {
