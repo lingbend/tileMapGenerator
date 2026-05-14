@@ -1,7 +1,7 @@
 namespace GoRogueWrapper
 {
     using System.Numerics;
-    using ConcurrentRandom;
+    using ConcRandom;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -16,7 +16,7 @@ namespace GoRogueWrapper
         [TestMethod]
         public void GetSimpleHorizontalVerticalHallTest()
         {
-            GoRogueWrapper.GetSimpleHorizontalVerticalHall(new Vector2(2, 2), new Vector2(9, 6), "chicken", new ConcurrentRandom(123));
+            GoRogueWrapper.GetSimpleHorizontalVerticalHall(new Vector2(2, 2), new Vector2(9, 6), "chicken", new ConcRandom(123));
         }
 
     }

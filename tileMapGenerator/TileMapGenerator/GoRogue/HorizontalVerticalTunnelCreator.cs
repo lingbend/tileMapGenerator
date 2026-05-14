@@ -27,15 +27,15 @@ SOFTWARE.
 namespace GoRogueWrapper
 {
     using System.Numerics;
-    using ConcurrentRandom;
+    using ConcRandom;
     using SadRogue.Primitives.GridViews;
     using System;
 
     public class HorizontalVerticalTunnelCreator : ITunnelCreator
     {
-        private readonly ConcurrentRandom _rng;
+        private readonly ConcRandom _rng;
 
-        public HorizontalVerticalTunnelCreator(ConcurrentRandom? rng = null) => _rng = rng ?? new ConcurrentRandom(1);
+        public HorizontalVerticalTunnelCreator(ConcRandom? rng = null) => _rng = rng ?? new ConcRandom(1);
 
         public void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd)
         {

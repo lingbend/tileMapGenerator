@@ -1,11 +1,11 @@
 namespace TileMapGenerator
 {
-    using ConcurrentRandom;
+    using ConcRandom;
 
     static internal class UIDGenerator
     {
         // private static int _id = 0;
-        private static ConcurrentRandom _random = new ConcurrentRandom(4593264);
+        private static ConcRandom _random = new ConcRandom(4593264);
 
         public static int GetNextID(object unique_identifier)
         {
@@ -13,6 +13,7 @@ namespace TileMapGenerator
             // return Interlocked.Increment(ref _id);
         }
 
+        // TODO: Implement this before presentation
         // public static int GetNextConcurrentID()
         // {
         //     return _random.Next(_id);

@@ -83,8 +83,8 @@ namespace Grid
             grid.SetSlice(5, 1, 5, 5, 1);
             grid.ChangeBorders(1);
             Grid testGrid = new Grid(5, 5);
-            testGrid._grid = ToNumber(0b1_111_111_111_111_111_111_111_111_111_111_111_111_111_111_111_111);
-            Assert.AreEqual(testGrid, grid, $"test grid: {NumberToLong(testGrid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");;
+            testGrid._back = ToNumber(0b1_111_111_111_111_111_111_111_111_111_111_111_111_111_111_111_111);
+            Assert.AreEqual(testGrid, grid, $"test grid: {NumberToLong(testGrid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");;
         }
 
         [TestMethod]
@@ -98,8 +98,8 @@ namespace Grid
             grid.SetSlice(5, 1, 5, 5, 1);
             grid.ChangeBorders(0);
             Grid testGrid = new Grid(5, 5);
-            testGrid._grid = ToNumber(0b0_000_000_011_111_001_111_100_111_110_011_111_001_111_100_000_000);
-            Assert.AreEqual(testGrid, grid, $"test grid: {NumberToLong(testGrid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");;
+            testGrid._back = ToNumber(0b0_000_000_011_111_001_111_100_111_110_011_111_001_111_100_000_000);
+            Assert.AreEqual(testGrid, grid, $"test grid: {NumberToLong(testGrid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");;
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace Grid
         public void GridGetSetCell_0MiddleCellEmptyGraph_0Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000101_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000101_1000001_1111111);
             grid.SetCell(2, 2, 0);
             Assert.AreEqual<uint>(0, grid.GetCell(2, 2));
         }
@@ -127,7 +127,7 @@ namespace Grid
         public void GridGetSetCell_1MiddleCellEmptyGraph_1Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.SetCell(2, 2, 1);
             Assert.AreEqual<uint>(1, grid.GetCell(2, 2));
         }
@@ -136,7 +136,7 @@ namespace Grid
         public void GridSetCell_2MiddleCellEmptyGraph_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000101_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000101_1111111);
             Assert.Throws<ArgumentException>(()=>grid.SetCell(2, 2, 2));
         }
 
@@ -144,7 +144,7 @@ namespace Grid
         public void GridGetSetCell_0MiddleCellFullGraph_0Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetCell(2, 2, 0);
             Assert.AreEqual<uint>(0, grid.GetCell(2, 2));
         }
@@ -153,7 +153,7 @@ namespace Grid
         public void GridGetSetCell_1MiddleCellFullGraph_1Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetCell(2, 2, 1);
             Assert.AreEqual<uint>(1, grid.GetCell(2, 2));
         }
@@ -162,7 +162,7 @@ namespace Grid
         public void GridSetCell_2MiddleCellFullGraph_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             Assert.Throws<ArgumentException>(()=>grid.SetCell(2, 2, 2));
         }
 
@@ -170,7 +170,7 @@ namespace Grid
         public void GridGetSetCell_0CornerCellEmptyGraph_0Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
             grid.SetCell(1, 1, 0);
             Assert.AreEqual<uint>(0, grid.GetCell(1, 1));
         }
@@ -179,7 +179,7 @@ namespace Grid
         public void GridGetSetCell_1CornerCellEmptyGraph_1Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.SetCell(1, 1, 1);
             Assert.AreEqual<uint>(1, grid.GetCell(1, 1));
         }
@@ -188,7 +188,7 @@ namespace Grid
         public void GridSetCell_2CornerCellEmptyGraph_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.Throws<ArgumentException>(()=>grid.SetCell(1, 1, 2));
         }
 
@@ -196,7 +196,7 @@ namespace Grid
         public void GridGetCellNeighbors_All0NeighborsMiddle_0b00000000()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b000_000_000, grid.GetCellNeighbors(2, 2));
         }
 
@@ -204,31 +204,31 @@ namespace Grid
         public void GridGetCellNeighbors_EachDirectionAs1Middle_All0sExcept1()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000101_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000101_1000001_1111111);
             Assert.AreEqual<uint>(0b100_000_000, grid.GetCellNeighbors(2, 2), "self");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1001001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1001001_1000001_1111111);
             Assert.AreEqual<uint>(0b010_000_000, grid.GetCellNeighbors(2, 2), "right");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1001001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1001001_1111111);
             Assert.AreEqual<uint>(0b001_000_000, grid.GetCellNeighbors(2, 2), "upper right");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000101_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000101_1111111);
             Assert.AreEqual<uint>(0b000_100_000, grid.GetCellNeighbors(2, 2), "up");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
             Assert.AreEqual<uint>(0b000_010_000, grid.GetCellNeighbors(2, 2), "upper left");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000011_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000011_1000001_1111111);
             Assert.AreEqual<uint>(0b000_001_000, grid.GetCellNeighbors(2, 2), "left");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000011_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000011_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b000_000_100, grid.GetCellNeighbors(2, 2), "lower left");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000101_1000001_1000000_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000101_1000001_1000000_1111111);
             Assert.AreEqual<uint>(0b000_000_010, grid.GetCellNeighbors(2, 2), "down");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1001001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1001001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b000_000_001, grid.GetCellNeighbors(2, 2), "lower right");
         }
 
@@ -236,7 +236,7 @@ namespace Grid
         public void GridGetCellNeighbors_All1NeighborsMiddle_0b111111111()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1001111_1001111_1001111_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1001111_1001111_1001111_1111111);
             Assert.AreEqual<uint>(0b111_111_111, grid.GetCellNeighbors(2, 2));
         }
 
@@ -244,16 +244,16 @@ namespace Grid
         public void GridGetCellNeighbors_All0NeighborsCorners_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b001_111_100, grid.GetCellNeighbors(1, 1), "upper left corner");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b011_110_001, grid.GetCellNeighbors(1, 5), "upper right corner");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b000_011_111, grid.GetCellNeighbors(5, 1), "lower left corner");
 
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             Assert.AreEqual<uint>(0b011_000_111, grid.GetCellNeighbors(5, 5), "lower right corner");
         }
 
@@ -261,55 +261,55 @@ namespace Grid
         public void GridInsertRow_NormalSizeEmptyGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.InsertRow(2);
             Grid test_grid = new Grid(6, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertRow_NormalSizeAlternatingGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.InsertRow(2);
             Grid test_grid = new Grid(6, 5);
-            test_grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1010101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1010101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertRow_NormalSizeFullGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.InsertRow(2);
             Grid test_grid = new Grid(6, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1000001_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1000001_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertRow_NormalSizeEmptyGraphSides_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.InsertRow(1);
             Grid test_grid = new Grid(6, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertRow_NormalSizeFullGraphSides_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.InsertRow(1);
             Grid test_grid = new Grid(6, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
@@ -329,8 +329,8 @@ namespace Grid
             Grid grid = new Grid(5, 1);
             grid.InsertRow(1);
             Grid test_grid = new Grid(6, 1);
-            test_grid._grid = ToNumber(0b111_101_101_101_101_101_101_111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111_101_101_101_101_101_101_111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -339,8 +339,8 @@ namespace Grid
             Grid grid = new Grid(1, 5);
             grid.InsertRow(1);
             Grid test_grid = new Grid(2, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -370,22 +370,22 @@ namespace Grid
         public void GridInsertCol_NormalSizeEmptyGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.InsertCol(2);
             Grid test_grid = new Grid(5, 6);
-            test_grid._grid = ToNumber(0b11111111_10000001_10000001_10000001_10000001_10000001_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_10000001_10000001_10000001_10000001_10000001_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertCol_NormalSizeAlternatingGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.InsertCol(2);
             Grid test_grid = new Grid(5, 6);
-            test_grid._grid = ToNumber(0b11111111_10101001_10101001_10101001_10101001_10101001_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_10101001_10101001_10101001_10101001_10101001_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
 
@@ -393,33 +393,33 @@ namespace Grid
         public void GridInsertCol_NormalSizeFullGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.InsertCol(2);
             Grid test_grid = new Grid(5, 6);
-            test_grid._grid = ToNumber(0b11111111_11111011_11111011_11111011_11111011_11111011_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_11111011_11111011_11111011_11111011_11111011_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertCol_NormalSizeEmptyGraphSides_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.InsertCol(1);
             Grid test_grid = new Grid(5, 6);
-            test_grid._grid = ToNumber(0b11111111_10000001_10000001_10000001_10000001_10000001_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_10000001_10000001_10000001_10000001_10000001_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridInsertCol_NormalSizeFullGraphSides_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.InsertCol(1);
             Grid test_grid = new Grid(5, 6);
-            test_grid._grid = ToNumber(0b11111111_11111101_11111101_11111101_11111101_11111101_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_11111101_11111101_11111101_11111101_11111101_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
@@ -439,8 +439,8 @@ namespace Grid
             Grid grid = new Grid(5, 1);
             grid.InsertCol(1);
             Grid test_grid = new Grid(5, 2);
-            test_grid._grid = ToNumber(0b1111_1001_1001_1001_1001_1001_1111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111_1001_1001_1001_1001_1001_1111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -449,8 +449,8 @@ namespace Grid
             Grid grid = new Grid(1, 5);
             grid.InsertCol(1);
             Grid test_grid = new Grid(1, 6);
-            test_grid._grid = ToNumber(0b11111111_10000001_11111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b11111111_10000001_11111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -479,44 +479,44 @@ namespace Grid
         public void GridDeleteRow_NormalSizeEmptyGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.DeleteRow(2);
             Grid test_grid = new Grid(4, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridDeleteRow_NormalSizeAlternatingGraph_Valid()
         {
             Grid grid = new Grid(4, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
             grid.DeleteRow(2);
             Grid test_grid = new Grid(3, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1010101__1010101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1010101__1010101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridDeleteRow_NormalSizeFullGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.DeleteRow(2);
             Grid test_grid = new Grid(4, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridDeleteRow_NormalSizeGraphSides_Valid()
         {
             Grid grid = new Grid(4, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
             grid.DeleteRow(1);
             Grid test_grid = new Grid(3, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1010101__1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1010101__1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
@@ -536,8 +536,8 @@ namespace Grid
             Grid grid = new Grid(5, 1);
             grid.DeleteRow(1);
             Grid test_grid = new Grid(4, 1);
-            test_grid._grid = ToNumber(0b111_101_101_101_101_111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111_101_101_101_101_111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -568,22 +568,22 @@ namespace Grid
         public void GridDeleteCol_NormalSizeEmptyGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.DeleteCol(2);
             Grid test_grid = new Grid(5, 4);
-            test_grid._grid = ToNumber(0b111111_100001_100001_100001_100001_100001_111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111111_100001_100001_100001_100001_100001_111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridDeleteCol_NormalSizeAlternatingGraph_Valid()
         {
             Grid grid = new Grid(4, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101__1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101__1010101_1010101_1111111);
             grid.DeleteCol(2);
             Grid test_grid = new Grid(4, 4);
-            test_grid._grid = ToNumber(0b111111_101001_101001__101001_101001_111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111111_101001_101001__101001_101001_111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
 
@@ -591,22 +591,22 @@ namespace Grid
         public void GridDeleteCol_NormalSizeFullGraph_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.DeleteCol(2);
             Grid test_grid = new Grid(5, 4);
-            test_grid._grid = ToNumber(0b111111_111111_111111_111111_111111_111111_111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111111_111111_111111_111111_111111_111111_111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
         public void GridDeleteCol_NormalSizeGraphSides_Valid()
         {
             Grid grid = new Grid(4, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1010101__1000001_1010101_1111111);
             grid.DeleteCol(1);
             Grid test_grid = new Grid(4, 4);
-            test_grid._grid = ToNumber(0b111111_100001_101011__100001_101011_111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111111_100001_101011__100001_101011_111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
 
@@ -627,8 +627,8 @@ namespace Grid
             Grid grid = new Grid(1, 5);
             grid.DeleteCol(1);
             Grid test_grid = new Grid(1, 4);
-            test_grid._grid = ToNumber(0b111111_100001_111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111111_100001_111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         } 
 
         [TestMethod]
@@ -661,32 +661,32 @@ namespace Grid
             Grid grid = new Grid(5, 5);
             grid.SetSlice(1, 1, 5, 1, 1);
             Grid test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000011_1000011_1000011_1000011_1000011_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000011_1000011_1000011_1000011_1000011_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
             grid.SetSlice(2, 2, 4, 2, 1);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000101_1000101_1000101_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000101_1000101_1000101_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
             grid.SetSlice(1, 1, 1, 5, 1);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
             grid.SetSlice(2, 2, 2, 4, 1);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1011101_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1011101_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
     
             grid = new Grid(5, 5);
             grid.SetSlice(4, 2, 2, 2, 1);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000101_1000101_1000101_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000101_1000101_1000101_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
         }
 
@@ -694,39 +694,39 @@ namespace Grid
         public void GridSetSlice_1s_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetSlice(1, 1, 5, 1, 0);
             Grid test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1111101_1111101_1111101_1111101_1111101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111101_1111101_1111101_1111101_1111101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetSlice(2, 2, 4, 2, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111011_1111011_1111011_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111011_1111011_1111011_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetSlice(1, 1, 1, 5, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetSlice(2, 2, 2, 4, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1100011_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1100011_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
     
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.SetSlice(4, 2, 2, 2, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1111111_1111011_1111011_1111011_1111111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1111111_1111011_1111011_1111011_1111111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
         }
 
@@ -734,39 +734,39 @@ namespace Grid
         public void GridSetSlice_Mixed_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.SetSlice(1, 1, 5, 1, 1);
             Grid test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1010111_1010111_1010111_1010111_1010111_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010111_1010111_1010111_1010111_1010111_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.SetSlice(2, 2, 4, 2, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1010101_1010001_1010001_1010001_1010101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010101_1010001_1010001_1010001_1010101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.SetSlice(1, 1, 1, 5, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
 
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.SetSlice(2, 2, 2, 4, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1000001_1010101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1000001_1010101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1010101_1111111);
             grid.SetSlice(2, 4, 2, 2, 0);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1000001_1010101_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1000001_1010101_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
         }
 
         [TestMethod]
@@ -785,15 +785,15 @@ namespace Grid
             Grid grid = new Grid(5, 5);
             grid.SetSlice(1, 1, 1, 1, 1);
             Grid test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000011_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
             Assert.AreEqual(0b1U, grid.GetSlice(1, 1, 1, 1));
 
             grid = new Grid(5, 5);
             grid.SetSlice(3, 4, 3, 4, 1);
             test_grid = new Grid(5, 5);
-            test_grid._grid = ToNumber(0b1111111_1000001_1000001_1010001_1000001_1000001_1111111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b1111111_1000001_1000001_1010001_1000001_1000001_1111111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
             Assert.AreEqual(0b1U, grid.GetSlice(3, 4, 3, 4));
         }
 
@@ -826,8 +826,8 @@ namespace Grid
             Grid grid = new Grid(1, 1);
             grid.SetSlice(1, 1, 1, 1, 1);
             Grid test_grid = new Grid(1, 1);
-            test_grid._grid = ToNumber(0b111_111_111);
-            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._grid).ToString("b")} grid: {NumberToLong(grid._grid ).ToString("b")}");
+            test_grid._back = ToNumber(0b111_111_111);
+            Assert.AreEqual(test_grid, grid, $"test grid: {NumberToLong(test_grid._back).ToString("b")} grid: {NumberToLong(grid._back ).ToString("b")}");
             Assert.AreEqual(0b1U, grid.GetSlice(1, 1, 1, 1));
         }
 
@@ -835,7 +835,7 @@ namespace Grid
         public void GraphGetSliceOR_No1s_Valid0()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
             Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 1, 5));
             Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 5, 1));
         }
@@ -844,7 +844,7 @@ namespace Grid
         public void GraphGetSliceOR_1_1s_Valid1()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
             Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
             Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 3, 5, 3));
         }
@@ -853,7 +853,7 @@ namespace Grid
         public void GraphGetSliceOR_No0s_Valid1()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
             Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
             Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 2, 5, 2));
         }
@@ -893,7 +893,7 @@ namespace Grid
         public void GraphGetSliceOR_SameStartEnd_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
             Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 1));
             Assert.AreEqual<uint>(0, grid.GetSliceOR(3, 3, 3, 3));
         }
@@ -909,7 +909,7 @@ namespace Grid
         public void GraphGetSliceAND_No1s_Valid0()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
             Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
             Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 5, 1));
         }
@@ -918,7 +918,7 @@ namespace Grid
         public void GraphGetSliceAND_1_1s_Valid0()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
             Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
             Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 3, 5, 3));
         }
@@ -927,7 +927,7 @@ namespace Grid
         public void GraphGetSliceAND_No0s_Valid1()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
             Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 5));
             Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 2, 5, 2));
         }
@@ -967,7 +967,7 @@ namespace Grid
         public void GraphGetSliceAND_SameStartEnd_Valid()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
             Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 1));
             Assert.AreEqual<uint>(0, grid.GetSliceAND(3, 3, 3, 3));
         }
@@ -994,16 +994,16 @@ namespace Grid
         public void GraphToBMP_ByHand()
         {
             Grid grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1001111_1001111_1001111_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1001111_1001111_1001111_1111111);
             grid.ToBMP();
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
             grid.ToBMP();
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
+            grid._back = ToNumber(0b1111111_1000001_1000001_1000001_1000001_1000001_1111111);
             grid.ToBMP();
             grid = new Grid(5, 5);
-            grid._grid = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
+            grid._back = ToNumber(0b1111111_1111111_1111111_1111111_1111111_1111111_1111111);
             grid.ToBMP();
         }
     

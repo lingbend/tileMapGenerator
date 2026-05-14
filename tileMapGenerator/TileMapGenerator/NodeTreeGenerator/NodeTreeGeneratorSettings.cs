@@ -365,7 +365,7 @@ namespace NodeTreeGenerator
                     }
                 }
             }
-            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
+            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComp(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
             int counter = connected_components.Count*3;
             Graph unified_graph = new Graph(false);
             while (connected_components.Count > 1 && counter > 0)
@@ -423,7 +423,7 @@ namespace NodeTreeGenerator
                         new_graph.AddVerticesAndEdgeRange(subgraph.Edges);
                     }
                 }
-                connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+                connected_components = NodeTreeGenerator.GetConnectedComp(new_graph);
                 counter--;
             }
             return (new_graph, new_backing_dictionary);
@@ -538,7 +538,7 @@ namespace NodeTreeGenerator
                     }
                 }
             }
-            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
+            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComp(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
             int counter = connected_components.Count*3;
             Graph unified_graph = new Graph(false);
             while (connected_components.Count > 1 && counter > 0)
@@ -596,7 +596,7 @@ namespace NodeTreeGenerator
                         new_graph.AddVerticesAndEdgeRange(subgraph.Edges);
                     }
                 }
-                connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+                connected_components = NodeTreeGenerator.GetConnectedComp(new_graph);
                 counter--;
             }
             return (new_graph, new_backing_dictionary);

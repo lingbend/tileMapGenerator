@@ -2,7 +2,7 @@ namespace GoRogueWrapper
 {
     using System.Numerics;
     using Vector2Extensions;
-    using ConcurrentRandom;
+    using ConcRandom;
     using Grid;
     using SadRogue.Primitives.GridViews;
     using System;
@@ -19,7 +19,7 @@ namespace GoRogueWrapper
             return view.points;
         }
 
-        public static IEnumerable<Vector2> GetSimpleHorizontalVerticalHall(Vector2 start, Vector2 end, object state, ConcurrentRandom random)
+        public static IEnumerable<Vector2> GetSimpleHorizontalVerticalHall(Vector2 start, Vector2 end, object state, ConcRandom random)
         {
             Vector2 range = Vector2Ext.SpanRange(new Vector2[]{start, end});
             SimpleMapViewer view = new SimpleMapViewer(range);
@@ -59,8 +59,8 @@ namespace GoRogueWrapper
 
             public BinaryMapViewer(Grid grid, Vector2? locus = null)
             {
-                Height = (int) grid.RowSize;
-                Width = (int) grid.ColSize;
+                Height = (int) grid.NRows;
+                Width = (int) grid.NCols;
                 Grid = new Grid(grid);
                 if (locus != null)
                 {

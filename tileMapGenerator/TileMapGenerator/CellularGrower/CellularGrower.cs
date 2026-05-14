@@ -304,7 +304,7 @@ namespace CellularGrower
                 chosen_direction = direction_chooser(open_directions.OrderBy(v=>v.X + (5*v.Y)), room);
             }
 
-            Grid negative_grid = new Grid(grid_copy.RowSize, grid_copy.ColSize);
+            Grid negative_grid = new Grid(grid_copy.NRows, grid_copy.NCols);
             if (Settings.ValidDirections.Contains(chosen_direction))
             {
                 (grid_copy, negative_grid, room) = GrowSide(grid_copy, room, chosen_direction);
@@ -331,7 +331,7 @@ namespace CellularGrower
             var (temp_sides, _) = room.GetTempGrownSides(direction);
             foreach (var spot in temp_sides)
             {
-                if (spot.X > grid.ColSize || spot.X < 1 || spot.Y > grid.RowSize || spot.Y < 1)
+                if (spot.X > grid.NCols || spot.X < 1 || spot.Y > grid.NRows || spot.Y < 1)
                 {
                     return false;
                 }
@@ -357,7 +357,7 @@ namespace CellularGrower
             new_sides.ExceptWith(old_copy);
 
             Grid grid_copy = new Grid(grid);
-            Grid negative_grid = new Grid(grid.RowSize, grid.RowSize);
+            Grid negative_grid = new Grid(grid.NRows, grid.NRows);
 
             Parallel.ForEach(old_sides, point =>
             {

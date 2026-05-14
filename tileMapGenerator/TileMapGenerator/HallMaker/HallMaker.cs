@@ -31,7 +31,7 @@ namespace HallMaker
 
         public Grid GenerateOnlyHalls(in Graph graph, in Grid grid, in IEnumerable<Zone> rooms, in IEnumerable<Hall> halls)
         {
-            var out_grid = new Grid(grid.RowSize, grid.ColSize);
+            var out_grid = new Grid(grid.NRows, grid.NCols);
             var room_points = GetRoomInnerPoints(rooms);
             foreach (Hall hall in halls)
             {
@@ -43,7 +43,7 @@ namespace HallMaker
 
         private Grid AddHallAlone(in Grid grid, in IEnumerable<Vector2> room_points, in Hall hall)
         {
-            Grid temp_grid = new Grid(grid.RowSize, grid.ColSize);
+            Grid temp_grid = new Grid(grid.NRows, grid.NCols);
             (temp_grid, _, _) = AddHallInner(room_points, hall, temp_grid);
 
             return temp_grid;
@@ -117,7 +117,7 @@ namespace HallMaker
 
         private bool InBounds(Vector2 location, Grid grid)
         {
-            return location.X > 0 && location.Y > 0 && location.X <= grid.ColSize && location.Y <= grid.RowSize;
+            return location.X > 0 && location.Y > 0 && location.X <= grid.NCols && location.Y <= grid.NRows;
         }
     }
 }

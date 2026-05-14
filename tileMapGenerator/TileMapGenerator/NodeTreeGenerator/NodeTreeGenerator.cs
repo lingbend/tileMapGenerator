@@ -31,8 +31,8 @@ namespace NodeTreeGenerator
 
         internal Graph GenerateNodeTree(int num_rooms)
         {  
-            int size = (int) Math.Pow(4.0*(num_rooms*(1.0+(Settings.InitialPaddingPercent/100.0))), .5);
-            var (new_graph, backing_dictionary) = GenerateFilledGraph((int) Math.Ceiling(size*Settings.InitialRatio.Y),(int) Math.Ceiling(size*Settings.InitialRatio.X));
+            var size = (int) Math.Pow(4.0*(num_rooms*(1.0+(Settings.InitialPaddingPercent/100.0))), .5);
+            var (new_graph, backing_dictionary) = GenerateFilled((int) Math.Ceiling(size*Settings.InitialRatio.Y),(int) Math.Ceiling(size*Settings.InitialRatio.X));
             _graph = new_graph;
             return GenerateNodeTreeInner(num_rooms, ref backing_dictionary);
         }
@@ -53,7 +53,7 @@ namespace NodeTreeGenerator
             if (num_rooms == 1)
             {
                 _graph = new Graph();
-                Vertex vert = new Vertex(Vector2.One);
+                var vert = new Vertex(Vector2.One);
                 _graph.AddVertex(vert);
                 backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
                 backing_dictionary.TryAdd(Vector2.One, vert);
@@ -78,19 +78,19 @@ namespace NodeTreeGenerator
 
         private (Graph, ConcurrentDictionary<Vector2, Vertex>) ReworkDegreeDistribution(Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes)
         {
-            Dictionary<int, int> degree_percents = Settings.degree_percents;
+            var degree_percents = Settings.degree_percents;
             int min = degree_percents.Keys.Min();
             int max = degree_percents.Keys.Max();
 
             (graph, backing_dictionary) = ForceEdgesToRange(graph, backing_dictionary, holes, min, max);
 
-            Graph min_span_tree = GetMinSpanTree(graph);
-            Graph min_span_tree_copy = GetMinSpanTree(graph);
+            var min_span_tree = GetMinSpanTree(graph);
+            var min_span_tree_copy = GetMinSpanTree(graph);
 
-            OrderedHashSet<Vertex> processed_vertices = new OrderedHashSet<Vertex>();
-            OrderedHashSet<Vertex> deleted_vertices = new OrderedHashSet<Vertex>();
-            OrderedHashSet<Vertex> new_vertices = new OrderedHashSet<Vertex>();
-            OrderedHashSet<Edge> processed_edges = new OrderedHashSet<Edge>(); 
+            var processed_vertices = new OrderedHashSet<Vertex>();
+            var deleted_vertices = new OrderedHashSet<Vertex>();
+            var new_vertices = new OrderedHashSet<Vertex>();
+            var processed_edges = new OrderedHashSet<Edge>(); 
             InnerReworkDegreeDistribution(ref graph, backing_dictionary, min_span_tree, min_span_tree_copy, degree_percents, processed_vertices, processed_edges, deleted_vertices, new_vertices);
             Graph new_vertices_container = new Graph(false);
             new_vertices_container.AddVerticesAndEdgeRange(GetAllEdges(new_vertices));
@@ -179,19 +179,19 @@ namespace NodeTreeGenerator
 
         private (OrderedHashSet<Vertex>, OrderedHashSet<Vertex>) TryTransplantVertices(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<ZEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
         {
-            OrderedHashSet<Vertex> deleted_vertices = new OrderedHashSet<Vertex>();
-            OrderedHashSet<Vertex> new_vertices = new OrderedHashSet<Vertex>();
+            var deleted = new OrderedHashSet<Vertex>();
+            var new_verts = new OrderedHashSet<Vertex>();
             while (degree < target_degree)
             {
-                OrderedHashSet<Vertex> sacrificial_vertices = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
+                var sacrificial = GetTarjanNonArticulatingPoints(graph, backing_dictionary);
 
-                sacrificial_vertices.ExceptWith(processed_vertices);
-                sacrificial_vertices.ExceptWith(GetAllVertices(processed_edges));
+                sacrificial.ExceptWith(processed_vertices);
+                sacrificial.ExceptWith(GetAllVertices(processed_edges));
 
-                if (sacrificial_vertices.Count != 0)
+                if (sacrificial.Count != 0)
                 {
-                    Vertex sacrificial_vertex = ChooseRandom(sacrificial_vertices!)!;
-                    deleted_vertices.Add(sacrificial_vertex);
+                    Vertex sacrificial_vertex = ChooseRandom(sacrificial!)!;
+                    deleted.Add(sacrificial_vertex);
                     graph.RemoveVertex(sacrificial_vertex);
 
                     if (min_span_tree.ContainsVertex(sacrificial_vertex))
@@ -215,7 +215,7 @@ namespace NodeTreeGenerator
                         continue;
                     }
                     Vertex replacement_vertex = new Vertex((Vector2) next_vertex.Weight + direction);
-                    new_vertices.Add(replacement_vertex);
+                    new_verts.Add(replacement_vertex);
                     Edge connection = next_vertex.ConnectToVertex(replacement_vertex, direction);
                     graph.AddVerticesAndEdge(connection);
                     min_span_tree.AddVerticesAndEdge(connection);
@@ -228,7 +228,7 @@ namespace NodeTreeGenerator
                     break;
                 }
             }  
-            return (deleted_vertices, new_vertices);  
+            return (deleted, new_verts);  
         }
 
         private IList<Edge> GetAllEdges(IEnumerable<Vertex> vertices)
@@ -262,7 +262,7 @@ namespace NodeTreeGenerator
                 }
             });
                 
-            Vector2 relative_loc = (Vector2) node.Weight;
+            var relative_loc = (Vector2) node.Weight;
 
             Parallel.ForEach(available_directions.Keys, direction=>{
             {
@@ -388,7 +388,7 @@ namespace NodeTreeGenerator
                 {
                     target_degree = max;
                 }
-                (Vector2? hole, bool local_success) = GetHoleOfDegreeOrGreater(backing_dictionary, holes, target_degree);
+                (Vector2? hole, bool local_success) = GetHoleOfGREQDeg(backing_dictionary, holes, target_degree);
                 if (local_success)
                 {
                     Vector2 hole_full = (Vector2) hole!;
@@ -411,7 +411,7 @@ namespace NodeTreeGenerator
                         graph.AddEdge(new_vertex.ConnectToVertex(choice, (Vector2) (choice.Weight - new_vertex.Weight)));
                     }
                 }
-                if (GetConnectedComponents(graph).Count > 1)
+                if (GetConnectedComp(graph).Count > 1)
                 {
                     throw new Exception();
                 }
@@ -444,7 +444,7 @@ namespace NodeTreeGenerator
             return graph;
         }
 
-        private (Vector2?, bool) GetHoleOfDegreeOrGreater(ConcurrentDictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes, int degree_min)
+        private (Vector2?, bool) GetHoleOfGREQDeg(ConcurrentDictionary<Vector2, Vertex> backing_dictionary, List<Vector2> holes, int degree_min)
         {
             string locker = string.Empty;
             Span<Vector2> holes_copy = new Span<Vector2>(holes.ToArray());
@@ -571,7 +571,7 @@ namespace NodeTreeGenerator
 
         private (Graph, ConcurrentDictionary<Vector2, Vertex>) CheckForHolesAndPatch(Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary)
         {
-            List<Graph> patching_graphs = GetConnectedComponents(graph);
+            List<Graph> patching_graphs = GetConnectedComp(graph);
             if (patching_graphs.Count > 1)
             {
                 graph = PatchHoles(patching_graphs, backing_dictionary);
@@ -579,7 +579,7 @@ namespace NodeTreeGenerator
             return (graph, backing_dictionary);
         }
 
-        internal static List<Graph> GetConnectedComponents(Graph graph)
+        internal static List<Graph> GetConnectedComp(Graph graph)
         {
             var test_connect = new QuikGraph.Algorithms.ConnectedComponents.ConnectedComponentsAlgorithm<Vertex, Edge>(graph);
             test_connect.Compute();
@@ -709,13 +709,12 @@ namespace NodeTreeGenerator
             return disposable_vertices;
         }
 
-        internal (Graph, ConcurrentDictionary<Vector2, Vertex>) GenerateFilledGraph(int rows, int cols)
+        internal (Graph, ConcurrentDictionary<Vector2, Vertex>) GenerateFilled(int rows, int cols)
         {
             ConcurrentDictionary<Vector2, Vertex> backing_dictionary = new ConcurrentDictionary<Vector2, Vertex>();
             Graph graph = new Graph(false);
             ConcurrentBag<Edge> edges = new ConcurrentBag<Edge>();
 
-            // initialize all vertices
             Parallel.For(1, rows+1, i=>
             {
                 Parallel.For(1, cols+1, j=>
@@ -744,7 +743,6 @@ namespace NodeTreeGenerator
 
             vertical_edging.Start();
 
-            //horizontal edging
             Parallel.For(1, rows, i=>
             {
                 Parallel.For(1, cols+1, j=>

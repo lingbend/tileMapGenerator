@@ -1,4 +1,4 @@
-namespace ConcurrentRandom
+namespace ConcRandom
 {
     using System.Text;
     using System.IO.Hashing;
@@ -7,7 +7,7 @@ namespace ConcurrentRandom
     using System.Linq;
     using static Medallion.Bits;
 
-    public class ConcurrentRandom
+    public class ConcRandom
     {
         private int _seed_1 = 0;
         private int _seed_3 = 0;
@@ -19,7 +19,7 @@ namespace ConcurrentRandom
 
         int[] backing;
 
-        public ConcurrentRandom(int seed)
+        public ConcRandom(int seed)
         {
             if (seed == 0)
             {
@@ -103,8 +103,6 @@ namespace ConcurrentRandom
             return original;
         }
 
-
-        // For GoRogue. Implement as needed.
         public bool CanReset => throw new NotImplementedException();
 
         public uint Seed => throw new NotImplementedException();

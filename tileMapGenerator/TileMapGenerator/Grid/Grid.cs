@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Vec2 = SadRogue.Primitives.Point;
+using Bits = System.Collections.BitArray;
 
 using static Medallion.Bits;
 
@@ -19,18 +21,18 @@ namespace Grid
 {
     public struct Grid : IDed, IGridView<bool>
     {
-        internal Backing _grid;
+        internal Backing _back;
         private (uint, uint) _size;
-        public uint RowSize{get{return _size.Item1;}}
-        public uint ColSize{get{return _size.Item2;}}
+        public uint NRows{get{return _size.Item1;}}
+        public uint NCols{get{return _size.Item2;}}
 
         public int ID { get => _id; set => _id = value; }
 
-        public int Height => (int) RowSize;
+        public int Height => (int) NRows;
 
-        public int Width => (int) ColSize;
+        public int Width => (int) NCols;
 
-        public int Count => _grid.Count;
+        public int Count => _back.Count;
 
         public bool this[int index1D] {
             get
@@ -43,14 +45,14 @@ namespace Grid
             }
         }
 
-        public bool this[SadRogue.Primitives.Point pos]  {
+        public bool this[Vec2 p]  {
             get
             {
-                return GetCell(pos.ToVector2()) == 1;
+                return GetCell(p.ToVector2()) == 1;
             }
             set
             {
-                SetCell(pos.ToVector2(), value ? 1u : 0u);
+                SetCell(p.ToVector2(), value ? 1u : 0u);
             }
         }
 
@@ -77,7 +79,7 @@ namespace Grid
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new Backing((int)((rows + 2) * (columns + 2)), 0);
+            _back = new Backing((int)((rows + 2) * (columns + 2)), 0);
             _queue_fill = new bool[(rows + 2) * (columns + 2)];
             _queue_empty = new bool[(rows + 2) * (columns + 2)];
 
@@ -95,12 +97,12 @@ namespace Grid
         public Grid(Grid old_grid)
         {
             _border_num = 1;
-            _id = GetID(old_grid._size.Item1, old_grid._size.Item2, old_grid._grid.ToString());
+            _id = GetID(old_grid._size.Item1, old_grid._size.Item2, old_grid._back.ToString());
             if (old_grid._size.Item1 == 0 || old_grid._size.Item2 == 0)
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new Backing((int)((old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)), 0);
+            _back = new Backing((int)((old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)), 0);
             _queue_fill = new bool[(old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)];
             _queue_empty = new bool[(old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)];
 
@@ -113,7 +115,7 @@ namespace Grid
             {
                 throw new ArgumentException("Value must be 0 or 1. Value was: " + old_grid._border_num);
             }
-            _grid = new Backing(old_grid._grid);
+            _back = new Backing(old_grid._back);
         }
 
         public void Clear()
@@ -132,7 +134,7 @@ namespace Grid
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new Backing((int)((rows + 2) * (columns + 2)), 0);
+            _back = new Backing((int)((rows + 2) * (columns + 2)), 0);
             _queue_fill = new bool[(rows + 2) * (columns + 2)];
             _queue_empty = new bool[(rows + 2) * (columns + 2)];
 
@@ -211,9 +213,9 @@ namespace Grid
 
         public void RunQueue()
         {
-            _grid |= new Backing(new BitArray(_queue_fill));
+            _back |= new Backing(new Bits(_queue_fill));
             _queue_fill = new bool[_queue_fill.Length];
-            _grid &= (~new Backing(new BitArray(_queue_empty))) &_grid;
+            _back &= (~new Backing(new Bits(_queue_empty))) &_back;
             _queue_empty = new bool[_queue_empty.Length];
         }
 
@@ -221,35 +223,35 @@ namespace Grid
         {
             foreach (var o_grid in other_grids)
             {
-                _grid |= o_grid._grid;
+                _back |= o_grid._back;
             }
         }
 
         public void DifferenceGrids(IEnumerable<Grid> other_grids)
         {
-            _grid |= other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2);
-            _grid &= (~other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2)) &_grid;
+            _back |= other_grids.Select(g=>g._back).Aggregate((g1, g2)=>g1 | g2);
+            _back &= (~other_grids.Select(g=>g._back).Aggregate((g1, g2)=>g1 | g2)) &_back;
         }
 
         private void SetCellInternal(uint row, uint col, uint val)
         {
             if (val == 1){
-                _grid.SetBit((int) GetCellIndex(row, col), true);
+                _back.SetBit((int) GetCellIndex(row, col), true);
             }
             else
             {
-                _grid.SetBit((int) GetCellIndex(row, col), false);
+                _back.SetBit((int) GetCellIndex(row, col), false);
             }
         }
 
         private void SetRowInternal(uint row, uint col, uint val, uint length)
         {        
             if (val == 1){
-                _grid |= new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length);
+                _back |= new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length);
             }
             else
             {
-                _grid &= ~((new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length))&_grid);
+                _back &= ~((new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length))&_back);
             }
         }
 
@@ -270,39 +272,39 @@ namespace Grid
 
         private uint GetCellInternal(uint row, uint col)
         {
-            return _grid.GetBit((int) GetCellIndex(row, col));
+            return _back.GetBit((int) GetCellIndex(row, col));
         }
 
         private void InsertEmptyCellInternal(uint row, uint col)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            Backing first_half = _grid & new Backing(cell_index, 1);
-            Backing second_half = (_grid << 1) & (new Backing(_grid.Count - cell_index, 1) << (cell_index+1));
-            _grid = first_half | second_half;
+            Backing first_half = _back & new Backing(cell_index, 1);
+            Backing second_half = (_back << 1) & (new Backing(_back.Count - cell_index, 1) << (cell_index+1));
+            _back = first_half | second_half;
         }
 
         private void InsertEmptyRowInternal(uint row, uint col, uint length)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            Backing first_half = _grid & new Backing(cell_index, 1);
-            Backing second_half = (_grid << (int) length+1) & (new Backing(_grid.Count - cell_index, 1) << (int) (cell_index+length+1));
-            _grid = first_half | second_half;
+            Backing first_half = _back & new Backing(cell_index, 1);
+            Backing second_half = (_back << (int) length+1) & (new Backing(_back.Count - cell_index, 1) << (int) (cell_index+length+1));
+            _back = first_half | second_half;
         }
 
         private void DeleteCellInternal(uint row, uint col)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            Backing first_half = _grid & new Backing(cell_index, 1);
-            Backing second_half = (_grid >> 1) & (new Backing(_grid.Count - cell_index, 1) << cell_index);
-            _grid = first_half | second_half;
+            Backing first_half = _back & new Backing(cell_index, 1);
+            Backing second_half = (_back >> 1) & (new Backing(_back.Count - cell_index, 1) << cell_index);
+            _back = first_half | second_half;
         }
 
         private void DeleteEmptyRowInternal(uint row, uint col, uint length)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            Backing first_half = _grid & new Backing(cell_index, 1);
-            Backing second_half = (_grid >> (int) length+1) & (new Backing(_grid.Count - cell_index, 1) << (int) (cell_index-length+1));
-            _grid = first_half | second_half;
+            Backing first_half = _back & new Backing(cell_index, 1);
+            Backing second_half = (_back >> (int) length+1) & (new Backing(_back.Count - cell_index, 1) << (int) (cell_index-length+1));
+            _back = first_half | second_half;
         }
 
         public uint GetCellNeighbors(uint row, uint col)
@@ -551,7 +553,7 @@ namespace Grid
         {
             if (obj != null && obj is Grid)
             {
-                return ((Grid) obj)._grid.Equals(_grid);
+                return ((Grid) obj)._back.Equals(_back);
             }
             return base.Equals(obj);
         }
@@ -631,106 +633,106 @@ namespace Grid
 
     internal struct Backing
         {
-            private BitArray _backing_array;
-            public Backing(ulong value)
+            private Bits _backing;
+            public Backing(ulong v)
             {
-                _backing_array = ToBitArray(value);
+                _backing = ToBits(v);
             } 
 
             public Backing(Backing old_number)
             {
-                _backing_array = new BitArray(old_number._backing_array);
+                _backing = new Bits(old_number._backing);
             }
 
             public static Backing ZERO{get;} = new Backing(0);
             public static Backing ONE{get;} = new Backing(1);
 
-            public int Count{get {return _backing_array.Count;}}
+            public int Count{get {return _backing.Count;}}
 
-            public Backing(int bit_number, int default_value)
+            public Backing(int num, int default_v)
             {
-                if (default_value != 1 && default_value != 0)
+                if (default_v != 1 && default_v != 0)
                 {
                     throw new ArgumentException("number must be 0 or 1");
                 }
-                _backing_array = new BitArray(bit_number, default_value == 1);
+                _backing = new Bits(num, default_v == 1);
             }
 
-            public Backing(BitArray bitArray)
+            public Backing(Bits backing)
             {
-                _backing_array = new BitArray(bitArray);
+                _backing = new Bits(backing);
             }
 
-            public static Backing operator <<(Backing n, int shift_num)
+            public static Backing operator <<(Backing n, int shift)
             {
-                Backing copy = new Backing(n._backing_array);
-                copy._backing_array.Length += shift_num;
-                copy._backing_array.LeftShift(shift_num);
+                Backing copy = new Backing(n._backing);
+                copy._backing.Length += shift;
+                copy._backing.LeftShift(shift);
                 return copy;
             }
 
-            public static Backing operator >>(Backing n, int shift_num)
+            public static Backing operator >>(Backing n, int shift)
             {
-                Backing copy = new Backing(n._backing_array);
-                copy._backing_array.RightShift(shift_num);
-                copy._backing_array.Length -= shift_num;
+                Backing copy = new Backing(n._backing);
+                copy._backing.RightShift(shift);
+                copy._backing.Length -= shift;
                 return copy;
             }
 
             public static Backing operator |(Backing n, Backing n2)
             {
-                if (n._backing_array.Count == n2._backing_array.Count){
-                    Backing copy = new Backing(n._backing_array);
-                    copy._backing_array.Or(n2._backing_array);
+                if (n._backing.Count == n2._backing.Count){
+                    Backing copy = new Backing(n._backing);
+                    copy._backing.Or(n2._backing);
                     return copy;
                 }
-                else if (n._backing_array.Count > n2._backing_array.Count)
+                else if (n._backing.Count > n2._backing.Count)
                 {
-                    Backing copy = new Backing(n2._backing_array);
-                    copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
-                    copy._backing_array.Or(n._backing_array);
+                    Backing copy = new Backing(n2._backing);
+                    copy._backing.Length += n._backing.Count - n2._backing.Count;
+                    copy._backing.Or(n._backing);
                     return copy;
                 }
                 else
                 {
-                    Backing copy = new Backing(n._backing_array);
-                    copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
-                    copy._backing_array.Or(n2._backing_array);
+                    Backing copy = new Backing(n._backing);
+                    copy._backing.Length += n2._backing.Count - n._backing.Count;
+                    copy._backing.Or(n2._backing);
                     return copy;
                 }
             }
         
             public static Backing operator &(Backing n, Backing n2)
             {
-                if (n._backing_array.Count == n2._backing_array.Count){
-                    Backing copy = new Backing(n._backing_array);
-                    copy._backing_array.And(n2._backing_array);
+                if (n._backing.Count == n2._backing.Count){
+                    Backing copy = new Backing(n._backing);
+                    copy._backing.And(n2._backing);
                     return copy;
                 }
-                else if (n._backing_array.Count > n2._backing_array.Count)
+                else if (n._backing.Count > n2._backing.Count)
                 {
-                    Backing copy = new Backing(n2._backing_array);
-                    copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
-                    copy._backing_array.And(n._backing_array);
+                    Backing copy = new Backing(n2._backing);
+                    copy._backing.Length += n._backing.Count - n2._backing.Count;
+                    copy._backing.And(n._backing);
                     return copy;
                 }
                 else
                 {
-                    Backing copy = new Backing(n._backing_array);
-                    copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
-                    copy._backing_array.And(n2._backing_array);
+                    Backing copy = new Backing(n._backing);
+                    copy._backing.Length += n2._backing.Count - n._backing.Count;
+                    copy._backing.And(n2._backing);
                     return copy;
                 }
             }
 
             public void SetBit(int index, bool value)
             {
-                _backing_array[index] = value;
+                _backing[index] = value;
             }
 
             public uint GetBit(int index)
             {
-                if (_backing_array[index])
+                if (_backing[index])
                 {
                     return 1u;
                 }
@@ -740,25 +742,25 @@ namespace Grid
                 }
             }
 
-            private static BitArray ToBitArray(object num_obj)
+            private static Bits ToBits(object num_obj)
             {
                 ulong num = (ulong) num_obj;
-                BitArray temp_array = new BitArray(BitConverter.GetBytes(num));
+                Bits temp_array = new Bits(BitConverter.GetBytes(num));
                 return temp_array;
             }
 
             public static Backing operator~(Backing n)
             {
-                Backing copy = new Backing(n._backing_array);
-                copy._backing_array.Not();
+                Backing copy = new Backing(n._backing);
+                copy._backing.Not();
                 return copy;
             }
 
 
             public uint ToUint()
             {
-                byte[] temp_array = new byte[_backing_array.Count];
-                _backing_array.CopyTo(temp_array, 0);
+                byte[] temp_array = new byte[_backing.Count];
+                _backing.CopyTo(temp_array, 0);
                 try
                 {
                     return BitConverter.ToUInt32(temp_array);
@@ -787,15 +789,15 @@ namespace Grid
 
             public ulong ToULong()
             {
-                byte[] temp_array = new byte[_backing_array.Count];
-                _backing_array.CopyTo(temp_array, 0);
+                byte[] temp_array = new byte[_backing.Count];
+                _backing.CopyTo(temp_array, 0);
                 return BitConverter.ToUInt64(temp_array);
             }
 
             public BigInteger ToBigInteger()
             {
-                byte[] temp_array = new byte[_backing_array.Count];
-                _backing_array.CopyTo(temp_array, 0);
+                byte[] temp_array = new byte[_backing.Count];
+                _backing.CopyTo(temp_array, 0);
                 return new BigInteger(temp_array);
             }
 

@@ -41,7 +41,7 @@ namespace Exits
             var exits = ExitStamper.ChooseExits(rooms, halls);
             var patches = ExitStamper.PatchFrames(exits, grid);
             grid.ToBMP("ExitStamper_CorrectCounts30_Valid");
-            Grid exit_grid = new Grid(grid.RowSize, grid.ColSize);
+            Grid exit_grid = new Grid(grid.NRows, grid.NCols);
             foreach (var point in exits)
             {
                 exit_grid.SetCell(point.Reverse(), 1);
@@ -69,7 +69,7 @@ namespace Exits
             var exits = ExitStamper.ChooseExits(rooms, halls);
             var patches = ExitStamper.PatchFrames(exits, grid);
             grid.ToBMP("ExitStamper_CircularCorrectCounts30_Valid");
-            Grid exit_grid = new Grid(grid.RowSize, grid.ColSize);
+            Grid exit_grid = new Grid(grid.NRows, grid.NCols);
             foreach (var point in exits)
             {
                 exit_grid.SetCell(point.Reverse(), 1);
@@ -98,7 +98,7 @@ namespace Exits
             var exits = ExitStamper.ChooseExits(rooms, halls);
             var patches = ExitStamper.PatchFrames(exits, grid);
             grid.ToBMP("ExitStamper_CaveCorrectCounts30_Valid");
-            Grid exit_grid = new Grid(grid.RowSize, grid.ColSize);
+            Grid exit_grid = new Grid(grid.NRows, grid.NCols);
             foreach (var point in exits)
             {
                 exit_grid.SetCell(point.Reverse(), 1);
