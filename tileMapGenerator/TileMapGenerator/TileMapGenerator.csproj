@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Bits" Version="1.1.0" />
+    <PackageReference Include="DeBroglie" Version="2.1.0" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="MSTest" Version="4.2.2" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="MSTest.TestAdapter" Version="4.2.2" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="MSTest.TestFramework" Version="4.2.2" />

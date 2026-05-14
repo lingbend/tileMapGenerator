@@ -1,4 +1,7 @@
 // First Step
+using DeBroglie;
+using WFC = DeBroglie.Wfc;
+
 namespace CellularGrower
 {
     using BitArray2D;
