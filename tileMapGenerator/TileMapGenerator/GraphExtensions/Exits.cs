@@ -11,35 +11,36 @@ using System.Linq;
 
 namespace Exits
 {
+    // TODO: Refactor to internal?
     public static class ExitStamper
     {
-        public static IEnumerable<Vector2> ChooseExits(IEnumerable<Zone> rooms, IEnumerable<Hall> halls, List<string>? excluded_tags = null)
+        public static IEnumerable<Vector2> ChooseExits(IEnumerable<Zone> zones, IEnumerable<Tunnel> tunnels, List<string>? excluded_tags = null)
         {
-            ConcurrentDictionary<Zone, List<Hall>> rooms_to_halls = new ConcurrentDictionary<Zone, List<Hall>>();
+            ConcurrentDictionary<Zone, List<Tunnel>> rooms_to_halls = new ConcurrentDictionary<Zone, List<Tunnel>>();
             if (excluded_tags is null)
             {
                 excluded_tags = new List<string>();
             }
-            foreach (Hall hall in halls)
+            foreach (Tunnel hall in tunnels)
             {
-                Zone source_room = rooms.First(r=>r.Locus == hall.SourceLocus);
-                if (!rooms_to_halls.TryAdd(source_room, new List<Hall>{hall}) && !source_room.Tags.Any(s=>excluded_tags.Contains(s)))
+                Zone source_room = zones.First(r=>r.Locus == hall.SourceLocus);
+                if (!rooms_to_halls.TryAdd(source_room, new List<Tunnel>{hall}) && !source_room.Tags.Any(s=>excluded_tags.Contains(s)))
                 {
                     rooms_to_halls[source_room].Add(hall);
                 }
 
-                Zone target_room = rooms.First(r=>r.Locus == hall.TargetLocus);
-                if (!rooms_to_halls.TryAdd(target_room, new List<Hall>{hall})&& !target_room.Tags.Any(s=>excluded_tags.Contains(s)))
+                Zone target_room = zones.First(r=>r.Locus == hall.TargetLocus);
+                if (!rooms_to_halls.TryAdd(target_room, new List<Tunnel>{hall})&& !target_room.Tags.Any(s=>excluded_tags.Contains(s)))
                 {
                     rooms_to_halls[target_room].Add(hall);
                 }
             }
         
             HashSet<Vector2> exit_locations = new HashSet<Vector2>();
-            foreach (Zone room in rooms)
+            foreach (Zone room in zones)
             {
                 var room_points = room.GetInsidePoints().Union(room.GetSides());
-                foreach (Hall hall in rooms_to_halls[room])
+                foreach (Tunnel hall in rooms_to_halls[room])
                 {
                     HashSet<Vector2> overlap = new HashSet<Vector2>(hall.InsidePoints.Intersect(room_points));
                     exit_locations.Add(overlap.OrderByDescending(v=>Vector2.DistanceSquared(v, room.Locus)).First());
@@ -57,21 +58,21 @@ namespace Exits
                 if (grid.GetAllSetCartesianNeighbors((uint) exit.Y, (uint) exit.X) <= 1)
                 {
                 
-                    if (grid.InBounds((exit + Vector2Ext.DOWN).Reverse()) && grid.GetCell((exit + Vector2Ext.DOWN).Reverse()) == 1)
+                    if (grid.InBounds((exit + Vec2Ext.DOWN).Reverse()) && grid.GetCell((exit + Vec2Ext.DOWN).Reverse()) == 1)
                     {
-                        patches.Add(exit + Vector2Ext.UP);
+                        patches.Add(exit + Vec2Ext.UP);
                     }
-                    else if (grid.InBounds((exit + Vector2Ext.UP).Reverse()) && grid.GetCell((exit + Vector2Ext.UP).Reverse()) == 1)
+                    else if (grid.InBounds((exit + Vec2Ext.UP).Reverse()) && grid.GetCell((exit + Vec2Ext.UP).Reverse()) == 1)
                     {
-                        patches.Add(exit + Vector2Ext.DOWN);
+                        patches.Add(exit + Vec2Ext.DOWN);
                     }
-                    else if (grid.InBounds((exit + Vector2Ext.LEFT).Reverse()) && grid.GetCell((exit + Vector2Ext.LEFT).Reverse()) == 1)
+                    else if (grid.InBounds((exit + Vec2Ext.LEFT).Reverse()) && grid.GetCell((exit + Vec2Ext.LEFT).Reverse()) == 1)
                     {
-                        patches.Add(exit + Vector2Ext.RIGHT);
+                        patches.Add(exit + Vec2Ext.RIGHT);
                     }
-                    else if (grid.InBounds((exit + Vector2Ext.RIGHT).Reverse()) && grid.GetCell((exit + Vector2Ext.RIGHT).Reverse()) == 1)
+                    else if (grid.InBounds((exit + Vec2Ext.RIGHT).Reverse()) && grid.GetCell((exit + Vec2Ext.RIGHT).Reverse()) == 1)
                     {
-                        patches.Add(exit + Vector2Ext.LEFT);
+                        patches.Add(exit + Vec2Ext.LEFT);
                     }
                 }
             }

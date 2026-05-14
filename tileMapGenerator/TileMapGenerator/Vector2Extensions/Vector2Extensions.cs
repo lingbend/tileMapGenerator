@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Vector2Extensions
 {
-    public static class Vector2Ext
+    public static class Vec2Ext
     {
         public static Vector2 MaxRange(IEnumerable<Vector2> vectors)
         {

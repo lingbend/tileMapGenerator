@@ -12,7 +12,7 @@ namespace GoRogueWrapper
     {
         public static IEnumerable<Vector2> GetSimpleDirectHall(Vector2 start, Vector2 end)
         {
-            Vector2 range = Vector2Ext.SpanRange(new Vector2[]{start, end});
+            Vector2 range = Vec2Ext.SpanRange(new Vector2[]{start, end});
             SimpleMapViewer view = new SimpleMapViewer(range);
             var chicken = new DirectLineTunnelCreator(AdjacencyRule.CARDINALS);
             chicken.CreateTunnel(view, start, end);
@@ -21,7 +21,7 @@ namespace GoRogueWrapper
 
         public static IEnumerable<Vector2> GetSimpleHorizontalVerticalHall(Vector2 start, Vector2 end, object state, ConcRandom random)
         {
-            Vector2 range = Vector2Ext.SpanRange(new Vector2[]{start, end});
+            Vector2 range = Vec2Ext.SpanRange(new Vector2[]{start, end});
             SimpleMapViewer view = new SimpleMapViewer(range);
             var chicken = new HorizontalVerticalTunnelCreator(random);
             lock (random)

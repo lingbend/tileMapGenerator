@@ -57,11 +57,11 @@ namespace GoRogueWrapper
                 ? Lines.Algorithm.Orthogonal
                 : Lines.Algorithm.Bresenham;
 
-            var previous = Vector2Ext.NONE;
+            var previous = Vec2Ext.NONE;
             foreach (var pos in Lines.GetLine(start.ToPoint(), end.ToPoint(), lineAlgorithm))
             {
                 map[pos] = true;
-                if (_doubleWideVertical && previous != Vector2Ext.NONE && pos.Y != previous.Y && pos.X + 1 < map.Width - 1)
+                if (_doubleWideVertical && previous != Vec2Ext.NONE && pos.Y != previous.Y && pos.X + 1 < map.Width - 1)
                 {
                     var wideningPos = pos + (1, 0);
                     map[wideningPos] = true;

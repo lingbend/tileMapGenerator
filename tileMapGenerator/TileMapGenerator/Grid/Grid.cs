@@ -236,11 +236,11 @@ namespace Grid
         private void SetCellInternal(uint row, uint col, uint val)
         {
             if (val == 1){
-                _back.SetBit((int) GetCellIndex(row, col), true);
+                _back.SetAt((int) GetCellIndex(row, col), true);
             }
             else
             {
-                _back.SetBit((int) GetCellIndex(row, col), false);
+                _back.SetAt((int) GetCellIndex(row, col), false);
             }
         }
 
@@ -272,7 +272,7 @@ namespace Grid
 
         private uint GetCellInternal(uint row, uint col)
         {
-            return _back.GetBit((int) GetCellIndex(row, col));
+            return _back.GetAt((int) GetCellIndex(row, col));
         }
 
         private void InsertEmptyCellInternal(uint row, uint col)
@@ -469,7 +469,7 @@ namespace Grid
             return result;
         }
 
-        public uint GetSliceOR(uint row1, uint col1, uint row2, uint col2)
+        public uint GetSliceOr(uint row1, uint col1, uint row2, uint col2)
         {
             CheckIndexValidity(row1, col1);
             CheckIndexValidity(row2, col2);
@@ -509,7 +509,7 @@ namespace Grid
             return result;
         }
 
-        public uint GetSliceAND(uint row1, uint col1, uint row2, uint col2)
+        public uint GetSliceAnd(uint row1, uint col1, uint row2, uint col2)
         {
             CheckIndexValidity(row1, col1);
             CheckIndexValidity(row2, col2);
@@ -725,12 +725,12 @@ namespace Grid
                 }
             }
 
-            public void SetBit(int index, bool value)
+            public void SetAt(int index, bool value)
             {
                 _backing[index] = value;
             }
 
-            public uint GetBit(int index)
+            public uint GetAt(int index)
             {
                 if (_backing[index])
                 {

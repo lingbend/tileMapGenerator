@@ -21,6 +21,7 @@ namespace NodeTreeGenerator
     using System.Threading;
     using System.Threading.Tasks;
 
+    // TODO: Refactor to internal
     public class NodeTreeGenerator
     {
         private Graph _graph = new Graph(false);

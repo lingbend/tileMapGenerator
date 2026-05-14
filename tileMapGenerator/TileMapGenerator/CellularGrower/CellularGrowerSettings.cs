@@ -23,7 +23,7 @@ namespace CellularGrower
         public Func<IEnumerable<Vector2>, Zone, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
         internal List<Vector2> ValidDirections{get; set;} = DefaultValidDirections;
         public static List<Vector2> DefaultValidDirections{get;} = new List<Vector2>(){
-        Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN};
+        Vec2Ext.RIGHT, Vec2Ext.UP, Vec2Ext.LEFT, Vec2Ext.DOWN};
 
         public Func<Graph, Vertex, Vector2, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>>> ShapeChooser{get; set;} = DefaultShapeChooser;
         public Func<Graph, Vertex, IEnumerable<string>>? Tagger{get; set;} = DefaultTagger;
@@ -49,7 +49,7 @@ namespace CellularGrower
             {
                  _prioritizer_random = new ConcRandom(Random.Next());
             }
-            IEnumerable<Zone> small_zones = zones.Where(r=>Vector2Ext.SpanRange(r.GetSides()).X < 3 && Vector2Ext.SpanRange(r.GetSides()).Y<3);
+            IEnumerable<Zone> small_zones = zones.Where(r=>Vec2Ext.SpanRange(r.GetSides()).X < 3 && Vec2Ext.SpanRange(r.GetSides()).Y<3);
             if (small_zones.Count() > 0)
             {
                 int index = _prioritizer_random.Next(small_zones.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, small_zones.Count());
@@ -90,7 +90,7 @@ namespace CellularGrower
 
         private static float CalculateSideRatio(IEnumerable<Vector2> corners)
         {
-            Vector2 range = Vector2Ext.SpanRange(corners) + Vector2.One;
+            Vector2 range = Vec2Ext.SpanRange(corners) + Vector2.One;
             return range.X / range.Y;
         }
 
@@ -103,9 +103,9 @@ namespace CellularGrower
         {
             List<Vector2> shape = new List<Vector2>();
 
-            Vector2 range = Vector2Ext.SpanRange(corners.Values);
+            Vector2 range = Vec2Ext.SpanRange(corners.Values);
 
-            foreach (Vector2 dir in new Vector2[] { Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN })
+            foreach (Vector2 dir in new Vector2[] { Vec2Ext.RIGHT, Vec2Ext.UP, Vec2Ext.LEFT, Vec2Ext.DOWN })
             {
                 int temp_length;
                 if (dir.X == 0)
@@ -166,9 +166,9 @@ namespace CellularGrower
         {
             Vector2 center = corners.Values.Aggregate((v1, v2) => v1 + v2) / 4.0f;
 
-            Vector2 min = Vector2Ext.MinRange(corners.Values);
-            Vector2 max = Vector2Ext.MaxRange(corners.Values);
-            Vector2 diameters = Vector2Ext.SpanRange(corners.Values);
+            Vector2 min = Vec2Ext.MinRange(corners.Values);
+            Vector2 max = Vec2Ext.MaxRange(corners.Values);
+            Vector2 diameters = Vec2Ext.SpanRange(corners.Values);
             Vector2 radii = diameters * .5f;
 
             if (!(diameters.X >= 5 && diameters.Y >= 6 || diameters.X >= 6 && diameters.Y >= 5))
@@ -221,9 +221,9 @@ namespace CellularGrower
             return (length, direction, corners) =>
             {
                 Vector2 center = corners.Values.Aggregate((v1, v2)=>v1+v2)/4.0f;
-                Vector2 min = Vector2Ext.MinRange(corners.Values);
-                Vector2 max = Vector2Ext.MaxRange(corners.Values);
-                Vector2 diameters = Vector2Ext.SpanRange(corners.Values);
+                Vector2 min = Vec2Ext.MinRange(corners.Values);
+                Vector2 max = Vec2Ext.MaxRange(corners.Values);
+                Vector2 diameters = Vec2Ext.SpanRange(corners.Values);
 
                 float diagonal_length = (corners.Values.First() - center).Length();
                 if (!(diameters.X >= 5 && diameters.Y >= 6 || diameters.X >= 6 && diameters.Y >= 5))

@@ -1,0 +1,7 @@
+Ideas:
+- create algorithm that does area building using wfc -> graph connections between -> carve exits and tunnels
+- tag areas at initial run
+- want polygonal, circular, and blobby rooms
+- item population in area in scope rn?
+
+NOTE: Remove file before publishing to team

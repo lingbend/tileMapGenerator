@@ -6,7 +6,7 @@ namespace Primitives
     using TileMapGenerator;
     using System.Collections.Generic;
 
-    public class Hall : IDed
+    public class Tunnel : IDed
     {
         public int ID{get; set;}
         public Vector2 Locus{get;}
@@ -16,7 +16,7 @@ namespace Primitives
         public HashSet<Vector2> InsidePoints{get; set;} = new HashSet<Vector2>();
         public HashSet<Vector2> WallPoints{get; set;} = new HashSet<Vector2>();
 
-        internal Hall(Edge edge, Vector2 center, Vector2 source_locus, Vector2 target_locus)
+        internal Tunnel(Edge edge, Vector2 center, Vector2 source_locus, Vector2 target_locus)
         {
             ID = UIDGenerator.GetNextID("hall" + edge.ID + center.X + center.Y);
             Edge = edge;

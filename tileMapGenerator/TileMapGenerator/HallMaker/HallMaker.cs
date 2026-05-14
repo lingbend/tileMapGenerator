@@ -14,14 +14,15 @@ namespace HallMaker
     using System.Linq;
     using System.Threading.Tasks;
 
+    // TODO: Refactor to internal
     public class HallMaker
     {
         public HallMaker(){}
 
-        public (Graph, Grid, IEnumerable<Zone>, IEnumerable<Hall>) GenerateHalls(Graph graph, Grid grid, IEnumerable<Zone> rooms, IEnumerable<Hall> halls)
+        public (Graph, Grid, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateHalls(Graph graph, Grid grid, IEnumerable<Zone> rooms, IEnumerable<Tunnel> halls)
         {
             var room_points = GetRoomInnerPoints(rooms);
-            foreach (Hall hall in halls)
+            foreach (Tunnel hall in halls)
             {
                 grid = AddHallToAll(grid, room_points, hall);
             }
@@ -29,11 +30,11 @@ namespace HallMaker
             return (graph, grid, rooms, halls);
         }
 
-        public Grid GenerateOnlyHalls(in Graph graph, in Grid grid, in IEnumerable<Zone> rooms, in IEnumerable<Hall> halls)
+        public Grid GenerateOnlyHalls(in Graph graph, in Grid grid, in IEnumerable<Zone> rooms, in IEnumerable<Tunnel> halls)
         {
             var out_grid = new Grid(grid.NRows, grid.NCols);
             var room_points = GetRoomInnerPoints(rooms);
-            foreach (Hall hall in halls)
+            foreach (Tunnel hall in halls)
             {
                 out_grid.CombineGrids(new Grid[]{AddHallAlone(grid, room_points, hall)});
 
@@ -41,7 +42,7 @@ namespace HallMaker
             return out_grid;
         }
 
-        private Grid AddHallAlone(in Grid grid, in IEnumerable<Vector2> room_points, in Hall hall)
+        private Grid AddHallAlone(in Grid grid, in IEnumerable<Vector2> room_points, in Tunnel hall)
         {
             Grid temp_grid = new Grid(grid.NRows, grid.NCols);
             (temp_grid, _, _) = AddHallInner(room_points, hall, temp_grid);
@@ -49,7 +50,7 @@ namespace HallMaker
             return temp_grid;
         }
 
-        private Grid AddHallToAll(Grid grid, IEnumerable<Vector2> room_points, Hall hall)
+        private Grid AddHallToAll(Grid grid, IEnumerable<Vector2> room_points, Tunnel hall)
         {
             var (new_grid, inner_points, wall_points) = AddHallInner(room_points, hall, grid);
             grid = new_grid;
@@ -59,7 +60,7 @@ namespace HallMaker
             return grid;
         }
 
-        private (Grid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Hall hall, Grid grid)
+        private (Grid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Tunnel hall, Grid grid)
         {
             var (inner_points, wall_points) = GenerateHall(hall, room_points);
             foreach (var wall_point in wall_points.Except(room_points))
@@ -89,7 +90,7 @@ namespace HallMaker
             return new HashSet<Vector2>(points.SelectMany(i=>i));
         }
 
-        private (IEnumerable<Vector2>, IEnumerable<Vector2>) GenerateHall(Hall hall, IEnumerable<Vector2> room_inner)
+        private (IEnumerable<Vector2>, IEnumerable<Vector2>) GenerateHall(Tunnel hall, IEnumerable<Vector2> room_inner)
         {
             HashSet<Vector2> inner_points = new HashSet<Vector2>(GenerateInsideHall(hall.Locus, hall.SourceLocus));
             inner_points.UnionWith(GenerateInsideHall(hall.Locus, hall.TargetLocus));

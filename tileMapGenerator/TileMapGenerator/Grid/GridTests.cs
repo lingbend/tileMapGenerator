@@ -836,8 +836,8 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
-            Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 1, 5));
-            Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 5, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceOr(1, 1, 1, 5));
+            Assert.AreEqual<uint>(0, grid.GetSliceOr(1, 1, 5, 1));
         }
 
         [TestMethod]
@@ -845,8 +845,8 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
-            Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
-            Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 3, 5, 3));
+            Assert.AreEqual<uint>(1, grid.GetSliceOr(1, 1, 1, 5));
+            Assert.AreEqual<uint>(1, grid.GetSliceOr(1, 3, 5, 3));
         }
 
         [TestMethod]
@@ -854,39 +854,39 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
-            Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 5));
-            Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 2, 5, 2));
+            Assert.AreEqual<uint>(1, grid.GetSliceOr(1, 1, 1, 5));
+            Assert.AreEqual<uint>(1, grid.GetSliceOr(1, 2, 5, 2));
         }
 
         [TestMethod]
         public void GraphGetSliceOR_Diagonal_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 5, 5));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 5, 5));
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(5, 1, 1, 5));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(5, 1, 1, 5));
         }
 
         [TestMethod]
         public void GraphGetSliceOR_BadIndices_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 0, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 0, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 6, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 6, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 7, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 7, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 0));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 1, 0));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 6));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 1, 6));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceOR(1, 1, 1, 7));
+            Assert.Throws<Exception>(()=>grid.GetSliceOr(1, 1, 1, 7));
         }
 
         [TestMethod]
@@ -894,15 +894,15 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
-            Assert.AreEqual<uint>(1, grid.GetSliceOR(1, 1, 1, 1));
-            Assert.AreEqual<uint>(0, grid.GetSliceOR(3, 3, 3, 3));
+            Assert.AreEqual<uint>(1, grid.GetSliceOr(1, 1, 1, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceOr(3, 3, 3, 3));
         }
 
         [TestMethod]
         public void GraphGetSliceOR_1by1_Valid()
         {
             Grid grid = new Grid(1, 1);
-            Assert.AreEqual<uint>(0, grid.GetSliceOR(1, 1, 1, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceOr(1, 1, 1, 1));
         }
 
         [TestMethod]
@@ -910,8 +910,8 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1000001_1111111);
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 5, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(1, 1, 1, 5));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(1, 1, 5, 1));
         }
 
         [TestMethod]
@@ -919,8 +919,8 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1001001_1111111);
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 5));
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 3, 5, 3));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(1, 1, 1, 5));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(1, 3, 5, 3));
         }
 
         [TestMethod]
@@ -928,39 +928,39 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
-            Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 5));
-            Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 2, 5, 2));
+            Assert.AreEqual<uint>(1, grid.GetSliceAnd(1, 1, 1, 5));
+            Assert.AreEqual<uint>(1, grid.GetSliceAnd(1, 2, 5, 2));
         }
 
         [TestMethod]
         public void GraphGetSliceAND_Diagonal_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 5, 5));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 5, 5));
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(5, 1, 1, 5));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(5, 1, 1, 5));
         }
 
         [TestMethod]
         public void GraphGetSliceAND_BadIndices_Invalid()
         {
             Grid grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 0, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 0, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 6, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 6, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 7, 1));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 7, 1));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 0));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 1, 0));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 6));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 1, 6));
 
             grid = new Grid(5, 5);
-            Assert.Throws<Exception>(()=>grid.GetSliceAND(1, 1, 1, 7));
+            Assert.Throws<Exception>(()=>grid.GetSliceAnd(1, 1, 1, 7));
         }
 
         [TestMethod]
@@ -968,15 +968,15 @@ namespace Grid
         {
             Grid grid = new Grid(5, 5);
             grid._back = ToNumber(0b1111111_1010101_1010101_1010101_1010101_1111111_1111111);
-            Assert.AreEqual<uint>(1, grid.GetSliceAND(1, 1, 1, 1));
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(3, 3, 3, 3));
+            Assert.AreEqual<uint>(1, grid.GetSliceAnd(1, 1, 1, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(3, 3, 3, 3));
         }
 
         [TestMethod]
         public void GraphGetSliceAND_1by1_Valid()
         {
             Grid grid = new Grid(1, 1);
-            Assert.AreEqual<uint>(0, grid.GetSliceAND(1, 1, 1, 1));
+            Assert.AreEqual<uint>(0, grid.GetSliceAnd(1, 1, 1, 1));
         }
 
         private Backing ToNumber(long num)

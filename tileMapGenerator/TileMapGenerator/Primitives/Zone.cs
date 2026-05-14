@@ -84,9 +84,9 @@ namespace Primitives
             Corners = temp_corners;
             sides = new List<Side>(new_sides);
 
-            Vector2 max = Vector2Ext.MaxRange(Corners.Values);
-            Vector2 min = Vector2Ext.MinRange(Corners.Values);
-            Vector2 range = Vector2Ext.SpanRange(Corners.Values) + Vector2.One;
+            Vector2 max = Vec2Ext.MaxRange(Corners.Values);
+            Vector2 min = Vec2Ext.MinRange(Corners.Values);
+            Vector2 range = Vec2Ext.SpanRange(Corners.Values) + Vector2.One;
 
             LocalGrid = new Grid((uint) range.Y, (uint) range.X);
 
@@ -140,9 +140,9 @@ namespace Primitives
         {
             ConcurrentDictionary<Vector2, bool> inside = new ConcurrentDictionary<Vector2, bool>();
             inside.TryAdd(Locus, true);
-            Vector2 min_corner = Vector2Ext.MinRange(Corners.Values);
-            Vector2 max_corner = Vector2Ext.MaxRange(Corners.Values);
-            Parallel.ForEach(Vector2Ext.Enumerate(min_corner, max_corner+Vector2.One), point =>
+            Vector2 min_corner = Vec2Ext.MinRange(Corners.Values);
+            Vector2 max_corner = Vec2Ext.MaxRange(Corners.Values);
+            Parallel.ForEach(Vec2Ext.Enumerate(min_corner, max_corner+Vector2.One), point =>
             {
                 bool broken = false;
                 foreach (var neighbor in point.GetCartesianNeighbors())

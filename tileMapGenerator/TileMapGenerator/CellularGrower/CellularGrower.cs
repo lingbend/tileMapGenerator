@@ -1,7 +1,8 @@
+// First Step
 namespace CellularGrower
 {
     using Grid;
-    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
+    using Layout = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
     using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
     using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
     using System.Numerics;
@@ -14,7 +15,7 @@ namespace CellularGrower
     using System.Linq;
     using System.Threading.Tasks;
 
-    // Step 1?
+    // TODO: Refactor to internal?
     public class CellularGrower
     {
         public CellularGrowerSettings Settings{get; set;} = new CellularGrowerSettings();
@@ -23,7 +24,7 @@ namespace CellularGrower
 
         private string grid_lock = string.Empty;
 
-        public (Graph, Grid, IEnumerable<Zone>, IEnumerable<Hall>) GenerateZones(Graph graph, int map_area)
+        public (Layout, Grid, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateZones(Layout layout, int map_area)
         {
             if (Settings.ValidDirections.Count == 0)
             {
@@ -47,30 +48,30 @@ namespace CellularGrower
                 }
             };
             Settings.MapArea = map_area;
-            old_relative_size = GetOldRelativeSize(graph);
-            IEnumerable<Zone> zones = MakeZones(graph);
-            IEnumerable<Hall> halls = BuildHalls(graph);
+            old_relative_size = GetOldRelativeSize(layout);
+            IEnumerable<Zone> zones = MakeZones(layout);
+            IEnumerable<Tunnel> halls = BuildHalls(layout);
             Grid grid = BuildGrid(zones, halls);
-            (zones, grid) = GrowZones(zones, graph, grid, Settings.Prioritizer);
+            (zones, grid) = GrowZones(zones, layout, grid, Settings.Prioritizer);
 
             int retry_count = 0;
-            while (retry_count < 10 && Settings.MapArea < Settings.MaxArea && (zones.Count() < graph.VertexCount || CheckForBadArea(zones)))
+            while (retry_count < 10 && Settings.MapArea < Settings.MaxArea && (zones.Count() < layout.VertexCount || CheckForBadArea(zones)))
             {
                 Settings.MapArea = (int) Math.Ceiling(Math.Pow(Settings.MapArea, 1.1d));
-                zones = MakeZones(graph);
-                halls = BuildHalls(graph);
+                zones = MakeZones(layout);
+                halls = BuildHalls(layout);
                 grid = BuildGrid(zones, halls);
-                (zones, grid) = GrowZones(zones, graph, grid, Settings.Prioritizer);
+                (zones, grid) = GrowZones(zones, layout, grid, Settings.Prioritizer);
                 retry_count++;
             }
-            return (graph, grid, zones, halls);
+            return (layout, grid, zones, halls);
         }
 
         private bool CheckForBadArea(IEnumerable<Zone> areas)
         {
             foreach (Zone room in areas)
             {
-                Vector2 range = Vector2Ext.SpanRange(room.Corners.Values);
+                Vector2 range = Vec2Ext.SpanRange(room.Corners.Values);
                 if (range.X < 2 || range.Y < 2)
                 {
                     return true;
@@ -79,26 +80,26 @@ namespace CellularGrower
             return false;
         }
 
-        private Vector2 GetOldRelativeSize(Graph graph)
+        private Vector2 GetOldRelativeSize(Layout layout)
         {
-            Vector2 max = Vector2Ext.MaxRange(graph?.Vertices.Select(v=>(Vector2) v.Weight!)!);
+            Vector2 max = Vec2Ext.MaxRange(layout?.Vertices.Select(v=>(Vector2) v.Weight!)!);
             return max;
         }
 
 
-        internal IEnumerable<Zone> MakeZones(Graph graph)
+        internal IEnumerable<Zone> MakeZones(Layout layout)
         {
-            List<Zone> zones = new List<Zone>(graph.VertexCount);
-            foreach (Vertex vertex in graph.Vertices)
+            List<Zone> zones = new List<Zone>(layout.VertexCount);
+            foreach (Vertex vertex in layout.Vertices)
             {
                 List<string> tags = new List<string>();
                 if (Settings.Tagger != null)
                 {
-                    tags = new List<string>(Settings.Tagger(graph, vertex));
+                    tags = new List<string>(Settings.Tagger(layout, vertex));
                 }
 
-                Vector2 locus = AdjustLocus((Vector2) vertex.Weight!, graph.VertexCount);
-                var shape = Settings.ShapeChooser(graph, vertex, locus);
+                Vector2 locus = AdjustLocus((Vector2) vertex.Weight!, layout.VertexCount);
+                var shape = Settings.ShapeChooser(layout, vertex, locus);
                 Zone new_room = new Zone(vertex, shape, Settings.ValidDirections, locus, tags);
                 zones.Add(new_room);
                 vertex["room"] = new_room;
@@ -106,12 +107,12 @@ namespace CellularGrower
             return zones;
         }
 
-        internal IEnumerable<Hall> BuildHalls(Graph graph)
+        internal IEnumerable<Tunnel> BuildHalls(Layout layout)
         {
-            List<Hall> halls = new List<Hall>(graph.EdgeCount);
-            foreach (Edge edge in graph.Edges)
+            List<Tunnel> halls = new List<Tunnel>(layout.EdgeCount);
+            foreach (Edge edge in layout.Edges)
             {
-                var new_hall = new Hall(edge, AdjustLocus(((Vector2) edge.Source.Weight! + (Vector2) edge.Target.Weight!) * new Vector2(.5f, .5f), graph.VertexCount),
+                var new_hall = new Tunnel(edge, AdjustLocus(((Vector2) edge.Source.Weight! + (Vector2) edge.Target.Weight!) * new Vector2(.5f, .5f), layout.VertexCount),
                 ((Zone)edge.Source["room"]!).Locus,
                 ((Zone)edge.Target["room"]!).Locus);
                 halls.Add(new_hall);
@@ -127,7 +128,7 @@ namespace CellularGrower
             return new Vector2((float) Math.Ceiling(locus.X * width_modifier) + 1, (float) Math.Ceiling(locus.Y * height_modifier) + 1);
         }
 
-        internal Grid BuildGrid(IEnumerable<Zone> zones, IEnumerable<Hall> halls)
+        internal Grid BuildGrid(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls)
         {
             double width = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 5.0);
             double height = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 5.0);
@@ -161,7 +162,7 @@ namespace CellularGrower
             return grid;
         }
 
-        private void CheckAreasOccupied(IEnumerable<Zone> zones, IEnumerable<Hall> halls, ref Grid grid)
+        private void CheckAreasOccupied(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls, ref Grid grid)
         {
                 foreach (Zone room in zones)
                 {
@@ -171,7 +172,7 @@ namespace CellularGrower
                     }
                 }
 
-                foreach (Hall hall in halls)
+                foreach (Tunnel hall in halls)
                 {
                     if (grid.GetCell((uint)hall.Locus.Y, (uint)hall.Locus.X) == 1U)
                     {
@@ -180,7 +181,7 @@ namespace CellularGrower
                 }
         }
 
-        internal (IEnumerable<Zone>, Grid) GrowZones(IEnumerable<Zone> zones, Graph graph, Grid grid, Func<Graph, IEnumerable<Zone>, IEnumerable<Zone>> prioritizer)
+        internal (IEnumerable<Zone>, Grid) GrowZones(IEnumerable<Zone> zones, Layout layout, Grid grid, Func<Layout, IEnumerable<Zone>, IEnumerable<Zone>> prioritizer)
         {
             IEnumerable<Zone> growable_zones;
             ConcurrentStack<Zone> next_zones;
@@ -191,7 +192,7 @@ namespace CellularGrower
                 foreach (Vector2 direction in Settings.ValidDirections)
                 {
                     growable_zones = GetGrowable(zones, grid, direction);
-                    next_zones = new ConcurrentStack<Zone>(prioritizer(graph, growable_zones));
+                    next_zones = new ConcurrentStack<Zone>(prioritizer(layout, growable_zones));
                     if (next_zones.Count() == 0 || !growable_zones.Any())
                     {
                         no_zones_found_counter++;
@@ -249,7 +250,7 @@ namespace CellularGrower
 
         private float CalculateSideRatio(Zone room)
         {
-            Vector2 range = Vector2Ext.SpanRange(room.Corners.Values) + Vector2.One;
+            Vector2 range = Vec2Ext.SpanRange(room.Corners.Values) + Vector2.One;
             return range.X / range.Y;
         }
 
@@ -272,30 +273,30 @@ namespace CellularGrower
             }
 
             Vector2 chosen_direction;
-            Vector2 range = Vector2Ext.SpanRange(room.Corners.Values);
-            if (range.X < 2 && (open_directions.Contains(Vector2Ext.RIGHT) || open_directions.Contains(Vector2Ext.LEFT)))
+            Vector2 range = Vec2Ext.SpanRange(room.Corners.Values);
+            if (range.X < 2 && (open_directions.Contains(Vec2Ext.RIGHT) || open_directions.Contains(Vec2Ext.LEFT)))
             {
                 List<Vector2> payload = new List<Vector2>();
-                if (open_directions.Contains(Vector2Ext.RIGHT))
+                if (open_directions.Contains(Vec2Ext.RIGHT))
                 {
-                    payload.Add(Vector2Ext.RIGHT);
+                    payload.Add(Vec2Ext.RIGHT);
                 }
-                if (open_directions.Contains(Vector2Ext.LEFT))
+                if (open_directions.Contains(Vec2Ext.LEFT))
                 {
-                    payload.Add(Vector2Ext.LEFT);
+                    payload.Add(Vec2Ext.LEFT);
                 }
                 chosen_direction = direction_chooser(payload, room);
             }
-            else if (range.Y < 2 && (open_directions.Contains(Vector2Ext.UP) || open_directions.Contains(Vector2Ext.DOWN)))
+            else if (range.Y < 2 && (open_directions.Contains(Vec2Ext.UP) || open_directions.Contains(Vec2Ext.DOWN)))
             {
                 List<Vector2> payload = new List<Vector2>();
-                if (open_directions.Contains(Vector2Ext.UP))
+                if (open_directions.Contains(Vec2Ext.UP))
                 {
-                    payload.Add(Vector2Ext.UP);
+                    payload.Add(Vec2Ext.UP);
                 }
-                if (open_directions.Contains(Vector2Ext.DOWN))
+                if (open_directions.Contains(Vec2Ext.DOWN))
                 {
-                    payload.Add(Vector2Ext.DOWN);
+                    payload.Add(Vec2Ext.DOWN);
                 }
                 chosen_direction = direction_chooser(payload, room);
             }

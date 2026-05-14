@@ -85,8 +85,8 @@ namespace Grid
             Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 1000; i++)
             {
-                _ = grid.GetSliceOR((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
-                _ = grid.GetSliceAND((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
+                _ = grid.GetSliceOr((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
+                _ = grid.GetSliceAnd((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
             }
         }
 
