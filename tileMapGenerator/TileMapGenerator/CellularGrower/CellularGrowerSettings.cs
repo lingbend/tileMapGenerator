@@ -1,15 +1,15 @@
-namespace CellularRoomGrower
+namespace CellularGrower
 {
-    using BinaryGrid;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
-    using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
+    using Grid;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using static System.Math;
     using ConcurrentRandom;
     using System.Collections.Concurrent;
     using Vector2Extensions;
-    using MapPrimitives;
+    using Primitives;
     using GoRogueWrapper;
 
     using System;
@@ -17,10 +17,10 @@ namespace CellularRoomGrower
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class CellularRoomGrowerSettings
+    public class CellularGrowerSettings
     {
-        public Func<Graph, IEnumerable<Room>, IEnumerable<Room>> Prioritizer{get; set;} = DefaultPrioritizer;
-        public Func<IEnumerable<Vector2>, Room, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
+        public Func<Graph, IEnumerable<Zone>, IEnumerable<Zone>> Prioritizer{get; set;} = DefaultPrioritizer;
+        public Func<IEnumerable<Vector2>, Zone, Vector2> DirectionChooser{get; set;} = DefaultDirectionChooser;
         internal List<Vector2> ValidDirections{get; set;} = DefaultValidDirections;
         public static List<Vector2> DefaultValidDirections{get;} = new List<Vector2>(){
         Vector2Ext.RIGHT, Vector2Ext.UP, Vector2Ext.LEFT, Vector2Ext.DOWN};
@@ -39,33 +39,33 @@ namespace CellularRoomGrower
         private static ConcurrentRandom _prioritizer_random;
         private static ConcurrentRandom _shaper_random;
     
-        public static IEnumerable<Room> DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
+        public static IEnumerable<Zone> DefaultPrioritizer(Graph graph, IEnumerable<Zone> zones)
         {
-            if (rooms.Count() == 0)
+            if (zones.Count() == 0)
             {
-                return new Room[]{};
+                return new Zone[]{};
             }
             if (_prioritizer_random == null)
             {
                  _prioritizer_random = new ConcurrentRandom(Random.Next());
             }
-            IEnumerable<Room> small_rooms = rooms.Where(r=>Vector2Ext.SpanRange(r.GetSides()).X < 3 && Vector2Ext.SpanRange(r.GetSides()).Y<3);
-            if (small_rooms.Count() > 0)
+            IEnumerable<Zone> small_zones = zones.Where(r=>Vector2Ext.SpanRange(r.GetSides()).X < 3 && Vector2Ext.SpanRange(r.GetSides()).Y<3);
+            if (small_zones.Count() > 0)
             {
-                int index = _prioritizer_random.Next(small_rooms.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, small_rooms.Count());
-                return new Room[]{small_rooms.OrderBy(r=>r.ID).ElementAt(index)};
+                int index = _prioritizer_random.Next(small_zones.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, small_zones.Count());
+                return new Zone[]{small_zones.OrderBy(r=>r.ID).ElementAt(index)};
             }
-            int room_index = _prioritizer_random.Next(rooms.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, rooms.Count());
-            return new Room[]{rooms.OrderBy(r=>r.ID).ElementAt(room_index)};
+            int zone_index = _prioritizer_random.Next(zones.OrderBy(r=>r.Locus.X + (5*r.Locus.Y) + r.ID).Select(r=>r.ID + r.Locus.ToString()).Aggregate((r1, r2)=>r1+r2), 0, zones.Count());
+            return new Zone[]{zones.OrderBy(r=>r.ID).ElementAt(zone_index)};
         }
 
-        public static Vector2 DefaultDirectionChooser(IEnumerable<Vector2> directions, Room room)
+        public static Vector2 DefaultDirectionChooser(IEnumerable<Vector2> directions, Zone zone)
         {
             if (_direction_random == null)
             {
                  _direction_random = new ConcurrentRandom(Random.Next());
             }
-            float x_to_y_ratio = CalculateSideRatio(room);
+            float x_to_y_ratio = CalculateSideRatio(zone);
             List<Vector2> directions_copy = new List<Vector2>(directions);
             if (x_to_y_ratio >= MaxRatio.X / MaxRatio.Y)
             {
@@ -79,13 +79,13 @@ namespace CellularRoomGrower
             {
                 directions_copy = new List<Vector2>(directions);
             }
-            int index = _direction_random.Next(room.ID + room.Corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v=>v.ToString()).Aggregate((s1, s2)=>s1+s2), 0, directions_copy.Count());
+            int index = _direction_random.Next(zone.ID + zone.Corners.Values.OrderBy(v=>v.X+(5*v.Y)).Select(v=>v.ToString()).Aggregate((s1, s2)=>s1+s2), 0, directions_copy.Count());
             return directions.OrderBy(v=>v.X + (5*v.Y)).ToArray()[index];
         }
 
-        private static float CalculateSideRatio(Room room)
+        private static float CalculateSideRatio(Zone zone)
         {
-            return CalculateSideRatio(room.Corners.Values); 
+            return CalculateSideRatio(zone.Corners.Values); 
         }
 
         private static float CalculateSideRatio(IEnumerable<Vector2> corners)
@@ -232,7 +232,7 @@ namespace CellularRoomGrower
                 }
                 ConcurrentBag<Vector2> points  = new ConcurrentBag<Vector2>(RoundPoints(GetCircleSides(length, direction, corners, 9)));
                 ConcurrentRandom rand = new ConcurrentRandom(_shaper_random.Next(center.ToString() + vertex.ID));
-                BinaryGrid test_grid = new BinaryGrid((uint) (diameters.Y + 1), (uint) (diameters.X + 1), 0u);
+                Grid test_grid = new Grid((uint) (diameters.Y + 1), (uint) (diameters.X + 1), 0u);
             
                 int i_max = 1;
                 for (int i = 0; i < i_max + 1; i++)
@@ -259,8 +259,8 @@ namespace CellularRoomGrower
                     {
                         for (uint col = 1u; col < (int) diameters.X + 1; col++)
                         {                        
-                            Vector2 room_coord_vector = new Vector2(col+min.X - 1, row+min.Y - 1);
-                            float distance_from_center = (room_coord_vector - center).Length();
+                            Vector2 zone_coord_vector = new Vector2(col+min.X - 1, row+min.Y - 1);
+                            float distance_from_center = (zone_coord_vector - center).Length();
                         
                             if (distance_from_center <= .8 * diagonal_length && distance_from_center >= 2)
                             {
@@ -277,7 +277,7 @@ namespace CellularRoomGrower
                                 }
                                 if (num_neighbors + i >= 4)
                                 {
-                                    points.Add(room_coord_vector);
+                                    points.Add(zone_coord_vector);
                                 }
                             }
                         };

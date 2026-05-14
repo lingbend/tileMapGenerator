@@ -1,0 +1,28 @@
+Working title: Bug Commander Game ??
+Basic theme: ants in dirt fight other termites?
+
+    - hole straight vs dig fast: Need find good part so bug no stuck in circle
+    - many holes in map modify difficulty
+    - rage button
+    - big breaky events: make screen shake more or ui look scary.
+    - Camera make it go far when lots of bugs on screen.
+    - Shapes make them look like real holes not just circles. use the messy ones for bad bugs.
+    - path count: too many paths make bugs go everywhere and no find food
+    - use that fancy math for maps... forgot name
+
+Testing Strategy:
+    - Learning test: see if person finish manual map faster than random map.
+    - the pathy code: check if laggy when many bad guys in zones.
+
+Intial Questions:
+    - "is bug control bad or good?"
+    - "do the smell lines show where go?"
+    - "what kills you? dirt or other bugs? both?"
+
+Code/API TODOs:
+    - focus on performance
+    - use quantum physics simulator technique thing
+    - get very basic setup first
+
+NEXT STEPS:
+    - get basic mockup for playtests.

@@ -1,54 +1,54 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BinaryGrid
+namespace Grid
 {
-#pragma warning disable MSTEST0045 // Use 'CooperativeCancellation = true' with '[Timeout]'
+#pragma warning disable MSTEST0045
 
     [TestClass]
-    public class BinaryGridStressTests
+    public class GridStressTests
     {
 
 
         [Timeout(1000)]
         [TestMethod]
-        public void BinaryGridConstructor_200_Valid()
+        public void GridConstructor_200_Valid()
         {
-            _ = new BinaryGrid(200, 200);
+            _ = new Grid(200, 200);
         }
 
         [Timeout(1000)]
         [TestMethod]
-        public void BinaryGridConstructor_400_Valid()
+        public void GridConstructor_400_Valid()
         {
-            _ = new BinaryGrid(400, 400);
+            _ = new Grid(400, 400);
         }
 
         [Timeout(1000)]
         [TestMethod]
-        public void BinaryGridConstructor_800_Valid()
+        public void GridConstructor_800_Valid()
         {
-            _ = new BinaryGrid(800, 800);
+            _ = new Grid(800, 800);
         }
 
         [Timeout(1000)]
         [TestMethod]
-        public void BinaryGridConstructor_1600_Valid()
+        public void GridConstructor_1600_Valid()
         {
-            _ = new BinaryGrid(1600, 1600);
+            _ = new Grid(1600, 1600);
         }
 
         [Timeout(1000)]
         [TestMethod]
-        public void BinaryGridConstructor_3200_Valid()
+        public void GridConstructor_3200_Valid()
         {
-            _ = new BinaryGrid(3200, 3200);
+            _ = new Grid(3200, 3200);
         }
 
         [Timeout(10000)]
         [TestMethod]
-        public void BinaryGridGetSlice_Huge_Valid()
+        public void GridGetSlice_Huge_Valid()
         {
-            BinaryGrid grid = new BinaryGrid(800, 800);
+            Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 1000; i++)
             {
                 _ = grid.GetSlice((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
@@ -57,9 +57,9 @@ namespace BinaryGrid
 
         [Timeout(10000)]
         [TestMethod]
-        public void BinaryGridSetSlice_Huge_Valid()
+        public void GridSetSlice_Huge_Valid()
         {
-            BinaryGrid grid = new BinaryGrid(800, 800);
+            Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 1000; i++)
             {
                 grid.SetSlice((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.25)%800)+1, 1);
@@ -68,9 +68,9 @@ namespace BinaryGrid
 
         [Timeout(10000)]
         [TestMethod]
-        public void BinaryGridInsertRowCol_Huge_Valid()
+        public void GridInsertRowCol_Huge_Valid()
         {
-            BinaryGrid grid = new BinaryGrid(800, 800);
+            Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 1000; i++)
             {
                 grid.InsertRow((i % 800) + 1);
@@ -80,9 +80,9 @@ namespace BinaryGrid
 
         [Timeout(10000)]
         [TestMethod]
-        public void BinaryGridGetSliceORAND_Huge_Valid()
+        public void GridGetSliceORAND_Huge_Valid()
         {
-            BinaryGrid grid = new BinaryGrid(800, 800);
+            Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 1000; i++)
             {
                 _ = grid.GetSliceOR((i%800)+1, (i%800)+1, (i%800)+1, (uint) ((i*.5)%800)+1);
@@ -92,9 +92,9 @@ namespace BinaryGrid
 
         [Timeout(10000)]
         [TestMethod]
-        public void BinaryGridDeleteRowCol_Huge_Valid()
+        public void GridDeleteRowCol_Huge_Valid()
         {
-            BinaryGrid grid = new BinaryGrid(800, 800);
+            Grid grid = new Grid(800, 800);
             for (uint i = 0; i < 799; i++)
             {
                 grid.DeleteRow(800 - i);

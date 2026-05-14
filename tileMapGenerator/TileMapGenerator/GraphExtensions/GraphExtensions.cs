@@ -1,7 +1,7 @@
 #if DEBUG
-using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
-using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
+using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
+using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
 
 using QuikGraph.Graphviz;
 using System.Diagnostics;

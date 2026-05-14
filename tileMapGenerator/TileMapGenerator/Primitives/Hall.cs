@@ -1,7 +1,7 @@
-namespace MapPrimitives
+namespace Primitives
 {
-    using Vertex = RoomVertex<System.Numerics.Vector2>;
-    using Edge = RoomEdge<System.Numerics.Vector2>;
+    using Vertex = ZVertex<System.Numerics.Vector2>;
+    using Edge = ZEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using TileMapGenerator;
     using System.Collections.Generic;

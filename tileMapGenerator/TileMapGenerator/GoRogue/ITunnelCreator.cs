@@ -28,20 +28,8 @@ namespace GoRogueWrapper
 {
     using System.Numerics;
     using SadRogue.Primitives.GridViews;
-    /// <summary>
-    /// Interface for implementing an algorithm for creating a tunnel between two positions on a
-    /// walkability map.
-    /// </summary>
     public interface ITunnelCreator
     {
-        /// <summary>
-        /// Implements the algorithm, creating the tunnel between the two points (ensuring there is a
-        /// path of positions set to true between those two points).
-        /// </summary>
-        /// <param name="map">_grid to create the tunnel on.</param>
-        /// <param name="tunnelStart">Start position to connect.</param>
-        /// <param name="tunnelEnd">End position to connect.</param>
-        /// <returns>An area containing all points that are part of the tunnel.</returns>
         void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd);
     }
 }

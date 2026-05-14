@@ -3,7 +3,7 @@ namespace GoRogueWrapper
     using System.Numerics;
     using Vector2Extensions;
     using ConcurrentRandom;
-    using BinaryGrid;
+    using Grid;
     using SadRogue.Primitives.GridViews;
     using System;
     using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace GoRogueWrapper
             return view.points;
         }
 
-        public static bool IsConnected(Vector2 start, Vector2 end, BinaryGrid grid, Vector2? locus = null)
+        public static bool IsConnected(Vector2 start, Vector2 end, Grid grid, Vector2? locus = null)
         {
             BinaryMapViewer view = new BinaryMapViewer(grid, locus);
             var fast_astar = new FastAStar(view, SadRogue.Primitives.Distance.Manhattan);
@@ -54,14 +54,14 @@ namespace GoRogueWrapper
             }
 
             public HashSet<Vector2> points = new HashSet<Vector2>();
-            private BinaryGrid Grid;
+            private Grid Grid;
             private Vector2 Locus;
 
-            public BinaryMapViewer(BinaryGrid grid, Vector2? locus = null)
+            public BinaryMapViewer(Grid grid, Vector2? locus = null)
             {
                 Height = (int) grid.RowSize;
                 Width = (int) grid.ColSize;
-                Grid = new BinaryGrid(grid);
+                Grid = new Grid(grid);
                 if (locus != null)
                 {
                     Locus = (Vector2) locus;

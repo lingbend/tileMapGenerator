@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Drawing;
 using TileMapGenerator;
-using MapPrimitives;
+using Primitives;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using SadRogue.Primitives.GridViews;
@@ -15,12 +15,11 @@ using System.Linq;
 
 using static Medallion.Bits;
 
-namespace BinaryGrid
+namespace Grid
 {
-    // 1 indexed
-    public struct BinaryGrid : IDed, IGridView<bool>
+    public struct Grid : IDed, IGridView<bool>
     {
-        internal BinaryNumber _grid;
+        internal Backing _grid;
         private (uint, uint) _size;
         public uint RowSize{get{return _size.Item1;}}
         public uint ColSize{get{return _size.Item2;}}
@@ -70,7 +69,7 @@ namespace BinaryGrid
         private int _id;
         private bool[] _queue_fill;
         private bool[] _queue_empty;
-        public BinaryGrid(uint rows, uint columns, uint borders = 1)
+        public Grid(uint rows, uint columns, uint borders = 1)
         {
             _border_num = 1;
             _id = GetID(rows, columns);
@@ -78,7 +77,7 @@ namespace BinaryGrid
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new BinaryNumber((int)((rows + 2) * (columns + 2)), 0);
+            _grid = new Backing((int)((rows + 2) * (columns + 2)), 0);
             _queue_fill = new bool[(rows + 2) * (columns + 2)];
             _queue_empty = new bool[(rows + 2) * (columns + 2)];
 
@@ -93,7 +92,7 @@ namespace BinaryGrid
             }
         }
 
-        public BinaryGrid(BinaryGrid old_grid)
+        public Grid(Grid old_grid)
         {
             _border_num = 1;
             _id = GetID(old_grid._size.Item1, old_grid._size.Item2, old_grid._grid.ToString());
@@ -101,7 +100,7 @@ namespace BinaryGrid
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new BinaryNumber((int)((old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)), 0);
+            _grid = new Backing((int)((old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)), 0);
             _queue_fill = new bool[(old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)];
             _queue_empty = new bool[(old_grid._size.Item1 + 2) * (old_grid._size.Item2 + 2)];
 
@@ -114,7 +113,7 @@ namespace BinaryGrid
             {
                 throw new ArgumentException("Value must be 0 or 1. Value was: " + old_grid._border_num);
             }
-            _grid = new BinaryNumber(old_grid._grid);
+            _grid = new Backing(old_grid._grid);
         }
 
         public void Clear()
@@ -133,7 +132,7 @@ namespace BinaryGrid
             {
                 throw new IndexOutOfRangeException();
             }
-            _grid = new BinaryNumber((int)((rows + 2) * (columns + 2)), 0);
+            _grid = new Backing((int)((rows + 2) * (columns + 2)), 0);
             _queue_fill = new bool[(rows + 2) * (columns + 2)];
             _queue_empty = new bool[(rows + 2) * (columns + 2)];
 
@@ -201,7 +200,6 @@ namespace BinaryGrid
             _queue_fill[GetCellIndex(row, col)] = true;
         }
 
-        // Runs after Fill
         public void QueueEmptyCell(uint row, uint col)
         {
             if (row < 1 || col < 1 || row > _size.Item1 || col > _size.Item2)
@@ -213,13 +211,13 @@ namespace BinaryGrid
 
         public void RunQueue()
         {
-            _grid |= new BinaryNumber(new BitArray(_queue_fill));
+            _grid |= new Backing(new BitArray(_queue_fill));
             _queue_fill = new bool[_queue_fill.Length];
-            _grid &= (~new BinaryNumber(new BitArray(_queue_empty))) &_grid;
+            _grid &= (~new Backing(new BitArray(_queue_empty))) &_grid;
             _queue_empty = new bool[_queue_empty.Length];
         }
 
-        public void CombineGrids(IEnumerable<BinaryGrid> other_grids)
+        public void CombineGrids(IEnumerable<Grid> other_grids)
         {
             foreach (var o_grid in other_grids)
             {
@@ -227,7 +225,7 @@ namespace BinaryGrid
             }
         }
 
-        public void DifferenceGrids(IEnumerable<BinaryGrid> other_grids)
+        public void DifferenceGrids(IEnumerable<Grid> other_grids)
         {
             _grid |= other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2);
             _grid &= (~other_grids.Select(g=>g._grid).Aggregate((g1, g2)=>g1 | g2)) &_grid;
@@ -247,11 +245,11 @@ namespace BinaryGrid
         private void SetRowInternal(uint row, uint col, uint val, uint length)
         {        
             if (val == 1){
-                _grid |= new BinaryNumber((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length);
+                _grid |= new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length);
             }
             else
             {
-                _grid &= ~((new BinaryNumber((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length))&_grid);
+                _grid &= ~((new Backing((int) length, 1) <<  (int) (GetCellIndex(row, col)+1-length))&_grid);
             }
         }
 
@@ -278,38 +276,32 @@ namespace BinaryGrid
         private void InsertEmptyCellInternal(uint row, uint col)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
-            BinaryNumber second_half = (_grid << 1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (cell_index+1));
+            Backing first_half = _grid & new Backing(cell_index, 1);
+            Backing second_half = (_grid << 1) & (new Backing(_grid.Count - cell_index, 1) << (cell_index+1));
             _grid = first_half | second_half;
         }
 
         private void InsertEmptyRowInternal(uint row, uint col, uint length)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
-            BinaryNumber second_half = (_grid << (int) length+1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (int) (cell_index+length+1));
+            Backing first_half = _grid & new Backing(cell_index, 1);
+            Backing second_half = (_grid << (int) length+1) & (new Backing(_grid.Count - cell_index, 1) << (int) (cell_index+length+1));
             _grid = first_half | second_half;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
 
         private void DeleteCellInternal(uint row, uint col)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
-            BinaryNumber second_half = (_grid >> 1) & (new BinaryNumber(_grid.Count - cell_index, 1) << cell_index);
+            Backing first_half = _grid & new Backing(cell_index, 1);
+            Backing second_half = (_grid >> 1) & (new Backing(_grid.Count - cell_index, 1) << cell_index);
             _grid = first_half | second_half;
         }
 
         private void DeleteEmptyRowInternal(uint row, uint col, uint length)
         {
             int cell_index = (int) GetCellIndex(row, col);
-            BinaryNumber first_half = _grid & new BinaryNumber(cell_index, 1);
-            BinaryNumber second_half = (_grid >> (int) length+1) & (new BinaryNumber(_grid.Count - cell_index, 1) << (int) (cell_index-length+1));
+            Backing first_half = _grid & new Backing(cell_index, 1);
+            Backing second_half = (_grid >> (int) length+1) & (new Backing(_grid.Count - cell_index, 1) << (int) (cell_index-length+1));
             _grid = first_half | second_half;
         }
 
@@ -431,15 +423,6 @@ namespace BinaryGrid
             }
         }
 
-        /// <summary>
-        ///   Returns min to max indexed
-        /// </summary>
-        /// <param name="row1"></param>
-        /// <param name="col1"></param>
-        /// <param name="row2"></param>
-        /// <param name="col2"></param>
-        /// <returns></returns>
-        /// <exception cref="IndexOutOfRangeException"></exception>
         public ulong GetSlice(uint row1, uint col1, uint row2, uint col2)
         {
             ulong result = 0;
@@ -566,9 +549,9 @@ namespace BinaryGrid
 
         public override bool Equals(object? obj)
         {
-            if (obj != null && obj is BinaryGrid)
+            if (obj != null && obj is Grid)
             {
-                return ((BinaryGrid) obj)._grid.Equals(_grid);
+                return ((Grid) obj)._grid.Equals(_grid);
             }
             return base.Equals(obj);
         }
@@ -646,25 +629,25 @@ namespace BinaryGrid
     }
     
 
-    internal struct BinaryNumber
+    internal struct Backing
         {
             private BitArray _backing_array;
-            public BinaryNumber(ulong value)
+            public Backing(ulong value)
             {
                 _backing_array = ToBitArray(value);
             } 
 
-            public BinaryNumber(BinaryNumber old_number)
+            public Backing(Backing old_number)
             {
                 _backing_array = new BitArray(old_number._backing_array);
             }
 
-            public static BinaryNumber ZERO{get;} = new BinaryNumber(0);
-            public static BinaryNumber ONE{get;} = new BinaryNumber(1);
+            public static Backing ZERO{get;} = new Backing(0);
+            public static Backing ONE{get;} = new Backing(1);
 
             public int Count{get {return _backing_array.Count;}}
 
-            public BinaryNumber(int bit_number, int default_value)
+            public Backing(int bit_number, int default_value)
             {
                 if (default_value != 1 && default_value != 0)
                 {
@@ -673,67 +656,67 @@ namespace BinaryGrid
                 _backing_array = new BitArray(bit_number, default_value == 1);
             }
 
-            public BinaryNumber(BitArray bitArray)
+            public Backing(BitArray bitArray)
             {
                 _backing_array = new BitArray(bitArray);
             }
 
-            public static BinaryNumber operator <<(BinaryNumber n, int shift_num)
+            public static Backing operator <<(Backing n, int shift_num)
             {
-                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                Backing copy = new Backing(n._backing_array);
                 copy._backing_array.Length += shift_num;
                 copy._backing_array.LeftShift(shift_num);
                 return copy;
             }
 
-            public static BinaryNumber operator >>(BinaryNumber n, int shift_num)
+            public static Backing operator >>(Backing n, int shift_num)
             {
-                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                Backing copy = new Backing(n._backing_array);
                 copy._backing_array.RightShift(shift_num);
                 copy._backing_array.Length -= shift_num;
                 return copy;
             }
 
-            public static BinaryNumber operator |(BinaryNumber n, BinaryNumber n2)
+            public static Backing operator |(Backing n, Backing n2)
             {
                 if (n._backing_array.Count == n2._backing_array.Count){
-                    BinaryNumber copy = new BinaryNumber(n._backing_array);
+                    Backing copy = new Backing(n._backing_array);
                     copy._backing_array.Or(n2._backing_array);
                     return copy;
                 }
                 else if (n._backing_array.Count > n2._backing_array.Count)
                 {
-                    BinaryNumber copy = new BinaryNumber(n2._backing_array);
+                    Backing copy = new Backing(n2._backing_array);
                     copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
                     copy._backing_array.Or(n._backing_array);
                     return copy;
                 }
                 else
                 {
-                    BinaryNumber copy = new BinaryNumber(n._backing_array);
+                    Backing copy = new Backing(n._backing_array);
                     copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
                     copy._backing_array.Or(n2._backing_array);
                     return copy;
                 }
             }
         
-            public static BinaryNumber operator &(BinaryNumber n, BinaryNumber n2)
+            public static Backing operator &(Backing n, Backing n2)
             {
                 if (n._backing_array.Count == n2._backing_array.Count){
-                    BinaryNumber copy = new BinaryNumber(n._backing_array);
+                    Backing copy = new Backing(n._backing_array);
                     copy._backing_array.And(n2._backing_array);
                     return copy;
                 }
                 else if (n._backing_array.Count > n2._backing_array.Count)
                 {
-                    BinaryNumber copy = new BinaryNumber(n2._backing_array);
+                    Backing copy = new Backing(n2._backing_array);
                     copy._backing_array.Length += n._backing_array.Count - n2._backing_array.Count;
                     copy._backing_array.And(n._backing_array);
                     return copy;
                 }
                 else
                 {
-                    BinaryNumber copy = new BinaryNumber(n._backing_array);
+                    Backing copy = new Backing(n._backing_array);
                     copy._backing_array.Length += n2._backing_array.Count - n._backing_array.Count;
                     copy._backing_array.And(n2._backing_array);
                     return copy;
@@ -761,13 +744,12 @@ namespace BinaryGrid
             {
                 ulong num = (ulong) num_obj;
                 BitArray temp_array = new BitArray(BitConverter.GetBytes(num));
-                // temp_array.Length = num.ToString("B").Length;
                 return temp_array;
             }
 
-            public static BinaryNumber operator~(BinaryNumber n)
+            public static Backing operator~(Backing n)
             {
-                BinaryNumber copy = new BinaryNumber(n._backing_array);
+                Backing copy = new Backing(n._backing_array);
                 copy._backing_array.Not();
                 return copy;
             }
@@ -819,15 +801,15 @@ namespace BinaryGrid
 
         public override bool Equals(object? obj)
         {
-            if (obj != null && obj is BinaryNumber)
+            if (obj != null && obj is Backing)
             {
                 try
                 {
-                    return ((BinaryNumber)obj).ToULong() == ToULong();
+                    return ((Backing)obj).ToULong() == ToULong();
                 }
                 catch (Exception)
                 {
-                    return ((BinaryNumber)obj).ToBigInteger() == ToBigInteger();
+                    return ((Backing)obj).ToBigInteger() == ToBigInteger();
                 }
             }
             return base.Equals(obj);

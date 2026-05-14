@@ -1,28 +1,28 @@
 using System.Numerics;
 using QuikGraph;
-using BinaryGrid;
+using Grid;
 using TileMapGenerator;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MapPrimitives
+namespace Primitives
 {
-    public class RoomVertex<Vector2> : IDed where Vector2 : struct
+    public class ZVertex<Vector2> : IDed where Vector2 : struct
     {
         private int _vertex_id;
 
         public int ID { get => _vertex_id; set => _vertex_id = value; }
-        public HashSet<RoomEdge<Vector2>> Edges{get; private set;} = new HashSet<RoomEdge<Vector2>>();
+        public HashSet<ZEdge<Vector2>> Edges{get; private set;} = new HashSet<ZEdge<Vector2>>();
         private Dictionary<string, object?> _data = new Dictionary<string, object?>();
         public int Degree{get{return Edges.Count;}}
         public Vector2? Weight {get; internal set;}
-        public RoomVertex(Vector2 weight)
+        public ZVertex(Vector2 weight)
         {
             Weight = weight;
             _vertex_id = UIDGenerator.GetNextID(Weight!.ToString());
         }
 
-        internal RoomVertex()
+        internal ZVertex()
         {
             _vertex_id = UIDGenerator.GetNextID(" ");
         }
@@ -33,7 +33,7 @@ namespace MapPrimitives
         //     _vertex_id = UIDGenerator.GetNextID();
         // }
 
-        public void RemoveEdge(RoomEdge<Vector2> edge)
+        public void RemoveEdge(ZEdge<Vector2> edge)
         {
             lock (Edges)
             {
@@ -41,9 +41,9 @@ namespace MapPrimitives
             }
         }
 
-        public RoomEdge<Vector2> ConnectToVertex(RoomVertex<Vector2> vertex, Vector2 weight)
+        public ZEdge<Vector2> ConnectToVertex(ZVertex<Vector2> vertex, Vector2 weight)
         {
-            RoomEdge<Vector2> new_edge = new RoomEdge<Vector2>(this, vertex);
+            ZEdge<Vector2> new_edge = new ZEdge<Vector2>(this, vertex);
             lock (Edges)
             {
                 Edges.Add(new_edge);
@@ -82,9 +82,9 @@ namespace MapPrimitives
 
         public override bool Equals(object? obj)
         {
-            if (obj != null && obj is RoomVertex<Vector2> edge)
+            if (obj != null && obj is ZVertex<Vector2> edge)
             {
-                return _vertex_id == ((RoomVertex<Vector2>) obj)._vertex_id;
+                return _vertex_id == ((ZVertex<Vector2>) obj)._vertex_id;
             }
             return base.Equals(obj);
         }

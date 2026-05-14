@@ -38,25 +38,11 @@ namespace GoRogueWrapper
         CARDINALS
     }
 
-    /// <summary>
-    /// Implements a tunnel creation algorithm that sets as walkable a direct line between the two
-    /// points. In the case that <see cref="SadRogue.Primitives.Distance.Manhattan" /> is being used, the line is calculated via the
-    /// <see cref="SadRogue.Primitives.Lines.Algorithm.Orthogonal" /> algorithm.  Otherwise, the line is calculated using
-    /// <see cref="SadRogue.Primitives.Lines.Algorithm.Bresenham" />.
-    /// </summary>
     public class DirectLineTunnelCreator : ITunnelCreator
     {
         private readonly AdjacencyRule _adjacencyRule;
         private readonly bool _doubleWideVertical;
 
-        /// <summary>
-        /// Constructor. Takes the distance calculation to use, which determines whether <see cref="SadRogue.Primitives.Lines.Algorithm.Orthogonal" />
-        /// or <see cref="SadRogue.Primitives.Lines.Algorithm.Bresenham" /> is used to create the tunnel.
-        /// </summary>
-        /// <param name="adjacencyRule">
-        /// Method of adjacency to respect when creating tunnels. Cannot be diagonal.
-        /// </param>
-        /// <param name="doubleWideVertical">Whether or not to create vertical tunnels as 2-wide.</param>
         public DirectLineTunnelCreator(AdjacencyRule adjacencyRule, bool doubleWideVertical = true)
         {
             if (adjacencyRule == AdjacencyRule.DIAGONALS)
@@ -75,8 +61,6 @@ namespace GoRogueWrapper
             foreach (var pos in Lines.GetLine(start.ToPoint(), end.ToPoint(), lineAlgorithm))
             {
                 map[pos] = true;
-                // Previous cell, and we're going vertical, go 2 wide so it looks nicer Make sure not
-                // to break rectangles (less than last index)!
                 if (_doubleWideVertical && previous != Vector2Ext.NONE && pos.Y != previous.Y && pos.X + 1 < map.Width - 1)
                 {
                     var wideningPos = pos + (1, 0);

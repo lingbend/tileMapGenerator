@@ -1,13 +1,13 @@
 namespace HallMaker
 {
-    using BinaryGrid;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
-    using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
+    using Grid;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using System.Collections.Concurrent;
     using Vector2Extensions;
-    using MapPrimitives;
+    using Primitives;
     using GoRogueWrapper;
     using System;
     using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace HallMaker
     {
         public HallMaker(){}
 
-        public (Graph, BinaryGrid, IEnumerable<Room>, IEnumerable<Hall>) GenerateHalls(Graph graph, BinaryGrid grid, IEnumerable<Room> rooms, IEnumerable<Hall> halls)
+        public (Graph, Grid, IEnumerable<Zone>, IEnumerable<Hall>) GenerateHalls(Graph graph, Grid grid, IEnumerable<Zone> rooms, IEnumerable<Hall> halls)
         {
             var room_points = GetRoomInnerPoints(rooms);
             foreach (Hall hall in halls)
@@ -29,27 +29,27 @@ namespace HallMaker
             return (graph, grid, rooms, halls);
         }
 
-        public BinaryGrid GenerateOnlyHalls(in Graph graph, in BinaryGrid grid, in IEnumerable<Room> rooms, in IEnumerable<Hall> halls)
+        public Grid GenerateOnlyHalls(in Graph graph, in Grid grid, in IEnumerable<Zone> rooms, in IEnumerable<Hall> halls)
         {
-            var out_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
+            var out_grid = new Grid(grid.RowSize, grid.ColSize);
             var room_points = GetRoomInnerPoints(rooms);
             foreach (Hall hall in halls)
             {
-                out_grid.CombineGrids(new BinaryGrid[]{AddHallAlone(grid, room_points, hall)});
+                out_grid.CombineGrids(new Grid[]{AddHallAlone(grid, room_points, hall)});
 
             }
             return out_grid;
         }
 
-        private BinaryGrid AddHallAlone(in BinaryGrid grid, in IEnumerable<Vector2> room_points, in Hall hall)
+        private Grid AddHallAlone(in Grid grid, in IEnumerable<Vector2> room_points, in Hall hall)
         {
-            BinaryGrid temp_grid = new BinaryGrid(grid.RowSize, grid.ColSize);
+            Grid temp_grid = new Grid(grid.RowSize, grid.ColSize);
             (temp_grid, _, _) = AddHallInner(room_points, hall, temp_grid);
 
             return temp_grid;
         }
 
-        private BinaryGrid AddHallToAll(BinaryGrid grid, IEnumerable<Vector2> room_points, Hall hall)
+        private Grid AddHallToAll(Grid grid, IEnumerable<Vector2> room_points, Hall hall)
         {
             var (new_grid, inner_points, wall_points) = AddHallInner(room_points, hall, grid);
             grid = new_grid;
@@ -59,7 +59,7 @@ namespace HallMaker
             return grid;
         }
 
-        private (BinaryGrid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Hall hall, BinaryGrid grid)
+        private (Grid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Hall hall, Grid grid)
         {
             var (inner_points, wall_points) = GenerateHall(hall, room_points);
             foreach (var wall_point in wall_points.Except(room_points))
@@ -79,7 +79,7 @@ namespace HallMaker
             return (grid, inner_points, wall_points);
         }
 
-        private IEnumerable<Vector2> GetRoomInnerPoints(IEnumerable<Room> rooms)
+        private IEnumerable<Vector2> GetRoomInnerPoints(IEnumerable<Zone> rooms)
         {
             ConcurrentBag<IEnumerable<Vector2>> points = new ConcurrentBag<IEnumerable<Vector2>>();
             Parallel.ForEach(rooms, room =>
@@ -115,7 +115,7 @@ namespace HallMaker
             return wall_points.Keys;
         }
 
-        private bool InBounds(Vector2 location, BinaryGrid grid)
+        private bool InBounds(Vector2 location, Grid grid)
         {
             return location.X > 0 && location.Y > 0 && location.X <= grid.ColSize && location.Y <= grid.RowSize;
         }

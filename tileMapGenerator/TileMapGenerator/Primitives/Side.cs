@@ -1,4 +1,4 @@
-namespace MapPrimitives
+namespace Primitives
 {
     using System.Numerics;
     using System.Collections.Concurrent;

@@ -1,20 +1,20 @@
-namespace MapPrimitives
+namespace Primitives
 {
-    using Graph = QuikGraph.UndirectedGraph<RoomVertex<System.Numerics.Vector2>, RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<ZVertex<System.Numerics.Vector2>, ZEdge<System.Numerics.Vector2>>;
+    using Vertex = ZVertex<System.Numerics.Vector2>;
     using System.Numerics;
     using TileMapGenerator;
     using System.Collections.Concurrent;
-    using CellularRoomGrower;
+    using CellularGrower;
     using Vector2Extensions;
     using GoRogueWrapper;
-    using BinaryGrid;
+    using Grid;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class Room : IDed
+    public class Zone : IDed
     {
         public Vector2 Locus {get; private set;}
         public Vertex Vertex {get; private set;}
@@ -24,17 +24,17 @@ namespace MapPrimitives
         public List<string> Tags{get; set;} = new List<string>();
         private int _room_id;
         public int ID { get => _room_id; set => _room_id = value; }
-        private BinaryGrid LocalGrid{get; set;}
+        private Grid LocalGrid{get; set;}
 
         private ConcurrentDictionary<Vector2, List<Side>> growth_cache = new ConcurrentDictionary<Vector2, List<Side>>();
     
 
-        internal Room(Vertex vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
+        internal Zone(Vertex vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
         {
-            LocalGrid = new BinaryGrid(1, 1);
+            LocalGrid = new Grid(1, 1);
             Vertex = vertex;
             Locus = center;
-            _room_id = UIDGenerator.GetNextID("room" + vertex.ID + center.X + center.Y);
+            _room_id = UIDGenerator.GetNextID("zone" + vertex.ID + center.X + center.Y);
             Corners.TryAdd(new Vector2(-1, -1), Locus);
             Corners.TryAdd(new Vector2(1, -1), Locus);
             Corners.TryAdd(new Vector2(-1, 1), Locus);
@@ -45,7 +45,7 @@ namespace MapPrimitives
                 var result = shaper(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
                 if (result.Count() == 0 || result is null)
                 {
-                    return CellularRoomGrowerSettings.DefaultShapeChooser(new Graph(), vertex, Locus)(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
+                    return CellularGrowerSettings.DefaultShapeChooser(new Graph(), vertex, Locus)(num, vec, (ConcurrentDictionary<Vector2, Vector2>) corners);
                 }
                 else
                 {
@@ -88,7 +88,7 @@ namespace MapPrimitives
             Vector2 min = Vector2Ext.MinRange(Corners.Values);
             Vector2 range = Vector2Ext.SpanRange(Corners.Values) + Vector2.One;
 
-            LocalGrid = new BinaryGrid((uint) range.Y, (uint) range.X);
+            LocalGrid = new Grid((uint) range.Y, (uint) range.X);
 
             foreach (var side in new_sides)
             {

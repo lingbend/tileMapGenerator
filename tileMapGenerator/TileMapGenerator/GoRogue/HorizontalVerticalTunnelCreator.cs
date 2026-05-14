@@ -31,18 +31,10 @@ namespace GoRogueWrapper
     using SadRogue.Primitives.GridViews;
     using System;
 
-    /// <summary>
-    /// Implements a tunnel creation algorithm that creates a tunnel that performs all needed
-    /// vertical movement before horizontal movement, or vice versa (depending on rng).
-    /// </summary>
     public class HorizontalVerticalTunnelCreator : ITunnelCreator
     {
         private readonly ConcurrentRandom _rng;
 
-        /// <summary>
-        /// Creates a new tunnel creator.
-        /// </summary>
-        /// <param name="rng">RNG to use for movement selection.</param>
         public HorizontalVerticalTunnelCreator(ConcurrentRandom? rng = null) => _rng = rng ?? new ConcurrentRandom(1);
 
         public void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd)
