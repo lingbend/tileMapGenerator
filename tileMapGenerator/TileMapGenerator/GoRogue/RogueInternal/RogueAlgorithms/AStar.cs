@@ -28,6 +28,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using Priority_Queue;
 using SadRogue.Primitives;
 using SadRogue.Primitives.GridViews;
@@ -113,7 +114,7 @@ namespace GoRogueWrapper
 
         public double MaxEuclideanMultiplier { get; private set; }
 
-        public Path? ShortestPath(Point start, Point end, bool assumeEndpointsWalkable = true)
+        internal Path? ShortestPath(Point start, Point end, bool assumeEndpointsWalkable = true)
         {
             SadRogue.Primitives.AdjacencyRule adjacencyRule = (SadRogue.Primitives.AdjacencyRule) DistanceMeasurement;
 
@@ -220,7 +221,7 @@ namespace GoRogueWrapper
             return null; 
         }
 
-        public Path? ShortestPath(int startX, int startY, int endX, int endY, bool assumeEndpointsWalkable = true)
+        internal Path? ShortestPath(int startX, int startY, int endX, int endY, bool assumeEndpointsWalkable = true)
             => ShortestPath(new Point(startX, startY), new Point(endX, endY), assumeEndpointsWalkable);
 
         private static bool IsOpen(AStarNode? node, FastPriorityQueue<AStarNode> openSet)
@@ -234,8 +235,20 @@ namespace GoRogueWrapper
             return WalkabilityView[pos] || pos == start || pos == end;
         }
     }
+    
+    public class FastAStar : AStar
+    {
+        public FastAStar(IGridView<bool> walkabilityView, Distance distanceMeasurement)
+            : base(walkabilityView, distanceMeasurement) => Heuristic = (c1, c2)
+            => Distance.Manhattan.Calculate(c1, c2) + Point.EuclideanDistanceMagnitude(c1, c2) * MaxEuclideanMultiplier;
 
-    public class Path
+        public FastAStar(IGridView<bool> walkabilityView, Distance distanceMeasurement, IGridView<double> weights,
+                         double minimumWeight)
+            : base(walkabilityView, distanceMeasurement, weights, minimumWeight) => Heuristic = (c1, c2)
+            => Distance.Manhattan.Calculate(c1, c2) + Point.EuclideanDistanceMagnitude(c1, c2) * MaxEuclideanMultiplier;
+    }
+
+    internal class Path
     {
         private double _cost;
         private readonly IReadOnlyList<Point> _steps;

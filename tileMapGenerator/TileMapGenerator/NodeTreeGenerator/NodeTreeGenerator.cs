@@ -5,10 +5,10 @@ namespace NodeTreeGenerator
     using QuikGraph;
     using System.Numerics;
     using Primitives;
-    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
-    using DFS = QuikGraph.Algorithms.Search.UndirectedDepthFirstSearchAlgorithm<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
+    using DFS = QuikGraph.Algorithms.Search.UndirectedDepthFirstSearchAlgorithm<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
     using System.Collections.Concurrent;
     #if DEBUG
     using QuikGraph.Graphviz;
@@ -102,7 +102,7 @@ namespace NodeTreeGenerator
             return (min_span_tree, backing_dictionary);
         }
 
-        private void InnerReworkDegreeDistribution(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, Graph min_span_tree_copy, Dictionary<int, int> degree_percents, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<ZEdge<Vector2>> processed_edges, OrderedHashSet<Vertex> deleted_vertices, OrderedHashSet<Vertex> new_vertices)
+        private void InnerReworkDegreeDistribution(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, Graph min_span_tree_copy, Dictionary<int, int> degree_percents, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<VectorEdge<Vector2>> processed_edges, OrderedHashSet<Vertex> deleted_vertices, OrderedHashSet<Vertex> new_vertices)
         {
             foreach ((Vertex next_vertex, int target_degree) in GetNextVertexDegreePair(min_span_tree_copy, new ConcurrentDictionary<Vector2, Vertex>(backing_dictionary), degree_percents))
             {
@@ -125,7 +125,7 @@ namespace NodeTreeGenerator
             }
         }
 
-        private void TryTransplantEdges(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<ZEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
+        private void TryTransplantEdges(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<VectorEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
         {
 
             while (degree < target_degree)
@@ -179,7 +179,7 @@ namespace NodeTreeGenerator
             }
         }
 
-        private (OrderedHashSet<Vertex>, OrderedHashSet<Vertex>) TryTransplantVertices(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<ZEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
+        private (OrderedHashSet<Vertex>, OrderedHashSet<Vertex>) TryTransplantVertices(ref Graph graph, ConcurrentDictionary<Vector2, Vertex> backing_dictionary, Graph min_span_tree, OrderedHashSet<Vertex> processed_vertices, OrderedHashSet<VectorEdge<Vector2>> processed_edges, Vertex next_vertex, int target_degree, ref int degree)
         {
             var deleted = new OrderedHashSet<Vertex>();
             var new_verts = new OrderedHashSet<Vertex>();
@@ -396,7 +396,7 @@ namespace NodeTreeGenerator
                     Vector2 hole_full = (Vector2) hole!;
                     holes.Remove(hole_full);
                     backing_dictionary.TryGetValue(hole_full, out Vertex value);
-                    RemoveEdges(graph, value?.Edges ?? new HashSet<ZEdge<Vector2>>());
+                    RemoveEdges(graph, value?.Edges ?? new HashSet<VectorEdge<Vector2>>());
                     if (value != null)
                     {
                         graph.RemoveVertex(backing_dictionary[hole_full]);
@@ -774,7 +774,7 @@ namespace NodeTreeGenerator
             return item;
         }
 
-        private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3) where T : IDed
+        private T ChooseWeightedRandom<T>(ICollection<T> coll, Dictionary<int, int> weight_percents,Func<T,Dictionary<int, int>, int> weighter, int iterations = 3) where T : ID
         {
             List<T> collection_copy = new List<T>(coll.OrderBy(v=>v.ID));
             List<T> choices = new List<T>();
@@ -805,7 +805,7 @@ namespace NodeTreeGenerator
         }
         #endif
 
-        internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : IDed
+        internal class OrderedHashSet<T> : HashSet<T>, IEnumerable<T> where T : ID
         {
 
             internal OrderedHashSet (IEnumerable<T> collection) : base(collection){}

@@ -1,10 +1,10 @@
 // First Step
 namespace CellularGrower
 {
-    using Grid;
-    using Layout = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
+    using BitArray2D;
+    using Layout = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using System.Collections.Concurrent;
     using Vector2Extensions;
@@ -24,7 +24,7 @@ namespace CellularGrower
 
         private string grid_lock = string.Empty;
 
-        public (Layout, Grid, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateZones(Layout layout, int map_area)
+        public (Layout, BitArray2D, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateZones(Layout layout, int map_area)
         {
             if (Settings.ValidDirections.Count == 0)
             {
@@ -51,7 +51,7 @@ namespace CellularGrower
             old_relative_size = GetOldRelativeSize(layout);
             IEnumerable<Zone> zones = MakeZones(layout);
             IEnumerable<Tunnel> halls = BuildHalls(layout);
-            Grid grid = BuildGrid(zones, halls);
+            BitArray2D grid = BuildGrid(zones, halls);
             (zones, grid) = GrowZones(zones, layout, grid, Settings.Prioritizer);
 
             int retry_count = 0;
@@ -128,11 +128,11 @@ namespace CellularGrower
             return new Vector2((float) Math.Ceiling(locus.X * width_modifier) + 1, (float) Math.Ceiling(locus.Y * height_modifier) + 1);
         }
 
-        internal Grid BuildGrid(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls)
+        internal BitArray2D BuildGrid(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls)
         {
             double width = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.X + 5.0);
             double height = Math.Ceiling(Math.Pow(Settings.MapArea, .75) * Settings.SideRatio.Y + 5.0);
-            Grid grid = new Grid((uint)height, (uint)width);
+            BitArray2D grid = new BitArray2D((uint)height, (uint)width);
             using var preprocess_zones = new Task(() =>
             {
                 Parallel.ForEach(zones, (room) =>
@@ -162,7 +162,7 @@ namespace CellularGrower
             return grid;
         }
 
-        private void CheckAreasOccupied(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls, ref Grid grid)
+        private void CheckAreasOccupied(IEnumerable<Zone> zones, IEnumerable<Tunnel> halls, ref BitArray2D grid)
         {
                 foreach (Zone room in zones)
                 {
@@ -181,7 +181,7 @@ namespace CellularGrower
                 }
         }
 
-        internal (IEnumerable<Zone>, Grid) GrowZones(IEnumerable<Zone> zones, Layout layout, Grid grid, Func<Layout, IEnumerable<Zone>, IEnumerable<Zone>> prioritizer)
+        internal (IEnumerable<Zone>, BitArray2D) GrowZones(IEnumerable<Zone> zones, Layout layout, BitArray2D grid, Func<Layout, IEnumerable<Zone>, IEnumerable<Zone>> prioritizer)
         {
             IEnumerable<Zone> growable_zones;
             ConcurrentStack<Zone> next_zones;
@@ -199,8 +199,8 @@ namespace CellularGrower
                     }
                     else
                     {
-                        ConcurrentBag<Grid> new_grids = new ConcurrentBag<Grid>();
-                        ConcurrentBag<Grid> negative_grids = new ConcurrentBag<Grid>();
+                        ConcurrentBag<BitArray2D> new_grids = new ConcurrentBag<BitArray2D>();
+                        ConcurrentBag<BitArray2D> negative_grids = new ConcurrentBag<BitArray2D>();
                         Parallel.ForEach(next_zones, next_room =>
                         {
                             (var new_grid, var negative_grid, Zone new_room) = GrowZone(grid, next_room, Settings.DirectionChooser);
@@ -221,7 +221,7 @@ namespace CellularGrower
             return (new_zones.Values.OrderBy(r=>r.ID), grid);
         }
 
-        private IEnumerable<Zone> GetGrowable(IEnumerable<Zone> zones, Grid grid, Vector2 target_direction)
+        private IEnumerable<Zone> GetGrowable(IEnumerable<Zone> zones, BitArray2D grid, Vector2 target_direction)
         {
             ConcurrentBag<Zone> growable_zones = new ConcurrentBag<Zone>();
             Parallel.ForEach(zones, room =>
@@ -254,9 +254,9 @@ namespace CellularGrower
             return range.X / range.Y;
         }
 
-        internal (Grid, Grid, Zone) GrowZone(Grid grid, Zone room, Func<IEnumerable<Vector2>, Zone, Vector2> direction_chooser)
+        internal (BitArray2D, BitArray2D, Zone) GrowZone(BitArray2D grid, Zone room, Func<IEnumerable<Vector2>, Zone, Vector2> direction_chooser)
         {
-            Grid grid_copy = new Grid(grid);
+            BitArray2D grid_copy = new BitArray2D(grid);
             ConcurrentStack<Vector2> open_directions = new ConcurrentStack<Vector2>();
             foreach (var direction in Settings.ValidDirections) // TODO: Implement parallelism
             {
@@ -305,7 +305,7 @@ namespace CellularGrower
                 chosen_direction = direction_chooser(open_directions.OrderBy(v=>v.X + (5*v.Y)), room);
             }
 
-            Grid negative_grid = new Grid(grid_copy.NRows, grid_copy.NCols);
+            BitArray2D negative_grid = new BitArray2D(grid_copy.NRows, grid_copy.NCols);
             if (Settings.ValidDirections.Contains(chosen_direction))
             {
                 (grid_copy, negative_grid, room) = GrowSide(grid_copy, room, chosen_direction);
@@ -317,7 +317,7 @@ namespace CellularGrower
             return (grid_copy, negative_grid, room);
         }
 
-        private bool CheckDirection(Grid grid, Vector2 direction, Zone room)
+        private bool CheckDirection(BitArray2D grid, Vector2 direction, Zone room)
         {
             float x_to_y_ratio = CalculateSideRatio(room);
             if (x_to_y_ratio >= CellularGrowerSettings.MaxRatio.X / CellularGrowerSettings.MaxRatio.Y && direction.X != 0)
@@ -349,7 +349,7 @@ namespace CellularGrower
             return side_check == 0;
         }
 
-        private (Grid, Grid, Zone) GrowSide(Grid grid, Zone room, Vector2 side)
+        private (BitArray2D, BitArray2D, Zone) GrowSide(BitArray2D grid, Zone room, Vector2 side)
         {
             HashSet<Vector2> old_sides = new HashSet<Vector2>(room.GetSides());
             HashSet<Vector2>  new_sides = new HashSet<Vector2>(room.GetTempGrownSides(side).Item1);
@@ -357,8 +357,8 @@ namespace CellularGrower
             old_sides.ExceptWith(new_sides);
             new_sides.ExceptWith(old_copy);
 
-            Grid grid_copy = new Grid(grid);
-            Grid negative_grid = new Grid(grid.NRows, grid.NRows);
+            BitArray2D grid_copy = new BitArray2D(grid);
+            BitArray2D negative_grid = new BitArray2D(grid.NRows, grid.NRows);
 
             Parallel.ForEach(old_sides, point =>
             {

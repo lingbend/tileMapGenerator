@@ -1,4 +1,4 @@
-namespace ConcRandom
+namespace CRandom
 {
     using System.Text;
     using System.IO.Hashing;
@@ -7,7 +7,7 @@ namespace ConcRandom
     using System.Linq;
     using static Medallion.Bits;
 
-    public class ConcRandom
+    public class CRandom
     {
         private int _seed_1 = 0;
         private int _seed_3 = 0;
@@ -19,7 +19,7 @@ namespace ConcRandom
 
         int[] backing;
 
-        public ConcRandom(int seed)
+        public CRandom(int seed)
         {
             if (seed == 0)
             {
@@ -32,9 +32,9 @@ namespace ConcRandom
             backing = new int[4]{_seed_1, _seed_2, _seed_3, global_state.GetHashCode()};
         } 
 
-        public int Next(object unique_state, int min = MIN, int max = MAX_INT)
+        public int Next(object state, int min = MIN, int max = MAX_INT)
         {
-            int[] backingCopy = (backing.Select(u=>(int) XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()! + u)))).ToArray();
+            int[] backingCopy = (backing.Select(u=>(int) XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(state.ToString()! + u)))).ToArray();
             int t = backingCopy[1] << 9;
             backingCopy[2] ^= backingCopy[0];
             backingCopy[3] ^= backingCopy[1];
@@ -49,41 +49,41 @@ namespace ConcRandom
             return result;
         }
 
-        public bool NextBool(object unique_state)
+        public bool NextBool(object state)
         {
-            return Next(unique_state) % 2 == 1;
+            return Next(state) % 2 == 1;
         }
 
-        public Vector2 NextVector2(object unique_state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT)
+        public Vector2 NextVector2(object state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT)
         {
-            int x = Next(unique_state.ToString() + "homo 13 neanderthalis", min_x, max_x);
-            int y = Next(unique_state.ToString() + "teq 13 uila", min_y, max_y);
+            int x = Next(state.ToString() + "homo 13 neanderthalis", min_x, max_x);
+            int y = Next(state.ToString() + "teq 13 uila", min_y, max_y);
             return new Vector2(x, y);
         }
 
-        public int RollMultiple(object unique_state, int sides, int number)
+        public int RollMultiple(object state, int sides, int number)
         {
             int result = 0;
             for (int i = 0; i < number; i++)
             {
-                result += Next(unique_state, 1, sides + 1);
+                result += Next(state, 1, sides + 1);
             }
             int modified_roll = Modify(result, number, number*sides);
             return modified_roll;
         }
 
-        public Vector2 RollMultipleVector2(object unique_state, int sides_x, int number_x, int sides_y, int number_y)
+        public Vector2 RollMultipleVector2(object state, int sides_x, int number_x, int sides_y, int number_y)
         {
-            int x = RollMultiple(unique_state.ToString() + "homo 13 neanderthalis", sides_x, number_x);
-            int y = RollMultiple(unique_state.ToString() + "teq 13 uila", sides_y, number_y);
+            int x = RollMultiple(state.ToString() + "homo 13 neanderthalis", sides_x, number_x);
+            int y = RollMultiple(state.ToString() + "teq 13 uila", sides_y, number_y);
             return new Vector2(x, y);
         }
 
-        public int BellCurved(object unique_state, int min_inclusive, int max_inclusive, uint curve_degree)
+        public int BellCurved(object state, int min_inclusive, int max_inclusive, uint curve_degree)
         {
             int range = max_inclusive - min_inclusive;
             int sides = (int) (range / curve_degree);
-            int result = RollMultiple(unique_state, sides, (int) curve_degree);
+            int result = RollMultiple(state, sides, (int) curve_degree);
             result -= (int) curve_degree;
             result += min_inclusive;
             result = (int) (result * (range / (sides * curve_degree)));
@@ -91,10 +91,10 @@ namespace ConcRandom
             return modified_roll;
         }
 
-        public Vector2 BellCurvedVector2(object unique_state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree)
+        public Vector2 BellCurvedVector2(object state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree)
         {
-            int x = BellCurved(unique_state.ToString() + "homo 13 neanderthalis", min_inclusive_x, max_inclusive_x, curve_degree);
-            int y = BellCurved(unique_state.ToString() + "teq 13 uila", min_inclusive_y, max_inclusive_y, curve_degree);
+            int x = BellCurved(state.ToString() + "homo 13 neanderthalis", min_inclusive_x, max_inclusive_x, curve_degree);
+            int y = BellCurved(state.ToString() + "teq 13 uila", min_inclusive_y, max_inclusive_y, curve_degree);
             return new Vector2(x, y);
         }
 

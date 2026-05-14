@@ -1,20 +1,20 @@
 namespace Primitives
 {
-    using Graph = QuikGraph.UndirectedGraph<ZVertex<System.Numerics.Vector2>, ZEdge<System.Numerics.Vector2>>;
-    using Vertex = ZVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<VectorVertex<System.Numerics.Vector2>, VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = VectorVertex<System.Numerics.Vector2>;
     using System.Numerics;
     using TileMapGenerator;
     using System.Collections.Concurrent;
     using CellularGrower;
     using Vector2Extensions;
     using GoRogueWrapper;
-    using Grid;
+    using BitArray2D;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class Zone : IDed
+    public class Zone : ID
     {
         public Vector2 Locus {get; private set;}
         public Vertex Vertex {get; private set;}
@@ -24,14 +24,14 @@ namespace Primitives
         public List<string> Tags{get; set;} = new List<string>();
         private int _room_id;
         public int ID { get => _room_id; set => _room_id = value; }
-        private Grid LocalGrid{get; set;}
+        private BitArray2D LocalGrid{get; set;}
 
         private ConcurrentDictionary<Vector2, List<Side>> growth_cache = new ConcurrentDictionary<Vector2, List<Side>>();
     
 
         internal Zone(Vertex vertex, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, IEnumerable<Vector2> valid_directions, Vector2 center, List<string>? tags = null)
         {
-            LocalGrid = new Grid(1, 1);
+            LocalGrid = new BitArray2D(1, 1);
             Vertex = vertex;
             Locus = center;
             _room_id = UIDGenerator.GetNextID("zone" + vertex.ID + center.X + center.Y);
@@ -88,7 +88,7 @@ namespace Primitives
             Vector2 min = Vec2Ext.MinRange(Corners.Values);
             Vector2 range = Vec2Ext.SpanRange(Corners.Values) + Vector2.One;
 
-            LocalGrid = new Grid((uint) range.Y, (uint) range.X);
+            LocalGrid = new BitArray2D((uint) range.Y, (uint) range.X);
 
             foreach (var side in new_sides)
             {
@@ -154,7 +154,7 @@ namespace Primitives
                         break;
                     }
                 }
-                if (!broken && GoRogueWrapper.IsConnected(Locus-min_corner+Vector2.One, point-min_corner+Vector2.One, LocalGrid, Locus))
+                if (!broken && GoRogue.IsConnected(Locus-min_corner+Vector2.One, point-min_corner+Vector2.One, LocalGrid, Locus))
                 {
                     inside.TryAdd(point, true);
                 }
@@ -162,4 +162,54 @@ namespace Primitives
             return inside.Keys;
         }
     }
+
+    internal class Side
+        {
+            public Vector2 Direction{get;}
+            public Vector2 Center{get; private set;}
+            public int Length{get; private set;}
+            private Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> Shape {get;}
+            public IEnumerable<Vector2> Points{get; private set;} = new List<Vector2>();
+
+            public Side(Vector2 direction, Vector2 center, Func<int, Vector2, ConcurrentDictionary<Vector2, Vector2>, IEnumerable<Vector2>> shaper, ConcurrentDictionary<Vector2, Vector2> corners, int initial_length=1)
+            {
+                CheckIfSizeIsValid(initial_length);
+             
+                Direction = direction;
+                Center = center;
+                Shape = shaper;
+                Points = shaper(initial_length, direction, corners);
+                Length = initial_length;
+            }
+
+
+            private void CheckIfSizeIsValid(int size)
+            {
+                if (size <= 0)
+                {
+                    throw new ArgumentOutOfRangeException("Sides must have length >= 1");
+                }
+            }
+
+            internal Side ChangeLengthBy(int size_modifier, ConcurrentDictionary<Vector2, Vector2> corners)
+            {
+                return SetLengthTo(Length + size_modifier, corners);
+            }
+
+            internal Side SetLengthTo(int new_size, ConcurrentDictionary<Vector2, Vector2> corners)
+            {
+                CheckIfSizeIsValid(new_size);
+                return new Side(Direction, Center, Shape, corners, new_size);
+            }
+
+            internal Side ChangeCenterBy(Vector2 center_modifier, ConcurrentDictionary<Vector2, Vector2> corners)
+            {
+                return SetCenterTo(Center + center_modifier, corners);
+            }
+
+            internal Side SetCenterTo(Vector2 new_center, ConcurrentDictionary<Vector2, Vector2> corners)
+            {
+                return new Side(Direction, new_center, Shape, corners, Length);
+            }
+        }
 }

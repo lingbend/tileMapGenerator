@@ -1,6 +1,6 @@
 using System.Numerics;
 
-using Grid = Grid.Grid;
+using Grid = BitArray2D.BitArray2D;
 using System.Collections.Concurrent;
 using Primitives;
 using Vector2Extensions;
@@ -14,7 +14,7 @@ namespace Exits
     // TODO: Refactor to internal?
     public static class ExitStamper
     {
-        public static IEnumerable<Vector2> ChooseExits(IEnumerable<Zone> zones, IEnumerable<Tunnel> tunnels, List<string>? excluded_tags = null)
+        public static IEnumerable<Vector2> PlaceExits(IEnumerable<Zone> zones, IEnumerable<Tunnel> tunnels, List<string>? excluded_tags = null)
         {
             ConcurrentDictionary<Zone, List<Tunnel>> rooms_to_halls = new ConcurrentDictionary<Zone, List<Tunnel>>();
             if (excluded_tags is null)
@@ -50,7 +50,7 @@ namespace Exits
             return exit_locations;
         }
 
-        public static IEnumerable<Vector2> PatchFrames(IEnumerable<Vector2> exits, global::Grid.Grid grid)
+        public static IEnumerable<Vector2> PatchFrames(IEnumerable<Vector2> exits, global::BitArray2D.BitArray2D grid)
         {
             HashSet<Vector2> patches = new HashSet<Vector2>();
             foreach (Vector2 exit in exits)

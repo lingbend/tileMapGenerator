@@ -27,10 +27,15 @@ SOFTWARE.
 namespace GoRogueWrapper
 {
     using System.Numerics;
-    using Lines = SadRogue.Primitives.Lines;
     using SadRogue.Primitives.GridViews;
+    using Lines = SadRogue.Primitives.Lines;
     using Vector2Extensions;
     using System;
+    using CRandom;
+    public interface ITunnelCreator
+    {
+        void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd);
+    }
 
     public enum AdjacencyRule
     {
@@ -68,6 +73,43 @@ namespace GoRogueWrapper
                 }
 
                 previous = pos.ToVector2();
+            }
+        }
+    }
+
+    public class HorizontalVerticalTunnelCreator : ITunnelCreator
+    {
+        private readonly CRandom _rng;
+
+        public HorizontalVerticalTunnelCreator(CRandom? rng = null) => _rng = rng ?? new CRandom(1);
+
+        public void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd)
+        {
+            if (_rng.NextBool((map.Count * tunnelStart).GetHashCode()))
+            {
+                CreateHTunnel(map, (int) tunnelStart.X, (int) tunnelEnd.X, (int) tunnelStart.Y);
+                CreateVTunnel(map, (int) tunnelStart.Y, (int) tunnelEnd.Y, (int) tunnelEnd.X);
+            }
+            else
+            {
+                CreateVTunnel(map, (int) tunnelStart.Y, (int) tunnelEnd.Y, (int) tunnelStart.X);
+                CreateHTunnel(map, (int) tunnelStart.X, (int) tunnelEnd.X, (int) tunnelEnd.Y);
+            }
+        }
+
+        private static void CreateHTunnel(ISettableGridView<bool> map, int xStart, int xEnd, int yPos)
+        {
+            for (var x = Math.Min(xStart, xEnd); x <= Math.Max(xStart, xEnd); ++x)
+            {
+                map[x, yPos] = true;
+            }
+        }
+
+        private static void CreateVTunnel(ISettableGridView<bool> map, int yStart, int yEnd, int xPos)
+        {
+            for (var y = Math.Min(yStart, yEnd); y <= Math.Max(yStart, yEnd); ++y)
+            {
+                map[xPos, y] = true;
             }
         }
     }

@@ -1,9 +1,9 @@
 namespace HallMaker
 {
     using System.Numerics;
-    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
     using System.Collections.Concurrent;
     using System;
     using System.Collections.Generic;

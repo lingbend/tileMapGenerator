@@ -1,11 +1,11 @@
 namespace TileMapGenerator
 {
-    using ConcRandom;
+    using CRandom;
 
     static internal class UIDGenerator
     {
         // private static int _id = 0;
-        private static ConcRandom _random = new ConcRandom(4593264);
+        private static CRandom _random = new CRandom(4593264);
 
         public static int GetNextID(object unique_identifier)
         {
@@ -18,5 +18,10 @@ namespace TileMapGenerator
         // {
         //     return _random.Next(_id);
         // }
+    }
+
+    internal interface ID
+    {
+        int ID{get; set;}
     }
 }

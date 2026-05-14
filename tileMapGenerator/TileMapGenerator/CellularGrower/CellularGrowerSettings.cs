@@ -1,12 +1,12 @@
 namespace CellularGrower
 {
-    using Grid;
-    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
+    using BitArray2D;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using static System.Math;
-    using ConcRandom;
+    using CRandom;
     using System.Collections.Concurrent;
     using Vector2Extensions;
     using Primitives;
@@ -34,10 +34,10 @@ namespace CellularGrower
         public Vector2 SideRatio{get; set;} = Vector2.One;
         public static Vector2 MaxRatio{get; set;} = new Vector2(2.5f, 1);
         public static Random Random{get;set;}
-        private static ConcRandom _direction_random;
+        private static CRandom _direction_random;
 
-        private static ConcRandom _prioritizer_random;
-        private static ConcRandom _shaper_random;
+        private static CRandom _prioritizer_random;
+        private static CRandom _shaper_random;
     
         public static IEnumerable<Zone> DefaultPrioritizer(Graph graph, IEnumerable<Zone> zones)
         {
@@ -47,7 +47,7 @@ namespace CellularGrower
             }
             if (_prioritizer_random == null)
             {
-                 _prioritizer_random = new ConcRandom(Random.Next());
+                 _prioritizer_random = new CRandom(Random.Next());
             }
             IEnumerable<Zone> small_zones = zones.Where(r=>Vec2Ext.SpanRange(r.GetSides()).X < 3 && Vec2Ext.SpanRange(r.GetSides()).Y<3);
             if (small_zones.Count() > 0)
@@ -63,7 +63,7 @@ namespace CellularGrower
         {
             if (_direction_random == null)
             {
-                 _direction_random = new ConcRandom(Random.Next());
+                 _direction_random = new CRandom(Random.Next());
             }
             float x_to_y_ratio = CalculateSideRatio(zone);
             List<Vector2> directions_copy = new List<Vector2>(directions);
@@ -216,7 +216,7 @@ namespace CellularGrower
         {
             if (_shaper_random is null)
             {
-                _shaper_random = new ConcRandom(Random.Next());
+                _shaper_random = new CRandom(Random.Next());
             }
             return (length, direction, corners) =>
             {
@@ -231,8 +231,8 @@ namespace CellularGrower
                     return RoundPoints(GetCircleSides(length, direction, corners));
                 }
                 ConcurrentBag<Vector2> points  = new ConcurrentBag<Vector2>(RoundPoints(GetCircleSides(length, direction, corners, 9)));
-                ConcRandom rand = new ConcRandom(_shaper_random.Next(center.ToString() + vertex.ID));
-                Grid test_grid = new Grid((uint) (diameters.Y + 1), (uint) (diameters.X + 1), 0u);
+                CRandom rand = new CRandom(_shaper_random.Next(center.ToString() + vertex.ID));
+                BitArray2D test_grid = new BitArray2D((uint) (diameters.Y + 1), (uint) (diameters.X + 1), 0u);
             
                 int i_max = 1;
                 for (int i = 0; i < i_max + 1; i++)
@@ -283,9 +283,9 @@ namespace CellularGrower
                         };
                     };
                 }
-                var direct_hall = GoRogueWrapper.GetSimpleDirectHall(center, locus);
+                var direct_hall = GoRogue.GetSimpleDirectHall(center, locus);
 
-                points = new ConcurrentBag<Vector2>(points.Union(RoundPoints(GetCircleSides(length, direction, corners))).Except(GoRogueWrapper.GetSimpleDirectHall(center, locus)));
+                points = new ConcurrentBag<Vector2>(points.Union(RoundPoints(GetCircleSides(length, direction, corners))).Except(GoRogue.GetSimpleDirectHall(center, locus)));
 
                 return points;
             };

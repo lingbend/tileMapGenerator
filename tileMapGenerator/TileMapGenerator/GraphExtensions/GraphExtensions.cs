@@ -1,8 +1,8 @@
 // For testing only
 #if DEBUG
-using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
+using Graph = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
 
 using QuikGraph.Graphviz;
 using System.Diagnostics;

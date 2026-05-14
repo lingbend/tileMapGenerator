@@ -1,9 +1,9 @@
 namespace HallMaker
 {
-    using Grid;
-    using Graph = QuikGraph.UndirectedGraph<Primitives.ZVertex<System.Numerics.Vector2>, Primitives.ZEdge<System.Numerics.Vector2>>;
-    using Vertex = Primitives.ZVertex<System.Numerics.Vector2>;
-    using Edge = Primitives.ZEdge<System.Numerics.Vector2>;
+    using BitArray2D;
+    using Graph = QuikGraph.UndirectedGraph<Primitives.VectorVertex<System.Numerics.Vector2>, Primitives.VectorEdge<System.Numerics.Vector2>>;
+    using Vertex = Primitives.VectorVertex<System.Numerics.Vector2>;
+    using Edge = Primitives.VectorEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using System.Collections.Concurrent;
     using Vector2Extensions;
@@ -19,7 +19,7 @@ namespace HallMaker
     {
         public HallMaker(){}
 
-        public (Graph, Grid, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateHalls(Graph graph, Grid grid, IEnumerable<Zone> rooms, IEnumerable<Tunnel> halls)
+        public (Graph, BitArray2D, IEnumerable<Zone>, IEnumerable<Tunnel>) GenerateHalls(Graph graph, BitArray2D grid, IEnumerable<Zone> rooms, IEnumerable<Tunnel> halls)
         {
             var room_points = GetRoomInnerPoints(rooms);
             foreach (Tunnel hall in halls)
@@ -30,27 +30,27 @@ namespace HallMaker
             return (graph, grid, rooms, halls);
         }
 
-        public Grid GenerateOnlyHalls(in Graph graph, in Grid grid, in IEnumerable<Zone> rooms, in IEnumerable<Tunnel> halls)
+        public BitArray2D GenerateOnlyHalls(in Graph graph, in BitArray2D grid, in IEnumerable<Zone> rooms, in IEnumerable<Tunnel> halls)
         {
-            var out_grid = new Grid(grid.NRows, grid.NCols);
+            var out_grid = new BitArray2D(grid.NRows, grid.NCols);
             var room_points = GetRoomInnerPoints(rooms);
             foreach (Tunnel hall in halls)
             {
-                out_grid.CombineGrids(new Grid[]{AddHallAlone(grid, room_points, hall)});
+                out_grid.CombineGrids(new BitArray2D[]{AddHallAlone(grid, room_points, hall)});
 
             }
             return out_grid;
         }
 
-        private Grid AddHallAlone(in Grid grid, in IEnumerable<Vector2> room_points, in Tunnel hall)
+        private BitArray2D AddHallAlone(in BitArray2D grid, in IEnumerable<Vector2> room_points, in Tunnel hall)
         {
-            Grid temp_grid = new Grid(grid.NRows, grid.NCols);
+            BitArray2D temp_grid = new BitArray2D(grid.NRows, grid.NCols);
             (temp_grid, _, _) = AddHallInner(room_points, hall, temp_grid);
 
             return temp_grid;
         }
 
-        private Grid AddHallToAll(Grid grid, IEnumerable<Vector2> room_points, Tunnel hall)
+        private BitArray2D AddHallToAll(BitArray2D grid, IEnumerable<Vector2> room_points, Tunnel hall)
         {
             var (new_grid, inner_points, wall_points) = AddHallInner(room_points, hall, grid);
             grid = new_grid;
@@ -60,7 +60,7 @@ namespace HallMaker
             return grid;
         }
 
-        private (Grid, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Tunnel hall, Grid grid)
+        private (BitArray2D, IEnumerable<Vector2>, IEnumerable<Vector2>) AddHallInner(IEnumerable<Vector2> room_points, Tunnel hall, BitArray2D grid)
         {
             var (inner_points, wall_points) = GenerateHall(hall, room_points);
             foreach (var wall_point in wall_points.Except(room_points))
@@ -100,7 +100,7 @@ namespace HallMaker
 
         private IEnumerable<Vector2> GenerateInsideHall(Vector2 source, Vector2 target)
         {
-            return GoRogueWrapper.GetSimpleDirectHall(source, target);
+            return GoRogue.GetSimpleDirectHall(source, target);
         }
 
         private IEnumerable<Vector2> GenerateHallWalls(IEnumerable<Vector2> inner_points)
@@ -116,7 +116,7 @@ namespace HallMaker
             return wall_points.Keys;
         }
 
-        private bool InBounds(Vector2 location, Grid grid)
+        private bool InBounds(Vector2 location, BitArray2D grid)
         {
             return location.X > 0 && location.Y > 0 && location.X <= grid.NCols && location.Y <= grid.NRows;
         }

@@ -1,12 +1,12 @@
 namespace Primitives
 {
-    using Vertex = ZVertex<System.Numerics.Vector2>;
-    using Edge = ZEdge<System.Numerics.Vector2>;
+    using Vertex = VectorVertex<System.Numerics.Vector2>;
+    using Edge = VectorEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using TileMapGenerator;
     using System.Collections.Generic;
 
-    public class Tunnel : IDed
+    public class Tunnel : ID
     {
         public int ID{get; set;}
         public Vector2 Locus{get;}

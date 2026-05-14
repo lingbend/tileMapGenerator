@@ -2,13 +2,13 @@ namespace GoRogueWrapper
 {
     using System.Numerics;
     using Vector2Extensions;
-    using ConcRandom;
-    using Grid;
+    using CRandom;
+    using BitArray2D;
     using SadRogue.Primitives.GridViews;
     using System;
     using System.Collections.Generic;
 
-    public static class GoRogueWrapper
+    public static class GoRogue
     {
         public static IEnumerable<Vector2> GetSimpleDirectHall(Vector2 start, Vector2 end)
         {
@@ -19,7 +19,7 @@ namespace GoRogueWrapper
             return view.points;
         }
 
-        public static IEnumerable<Vector2> GetSimpleHorizontalVerticalHall(Vector2 start, Vector2 end, object state, ConcRandom random)
+        public static IEnumerable<Vector2> GetSimpleHorizontalVerticalHall(Vector2 start, Vector2 end, object state, CRandom random)
         {
             Vector2 range = Vec2Ext.SpanRange(new Vector2[]{start, end});
             SimpleMapViewer view = new SimpleMapViewer(range);
@@ -33,7 +33,7 @@ namespace GoRogueWrapper
             return view.points;
         }
 
-        public static bool IsConnected(Vector2 start, Vector2 end, Grid grid, Vector2? locus = null)
+        public static bool IsConnected(Vector2 start, Vector2 end, BitArray2D grid, Vector2? locus = null)
         {
             GridMapViewer view = new GridMapViewer(grid, locus);
             var fast_astar = new FastAStar(view, SadRogue.Primitives.Distance.Manhattan);
@@ -54,14 +54,14 @@ namespace GoRogueWrapper
             }
 
             public HashSet<Vector2> points = new HashSet<Vector2>();
-            private Grid Grid;
+            private BitArray2D Grid;
             private Vector2 Locus;
 
-            public GridMapViewer(Grid grid, Vector2? locus = null)
+            public GridMapViewer(BitArray2D grid, Vector2? locus = null)
             {
                 Height = (int) grid.NRows;
                 Width = (int) grid.NCols;
-                Grid = new Grid(grid);
+                Grid = new BitArray2D(grid);
                 if (locus != null)
                 {
                     Locus = (Vector2) locus;
