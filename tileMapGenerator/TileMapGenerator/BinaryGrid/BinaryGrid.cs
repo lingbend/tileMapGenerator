@@ -18,7 +18,7 @@ using static Medallion.Bits;
 namespace BinaryGrid
 {
     // 1 indexed
-    public struct BinaryGrid : IDed, IGridView<bool>
+    public class BinaryGrid : IDed, IGridView<bool>
     {
         internal BinaryNumber _grid;
         private (uint, uint) _size;
@@ -598,7 +598,7 @@ namespace BinaryGrid
     }
     
 
-    internal struct BinaryNumber
+    internal class BinaryNumber
         {
             private BitArray _backing_array;
             public BinaryNumber(ulong value)
