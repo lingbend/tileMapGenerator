@@ -9,3 +9,4 @@ images
 samples
 *.png
 *.lscache
+*.meta
