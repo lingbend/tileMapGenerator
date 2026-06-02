@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using System.Collections;
 using System.Drawing;
 using TileMapGenerator;
@@ -18,7 +18,7 @@ using static Medallion.Bits;
 namespace BinaryGrid
 {
     // 1 indexed
-    public class BinaryGrid : IDed, IGridView<bool>
+    public struct BinaryGrid : IDed, IGridView<bool>
     {
         internal BinaryNumber _grid;
         private (uint, uint) _size;
@@ -595,10 +595,58 @@ namespace BinaryGrid
             }
             return InBounds((uint) coords.X, (uint) coords.Y);
         }
+
+        #if DEBUG
+        public void ToBMP(string name = "", string color = "0xFF000000", bool overlay = false)
+        {
+            Image image;
+            Graphics graphic;
+            if (!overlay)
+            {
+                image = new Bitmap((int) (30*_size.Item2), (int) (30*_size.Item1));
+                graphic = Graphics.FromImage(image);
+            }
+            else
+            {
+                File.Copy($"../../{name}Grid.bmp", $"../../__temp__{name}Grid.bmp");
+                image = Image.FromFile($"../../__temp__{name}Grid.bmp");
+                graphic = Graphics.FromImage(image);
+            }
+        
+            using var brush = new SolidBrush(Color.FromArgb(Convert.ToInt32(color, 16)));
+
+            if (!overlay)
+            {
+                graphic.Clear(Color.White);
+            }
+        
+            for(int row = 1; row <= _size.Item1; row++)
+            {
+                for(int col = 1; col <= _size.Item2; col++)
+                {
+                    if (GetCell((uint) row, (uint) col) == 1)
+                    {
+                        graphic.FillRectangle(brush, new RectangleF(30*(col-1), 30*(row-1), 30f, 30f));
+                    }
+                }
+            }
+            if (overlay)
+            {
+                File.Delete($"../../{name}Grid.bmp");
+            }
+            image.Save($"../../{name}Grid.bmp");
+            graphic.Dispose();
+            image.Dispose();
+            if (overlay)
+            {
+                File.Delete($"../../__temp__{name}Grid.bmp");
+            }     
+        }
+        #endif
     }
     
 
-    internal class BinaryNumber
+    internal struct BinaryNumber
         {
             private BitArray _backing_array;
             public BinaryNumber(ulong value)

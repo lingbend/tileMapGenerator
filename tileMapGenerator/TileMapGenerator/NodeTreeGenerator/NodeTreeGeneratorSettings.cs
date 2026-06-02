@@ -1,4 +1,3 @@
-#nullable enable
 namespace NodeTreeGenerator
 {
     using System.Numerics;
@@ -9,7 +8,6 @@ namespace NodeTreeGenerator
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using static Polyfills.Polyfill;
 
     public class NodeTreeGeneratorSettings
     {
