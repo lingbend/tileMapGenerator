@@ -32,8 +32,10 @@ namespace ConcurrentRandom
             backing = new int[4]{_seed_1, _seed_2, _seed_3, global_state.GetHashCode()};
         } 
 
-        public int Next(object unique_state, int min = MIN, int max = MAX_INT)
+        public int Next<T>(T unique_state, int min = MIN, int max = MAX_INT) where T : class
         {
+            if (min < 0) min = 0;
+            if (max <= 0) return 0;
             int[] backingCopy = (backing.Select(u=>(int) XxHash32.HashToUInt32(Encoding.ASCII.GetBytes(unique_state.ToString()! + u)))).ToArray();
             int t = backingCopy[1] << 9;
             backingCopy[2] ^= backingCopy[0];
@@ -49,19 +51,19 @@ namespace ConcurrentRandom
             return result;
         }
 
-        public bool NextBool(object unique_state)
+        public bool NextBool<T>(T unique_state) where T : class
         {
             return Next(unique_state) % 2 == 1;
         }
 
-        public Vector2 NextVector2(object unique_state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT)
+        public Vector2 NextVector2<T>(T unique_state, int min_x = 0, int max_x = MAX_INT, int min_y = 0, int max_y = MAX_INT) where T : class
         {
             int x = Next(unique_state.ToString() + "homo 13 neanderthalis", min_x, max_x);
             int y = Next(unique_state.ToString() + "teq 13 uila", min_y, max_y);
             return new Vector2(x, y);
         }
 
-        public int RollMultiple(object unique_state, int sides, int number)
+        public int RollMultiple<T>(T unique_state, int sides, int number) where T : class
         {
             int result = 0;
             for (int i = 0; i < number; i++)
@@ -72,14 +74,14 @@ namespace ConcurrentRandom
             return modified_roll;
         }
 
-        public Vector2 RollMultipleVector2(object unique_state, int sides_x, int number_x, int sides_y, int number_y)
+        public Vector2 RollMultipleVector2<T>(T unique_state, int sides_x, int number_x, int sides_y, int number_y) where T : class
         {
             int x = RollMultiple(unique_state.ToString() + "homo 13 neanderthalis", sides_x, number_x);
             int y = RollMultiple(unique_state.ToString() + "teq 13 uila", sides_y, number_y);
             return new Vector2(x, y);
         }
 
-        public int BellCurved(object unique_state, int min_inclusive, int max_inclusive, uint curve_degree)
+        public int BellCurved<T>(T unique_state, int min_inclusive, int max_inclusive, uint curve_degree) where T : class
         {
             int range = max_inclusive - min_inclusive;
             int sides = (int) (range / curve_degree);
@@ -91,7 +93,7 @@ namespace ConcurrentRandom
             return modified_roll;
         }
 
-        public Vector2 BellCurvedVector2(object unique_state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree)
+        public Vector2 BellCurvedVector2<T>(T unique_state, int min_inclusive_x, int max_inclusive_x, int min_inclusive_y, int max_inclusive_y, uint curve_degree) where T : class
         {
             int x = BellCurved(unique_state.ToString() + "homo 13 neanderthalis", min_inclusive_x, max_inclusive_x, curve_degree);
             int y = BellCurved(unique_state.ToString() + "teq 13 uila", min_inclusive_y, max_inclusive_y, curve_degree);
@@ -101,92 +103,6 @@ namespace ConcurrentRandom
         internal int Modify(int original, int original_min, int original_max)
         {
             return original;
-        }
-
-
-        // For GoRogue. Implement as needed.
-        public bool CanReset => throw new NotImplementedException();
-
-        public uint Seed => throw new NotImplementedException();
-
-        public int Next()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Next(int maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Next(int minValue, int maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool NextBoolean()
-        {
-            return Next(global_state) % 2 == 1;
-        }
-
-        public void NextBytes(byte[] buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double NextDouble()
-        {
-            throw new NotImplementedException();
-        }
-
-        public double NextDouble(double maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double NextDouble(double minValue, double maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int NextInclusiveMaxValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint NextUInt()
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint NextUInt(uint maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint NextUInt(uint minValue, uint maxValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint NextUIntExclusiveMaxValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public uint NextUIntInclusiveMaxValue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Reset()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Reset(uint seed)
-        {
-            throw new NotImplementedException();
         }
     }
 

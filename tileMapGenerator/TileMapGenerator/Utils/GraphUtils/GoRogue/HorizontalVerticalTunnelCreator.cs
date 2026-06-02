@@ -47,7 +47,7 @@ namespace GoRogueWrapper
 
         public void CreateTunnel(ISettableGridView<bool> map, Vector2 tunnelStart, Vector2 tunnelEnd)
         {
-            if (_rng.NextBool((map.Count * tunnelStart).GetHashCode()))
+            if (_rng.NextBool((map.Count * tunnelStart).GetHashCode().ToString()))
             {
                 CreateHTunnel(map, (int) tunnelStart.X, (int) tunnelEnd.X, (int) tunnelStart.Y);
                 CreateVTunnel(map, (int) tunnelStart.Y, (int) tunnelEnd.Y, (int) tunnelEnd.X);

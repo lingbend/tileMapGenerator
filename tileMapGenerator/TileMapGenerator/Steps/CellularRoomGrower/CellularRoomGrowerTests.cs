@@ -1,8 +1,8 @@
 namespace CellularRoomGrower
 {
     using BinaryGrid;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = MapPrimitives.RoomVertex;
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using NodeTreeGenerator;
@@ -13,6 +13,9 @@ namespace CellularRoomGrower
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Collections.Generic;
     using System.IO;
+    using static NodeTreeGenerator.GraphInitializer;
+    using ConcurrentRandom;
+    using Random = ConcurrentRandom.ConcurrentRandom;
 
     [TestClass]
     public class CellularRoomGrowerTests
@@ -38,7 +41,8 @@ namespace CellularRoomGrower
             var generator = new NodeTreeGenerator();
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
-            var(graph, _) = generator.GenerateFilledGraph(5, 5);
+            var(graph, _) = GenerateFilledGraph(5, 5);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (_, grid, _, _) = room_grower.GenerateSizedRooms(graph, 1000);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_Runs_Valid");
         }
@@ -50,7 +54,8 @@ namespace CellularRoomGrower
             var generator = new NodeTreeGenerator();
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
-            var(graph, _) = generator.GenerateFilledGraph(5, 5);
+            var(graph, _) = GenerateFilledGraph(5, 5);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (_, grid, _, _) = room_grower.GenerateSizedRooms(graph, 65);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_ExactSize_Valid");
         }
@@ -63,6 +68,7 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             var graph = generator.GenerateNodeTree(5);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*5);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts5_Valid");
             Assert.HasCount(graph.VertexCount, rooms, "Room count 5 failed");
@@ -80,6 +86,7 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             var graph = generator.GenerateNodeTree(1);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*1);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts1_Valid");
             Assert.HasCount(graph.VertexCount, rooms, "Room count 1 failed");
@@ -98,6 +105,7 @@ namespace CellularRoomGrower
             generator.Settings.degree_percents = degree_weights;
             var graph = generator.GenerateNodeTree(1);
             var vertex = new Vertex(new Vector2(10, 10));
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var room = new Room(vertex, CellularRoomGrowerSettings.DefaultShapeChooser(graph, vertex, new Vector2(10, 10)), CellularRoomGrowerSettings.DefaultValidDirections, new Vector2(10, 10));
             BinaryGrid grid = new BinaryGrid(100, 100);
             new CellularRoomGrower().GrowRoom(grid, room, (a, _)=>new Vector2(1, 0));
@@ -135,9 +143,10 @@ namespace CellularRoomGrower
             var room_grower = new CellularRoomGrower();
             var generator = new NodeTreeGenerator();
             generator.Settings.Random = new Random(123);
-            CellularRoomGrowerSettings.Random = new Random(123);
+            CellularRoomGrowerSettings.Random = new System.Random(123);
             generator.Settings.degree_percents = degree_weights;
             Graph graph = generator.GenerateNodeTree(30);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CorrectCounts30_Valid");
 
@@ -153,6 +162,7 @@ namespace CellularRoomGrower
         {
             var room_grower = new CellularRoomGrower();
             Graph graph = new Graph();
+            CellularRoomGrowerSettings.Random = new System.Random(123);
             Assert.Throws<Exception> (()=>room_grower.GenerateSizedRooms(graph, 30*1));
         }
 
@@ -163,11 +173,12 @@ namespace CellularRoomGrower
             var generator = new NodeTreeGenerator();
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
-            var(graph, _) = generator.GenerateFilledGraph(5, 5);
+            var(graph, _) = GenerateFilledGraph(5, 5);
             var (_, grid, rooms, _) = room_grower.GenerateSizedRooms(graph, 30);
             grid.ToBMP("CellularRoomGenerateSizedRooms_TooSmallToFit_Valid");
 
             Assert.HasCount(graph.VertexCount, rooms, "size 30");
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             (_, _, rooms, _) = room_grower.GenerateSizedRooms(graph, 64);
             Assert.HasCount(graph.VertexCount, rooms, "size 64");
         }
@@ -207,6 +218,7 @@ namespace CellularRoomGrower
             var room_grower = new CellularRoomGrower();
             Graph graph = InitializeGraph();
             room_grower.Settings.MapArea = 30 * 5;
+            CellularRoomGrowerSettings.Random = new System.Random(123);
             var rooms = room_grower.BuildRooms(graph);
             Assert.HasCount(graph.VertexCount, rooms);
         }
@@ -219,7 +231,9 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             var graph = generator.GenerateNodeTree(5);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             room_grower.Settings.MapArea = 30 * 5;
+            room_grower.BuildRooms(graph);
             var halls = room_grower.BuildHalls(graph);
             Assert.HasCount(graph.EdgeCount, halls);
         }
@@ -228,11 +242,12 @@ namespace CellularRoomGrower
         public void CellularRoomGrowerBuildGrid_FilledGridSpotsCount_Valid()
         {
             var room_grower = new CellularRoomGrower();
+            CellularRoomGrowerSettings.Random = new System.Random(123);
             room_grower.Settings.MapArea = 300 * 5;
-            List<Room> rooms = new List<Room>(){new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(), Vector2.Zero), room_grower.Settings.ValidDirections, Vector2.One)};
+            List<Room> rooms = new List<Room>(){new Room(new Vertex(Vector2.Zero), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(Vector2.Zero), Vector2.Zero), room_grower.Settings.ValidDirections, Vector2.One)};
             for (int i = 0; i < 5; i++)
             {
-                rooms.Add(new Room(new Vertex(), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(), Vector2.Zero), room_grower.Settings.ValidDirections, new Vector2((i+2)*5, (i+2)*5)));
+                rooms.Add(new Room(new Vertex(Vector2.Zero), room_grower.Settings.ShapeChooser(new Graph(), new Vertex(Vector2.Zero), Vector2.Zero), room_grower.Settings.ValidDirections, new Vector2((i+2)*5, (i+2)*5)));
             }
             List<Hall> halls = new List<Hall>();
             for (int i = 0; i < rooms.Count -1; i++)
@@ -252,6 +267,7 @@ namespace CellularRoomGrower
             room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
             room_grower.Settings.SideRatio = new Vector2(.5f, 2);
             var generator = new NodeTreeGenerator();
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             // generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             // Graph graph = generator.GenerateNodeTree(30);
@@ -316,8 +332,9 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(6312313);
             generator.Settings.degree_percents = degree_weights;
             room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CircularShapeChooser;
-            CellularRoomGrowerSettings.Random = new Random(134534); 
+            CellularRoomGrowerSettings.Random = new System.Random(134534); 
             Graph graph = generator.GenerateNodeTree(25);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CircularCorrectCounts30_Valid");
 
@@ -336,10 +353,10 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             room_grower.Settings.ShapeChooser = CellularRoomGrowerSettings.CaveShapeChooser;
-            CellularRoomGrowerSettings.Random = new Random(134534); 
+            CellularRoomGrowerSettings.Random = new System.Random(134534); 
             Graph graph = generator.GenerateNodeTree(25);
             // PrintGraphToPNG(graph, "Caves");
-        
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30*30);
             grid.ToBMP("CellularRoomGrowerGenerateSizedRooms_CaverCorrectCounts30_Valid");
 
@@ -350,16 +367,16 @@ namespace CellularRoomGrower
             Assert.HasCount(graph.EdgeCount, halls, "Hall count 30 failed");
         }
 
-        [TestMethod]
-        public void RandomCurrent()
-        {
-            var rand = new ConcurrentRandom.ConcurrentRandom(134534);
-            for (int i = 0; i < 1000; i++)
-            {
-                Console.WriteLine("rand:" + rand.Next(i, 0, 160));
-                Console.WriteLine("vec:" + rand.NextVector2(i, 0, 160, 0, 160));
-            }
-        }
+        // [TestMethod]
+        // public void RandomCurrent()
+        // {
+        //     var rand = new Random(134534);
+        //     for (int i = 0; i < 1000; i++)
+        //     {
+        //         Console.WriteLine("rand:" + rand.Next(i, 0, 160));
+        //         Console.WriteLine("vec:" + rand.NextVector2(i, 0, 160, 0, 160));
+        //     }
+        // }
 
         [TestMethod]
         public void CellularRoomGrowerGrowRooms_MaxSizeUsed_Valid()
@@ -369,6 +386,7 @@ namespace CellularRoomGrower
             generator.Settings.Random = new Random(123);
             generator.Settings.degree_percents = degree_weights;
             var graph = generator.GenerateNodeTree(5);
+            CellularRoomGrowerSettings.Random = new System.Random(generator.Settings.Random.Next("chicken"));
             var (new_graph, grid, rooms, halls) = room_grower.GenerateSizedRooms(graph, 30 * 5);
             grid.ToBMP("CellularRoomGrowerGrowRooms_MaxSizeUsed_Valid");
             for (uint i = 1; i < grid.RowSize; i++)

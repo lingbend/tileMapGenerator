@@ -1,8 +1,8 @@
 namespace CellularRoomGrower
 {
     using BinaryGrid;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = MapPrimitives.RoomVertex;
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using static System.Math;
@@ -16,6 +16,7 @@ namespace CellularRoomGrower
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Random = ConcurrentRandom.ConcurrentRandom;
 
     public class CellularRoomGrowerSettings
     {
@@ -33,11 +34,11 @@ namespace CellularRoomGrower
 
         public Vector2 SideRatio{get; set;} = Vector2.One;
         public static Vector2 MaxRatio{get; set;} = new Vector2(2.5f, 1);
-        public static Random Random{get;set;}
-        private static ConcurrentRandom _direction_random;
+        public static System.Random Random{get; set;}
+        private static Random _direction_random;
 
-        private static ConcurrentRandom _prioritizer_random;
-        private static ConcurrentRandom _shaper_random;
+        private static Random _prioritizer_random;
+        private static Random _shaper_random;
     
         public static IEnumerable<Room> DefaultPrioritizer(Graph graph, IEnumerable<Room> rooms)
         {

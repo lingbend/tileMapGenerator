@@ -4,10 +4,12 @@ using BinaryGrid;
 using TileMapGenerator;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using Vector2Extensions;
 
 namespace MapPrimitives
 {
-    public class RoomVertex<Vector2> : IDed where Vector2 : struct
+    public class RoomVertex : IDed
     {
         private int _vertex_id;
 
@@ -20,11 +22,6 @@ namespace MapPrimitives
         {
             Weight = weight;
             _vertex_id = UIDGenerator.GetNextID(Weight!.ToString());
-        }
-
-        internal RoomVertex()
-        {
-            _vertex_id = UIDGenerator.GetNextID(" ");
         }
 
         // public RoomVertex(Dictionary<string, object?> data)
@@ -41,7 +38,7 @@ namespace MapPrimitives
             }
         }
 
-        public RoomEdge<Vector2> ConnectToVertex(RoomVertex<Vector2> vertex, Vector2 weight)
+        public RoomEdge<Vector2> ConnectToVertex(RoomVertex vertex, Vector2 weight)
         {
             RoomEdge<Vector2> new_edge = new RoomEdge<Vector2>(this, vertex);
             lock (Edges)
@@ -82,9 +79,9 @@ namespace MapPrimitives
 
         public override bool Equals(object? obj)
         {
-            if (obj != null && obj is RoomVertex<Vector2> edge)
+            if (obj != null && obj is RoomVertex edge)
             {
-                return _vertex_id == ((RoomVertex<Vector2>) obj)._vertex_id;
+                return _vertex_id == ((RoomVertex) obj)._vertex_id;
             }
             return base.Equals(obj);
         }
@@ -93,5 +90,38 @@ namespace MapPrimitives
         {
             return _vertex_id;
         }
+
+        // public int CompareTo(object obj)
+        // {
+        //     if (Equals(obj))
+        //     {
+        //         return 0;
+        //     }
+        //     else if (obj is null)
+        //     {
+        //         return -1;
+        //     }
+        //     else if (obj.GetType() == typeof(RoomVertex))
+        //     {
+        //         RoomVertex otherVertex = (RoomVertex) obj;
+        //         if (otherVertex.ID < ID)
+        //         {
+        //             return 1;
+        //         }
+        //         else if (otherVertex.ID > ID)
+        //         {
+        //             return -1;
+        //         }
+        //         else
+        //         {
+        //             return 0;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         return -1;
+        //         // throw new ArgumentException("Cannot compare room vertices to non-room vertices");
+        //     }
+        // }
     }
 }

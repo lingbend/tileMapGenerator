@@ -4,8 +4,8 @@ namespace TileMapGenerator
     using System.Numerics;
     using BinaryGrid;
     using MapPrimitives;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = MapPrimitives.RoomVertex;
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using DoorChoser;
     using HallMaker;
@@ -15,6 +15,8 @@ namespace TileMapGenerator
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ConcurrentRandom;
+    using Random = ConcurrentRandom.ConcurrentRandom;
 
     public static class TileMapGenerator
     {
@@ -48,7 +50,7 @@ namespace TileMapGenerator
         {
             var room_grower = new CellularRoomGrower();
             room_grower.Settings = CellularRoomGrowerSettings;
-            CellularRoomGrowerSettings.Random = rand;
+            CellularRoomGrowerSettings.Random = new System.Random(rand.Next(nodeTree));
             return room_grower.GenerateSizedRooms(nodeTree, MapArea);
         }
 

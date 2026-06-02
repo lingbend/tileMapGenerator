@@ -1,7 +1,7 @@
 namespace MapPrimitives
 {
-    using Graph = QuikGraph.UndirectedGraph<RoomVertex<System.Numerics.Vector2>, RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<RoomVertex, RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = RoomVertex;
     using System.Numerics;
     using TileMapGenerator;
     using System.Collections.Concurrent;

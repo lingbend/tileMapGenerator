@@ -1,10 +1,11 @@
 namespace TileMapGenerator
 {
+    using System.Threading;
     using ConcurrentRandom;
 
     static internal class UIDGenerator
     {
-        // private static int _id = 0;
+        private static int _id = 0;
         private static ConcurrentRandom _random = new ConcurrentRandom(4593264);
 
         public static int GetNextID(object unique_identifier)

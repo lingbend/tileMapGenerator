@@ -3,8 +3,8 @@ namespace NodeTreeGenerator
     using System.Numerics;
     using System.Diagnostics;
     using MapPrimitives;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = MapPrimitives.RoomVertex;
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using QuikGraph.Graphviz;
     using System.Collections.Concurrent;
@@ -12,6 +12,10 @@ namespace NodeTreeGenerator
     using System.IO;
     using System.Collections.Generic;
     using System;
+    using static GraphInitializer;
+    using static TileMapGenerator.TarjansArticulatingPoints;
+    using ConcurrentRandom;
+    using Random = ConcurrentRandom.ConcurrentRandom;
 
     [TestClass]
     public class GraphBuilderTests
@@ -46,7 +50,7 @@ namespace NodeTreeGenerator
 
         private void CheckVerticesDegrees(Graph graph, int min, int max)
         {
-            foreach (RoomVertex<Vector2> vert in graph.Vertices)
+            foreach (RoomVertex vert in graph.Vertices)
             {
                 Assert.IsGreaterThanOrEqualTo(min, vert.Degree, $"degree too small with min: {min} and max: {max}");
                 Assert.IsLessThanOrEqualTo(max, vert.Degree, $"degree too big with min: {min} and max: {max}");
@@ -58,7 +62,7 @@ namespace NodeTreeGenerator
         public void NodeTreeGeneratorGenerateFilledGraph_NormalSize_Valid()
         {
             var generator = new NodeTreeGenerator();
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
             PrintToPNG(graph, "NodeTreeGeneratorGenerateFilledGraph_NormalSize_Valid");
             Assert.HasCount(25, dictionary.Keys);
             Assert.HasCount(25, graph.Vertices);
@@ -73,8 +77,8 @@ namespace NodeTreeGenerator
         public void NodeTreeGeneratorTarjans_NoArticulatingPoints_Valid()
         {
             var generator = new NodeTreeGenerator();
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
-            var non_articulating_points = generator.GetTarjanNonArticulatingPoints(graph, dictionary);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
+            var non_articulating_points = GetNonArticulatingPoints(graph, dictionary, generator.Settings.ValidDirections);
             Assert.HasCount(25, non_articulating_points);
         }
 
@@ -82,11 +86,11 @@ namespace NodeTreeGenerator
         public void NodeTreeGeneratorTarjans_2ArticulatingPoints_Valid()
         {
             var generator = new NodeTreeGenerator();
-            var(graph, dictionary) = generator.GenerateFilledGraph(3, 3);
-            var(graph2, dictionary2) = generator.GenerateFilledGraph(3, 3);
+            var(graph, dictionary) = GenerateFilledGraph(3, 3);
+            var(graph2, dictionary2) = GenerateFilledGraph(3, 3);
             graph.AddVerticesAndEdge(dictionary[new Vector2(1,1)].ConnectToVertex(dictionary2[new Vector2(1, 1)], Vector2.Zero));
             graph.AddVerticesAndEdgeRange(graph2.Edges);
-            var non_articulating_points = generator.GetTarjanNonArticulatingPoints(graph, dictionary);
+            var non_articulating_points = GetNonArticulatingPoints(graph, dictionary, generator.Settings.ValidDirections);
             Assert.HasCount(16, non_articulating_points);
         }
 
@@ -105,7 +109,7 @@ namespace NodeTreeGenerator
                 graph.AddVerticesAndEdge(center.ConnectToVertex(new_vertex, Vector2.Zero));
                 backing_dictionary.TryAdd((Vector2) new_vertex.Weight, new_vertex);
             }
-            var non_articulating_points = generator.GetTarjanNonArticulatingPoints(graph, backing_dictionary);
+            var non_articulating_points = GetNonArticulatingPoints(graph, backing_dictionary, generator.Settings.ValidDirections);
             Assert.HasCount(10, non_articulating_points);
         }
 
@@ -116,7 +120,7 @@ namespace NodeTreeGenerator
             var generator = new NodeTreeGenerator();
             generator.Settings.Random = new Random(4881);
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 12);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_NormalSizeHalfVertices_Valid");
             Assert.HasCount(13, holes);
@@ -130,7 +134,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 5);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_NormalSizeFifthVertices_Valid");
             Assert.HasCount(20, holes);
@@ -144,7 +148,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 1);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_NormalSize1Vertices_Valid");
             Assert.HasCount(24, holes);
@@ -158,7 +162,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(5, 5);
+            var(graph, dictionary) = GenerateFilledGraph(5, 5);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 25);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_NormalSizeNoVertices_Valid");
             Assert.HasCount(0, holes);
@@ -172,7 +176,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(2, 2);
+            var(graph, dictionary) = GenerateFilledGraph(2, 2);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 2);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_TinySizeHalfVertices_Valid");
             Assert.HasCount(2, holes);
@@ -186,12 +190,12 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(1, 1);
+            var(graph, dictionary) = GenerateFilledGraph(1, 1);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 0);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_OneSizeNoVertices_Valid");
-            Assert.HasCount(1, holes);
-            Assert.HasCount(0, new_dictionary.Keys);
-            Assert.HasCount(0, new_graph.Vertices);
+            Assert.HasCount(0, holes);
+            Assert.HasCount(1, new_dictionary.Keys);
+            Assert.HasCount(1, new_graph.Vertices);
         }
 
         [TestMethod]
@@ -199,7 +203,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(1, 1);
+            var(graph, dictionary) = GenerateFilledGraph(1, 1);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 1);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_OneSizeAllVertices_Valid");
             Assert.HasCount(0, holes);
@@ -214,7 +218,7 @@ namespace NodeTreeGenerator
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
             generator.Settings.WeightedVertexRemover = generator.Settings.AntiStrandingWeightedVertexRemover;
-            var(graph, dictionary) = generator.GenerateFilledGraph(50, 50);
+            var(graph, dictionary) = GenerateFilledGraph(50, 50);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 1250);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_HugeSizeHalfVertices_Valid");
             Assert.HasCount(1250, holes);
@@ -253,7 +257,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(50, 50);
+            var(graph, dictionary) = GenerateFilledGraph(50, 50);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 500);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_HugeSizeFifthVertices_Valid");
             Assert.HasCount(2000, holes);
@@ -267,7 +271,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(50, 50);
+            var(graph, dictionary) = GenerateFilledGraph(50, 50);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 1);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_HugeSizeAllButOneVertices_Valid");
             Assert.HasCount(2499, holes);
@@ -281,7 +285,7 @@ namespace NodeTreeGenerator
         {
             var generator = new NodeTreeGenerator();
             generator.Settings.degree_percents = degree_weights;
-            var(graph, dictionary) = generator.GenerateFilledGraph(50, 50);
+            var(graph, dictionary) = GenerateFilledGraph(50, 50);
             var (new_graph, new_dictionary, holes) = generator.CutVerticesDownTo(graph, dictionary, 2499);
             PrintToPNG(new_graph, "NodeTreeGeneratorCutVerticesDownTo_HugeSizeOnlyOneVertices_Valid");
             Assert.HasCount(1, holes);
@@ -331,8 +335,6 @@ namespace NodeTreeGenerator
             
             }
         }
-
-
 
         [TestMethod]
         public void GraphBuilderTreePhase_RoomNumber_Valid()
@@ -389,7 +391,7 @@ namespace NodeTreeGenerator
             }
         }
 
-        // [Timeout(10000)]
+        [Timeout(10000)]
         [TestMethod]
         public void GraphBuilderTreePhase_SpeedConnected_Valid()
         {

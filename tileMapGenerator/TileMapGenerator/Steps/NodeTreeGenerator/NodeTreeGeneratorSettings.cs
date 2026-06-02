@@ -1,19 +1,22 @@
 namespace NodeTreeGenerator
 {
     using System.Numerics;
-    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex<System.Numerics.Vector2>, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
-    using Vertex = MapPrimitives.RoomVertex<System.Numerics.Vector2>;
+    using Graph = QuikGraph.UndirectedGraph<MapPrimitives.RoomVertex, MapPrimitives.RoomEdge<System.Numerics.Vector2>>;
+    using Vertex = MapPrimitives.RoomVertex;
     using Edge = MapPrimitives.RoomEdge<System.Numerics.Vector2>;
     using System.Collections.Concurrent;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using static GraphHelpers.GraphHelpers;
+    using ConcurrentRandom;
+    using Random = ConcurrentRandom.ConcurrentRandom;
 
     public class NodeTreeGeneratorSettings
     {
         public List<Vector2> ValidDirections {get; set;}= new List<Vector2>()
         {Vector2.UnitX, Vector2.UnitY, -Vector2.UnitX, -Vector2.UnitY};
-        public Random Random{get; set;} = new Random();
+        public Random Random{get; set;} = new Random(new System.Random().Next());
 
         public Func<Graph, ConcurrentDictionary<Vector2, Vertex>, Dictionary<int, int>, IEnumerable<(Vertex, int)>> Shaper{get; set;} = DefaultShaper;
 
@@ -205,7 +208,7 @@ namespace NodeTreeGenerator
                     distance = (int) Math.Ceiling(Math.Pow(temp_distance, 1.1));
                 }
             }
-            int jitter = Random.Next(-distance,distance+1);
+            int jitter = Random.Next(vert.ID.ToString() + percents, -distance,distance+1);
             if (percents.TryGetValue(vert.Degree, out int val))
             {
                 return 100 - val + jitter;
@@ -227,7 +230,7 @@ namespace NodeTreeGenerator
                     distance = (int) Math.Ceiling(Math.Pow(temp_distance, 1.1));
                 }
             }
-            int jitter = Random.Next(-distance,distance+1);
+            int jitter = Random.Next(vert.ID.ToString() + percents, -distance,distance+1);
             if (vert.Degree == 1 || vert.Degree == 2)
             {
                 List<int> neighboring_degrees = new List<int>(vert.Degree);
@@ -365,7 +368,7 @@ namespace NodeTreeGenerator
                     }
                 }
             }
-            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
+            List<Graph> connected_components = new List<Graph>(new_graph.GetConnectedComponents().OrderBy(g=>g.EdgeCount * g.VertexCount));
             int counter = connected_components.Count*3;
             Graph unified_graph = new Graph(false);
             while (connected_components.Count > 1 && counter > 0)
@@ -423,7 +426,7 @@ namespace NodeTreeGenerator
                         new_graph.AddVerticesAndEdgeRange(subgraph.Edges);
                     }
                 }
-                connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+                connected_components = new_graph.GetConnectedComponents();
                 counter--;
             }
             return (new_graph, new_backing_dictionary);
@@ -538,7 +541,7 @@ namespace NodeTreeGenerator
                     }
                 }
             }
-            List<Graph> connected_components = new List<Graph>(NodeTreeGenerator.GetConnectedComponents(new_graph).OrderBy(g=>g.EdgeCount * g.VertexCount));
+            List<Graph> connected_components = new List<Graph>(new_graph.GetConnectedComponents().OrderBy(g=>g.EdgeCount * g.VertexCount));
             int counter = connected_components.Count*3;
             Graph unified_graph = new Graph(false);
             while (connected_components.Count > 1 && counter > 0)
@@ -596,7 +599,7 @@ namespace NodeTreeGenerator
                         new_graph.AddVerticesAndEdgeRange(subgraph.Edges);
                     }
                 }
-                connected_components = NodeTreeGenerator.GetConnectedComponents(new_graph);
+                connected_components = new_graph.GetConnectedComponents();
                 counter--;
             }
             return (new_graph, new_backing_dictionary);

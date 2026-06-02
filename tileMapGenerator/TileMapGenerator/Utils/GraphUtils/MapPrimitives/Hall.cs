@@ -1,6 +1,6 @@
 namespace MapPrimitives
 {
-    using Vertex = RoomVertex<System.Numerics.Vector2>;
+    using Vertex = RoomVertex;
     using Edge = RoomEdge<System.Numerics.Vector2>;
     using System.Numerics;
     using TileMapGenerator;

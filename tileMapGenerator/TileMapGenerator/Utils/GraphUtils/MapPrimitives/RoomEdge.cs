@@ -6,17 +6,17 @@ using System;
 
 namespace MapPrimitives
 {
-    public class RoomEdge<Vector2> : IEdge<RoomVertex<Vector2>>, IDed where Vector2 : struct
+    public class RoomEdge<Vector2> : IEdge<RoomVertex>, IDed
     {
         public int _edge_id;
 
         public Vector2? Weight {get; internal set;}
-        public RoomVertex<Vector2> Source {get; internal set;}
+        public RoomVertex Source {get; internal set;}
 
-        public RoomVertex<Vector2> Target {get; internal set;}
+        public RoomVertex Target {get; internal set;}
         public int ID { get => _edge_id; set => _edge_id = value; }
 
-        public RoomEdge (RoomVertex<Vector2> vertex_1, RoomVertex<Vector2> vertex_2)
+        public RoomEdge (RoomVertex vertex_1, RoomVertex vertex_2)
         {
             _edge_id = UIDGenerator.GetNextID(vertex_1.ID + vertex_2.ID);
             Source = vertex_1;
